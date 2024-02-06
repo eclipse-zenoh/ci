@@ -1,0 +1,23 @@
+name: Publish crates (Cargo)
+
+inputs:
+  dry-run:
+    required: true
+  branch:
+    required: true
+  repos:
+    required: true
+  actor-name:
+    required: true
+  actor-email:
+    required: true
+  github-token:
+    required: true
+  crates-io-token:
+    required: true
+  inter-deps-pattern:
+    required: true
+
+runs:
+  using: node20
+  main: ../dist/publish-crates-cargo-main.js

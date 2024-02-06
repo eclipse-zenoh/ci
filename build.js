@@ -6,10 +6,10 @@ const child_process = require("child_process");
 async function main() {
   const dir = await fs.opendir("src");
   for await (const dirent of dir) {
-    if (dirent.name.endsWith("-main.ts")) {
+    if (["-pre.ts", "-main.ts", "-post.ts"].some(x => dirent.name.endsWith(x))) {
       console.log(`> Transpiling ${dirent.name}`);
-      child_process.execSync(`ncc build src/${dirent.name} --out dist`);
-      const name = dirent.name.replace("ts", "js");
+      child_process.execSync(`ncc build src/${dirent.name} --out dist`, { stdio: "inherit" });
+      const name = dirent.name.replace(".ts", ".js");
       fs.rename("dist/index.js", `dist/${name}`);
       console.log(`> Generated dist/${name}`);
     }

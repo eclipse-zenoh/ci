@@ -4,7 +4,7 @@ import * as core from "@actions/core";
 
 import * as estuary from "./estuary";
 import * as cargo from "./cargo";
-import { run } from "./run";
+import { sh } from "./command";
 
 export type Input = {
   dryRun: boolean;
@@ -13,6 +13,7 @@ export type Input = {
   githubToken: string;
   actorEnv: NodeJS.ProcessEnv;
   interDepsRegExp: RegExp;
+  cratesIoToken?: string;
 };
 
 export function setup(): Input {
@@ -22,7 +23,8 @@ export function setup(): Input {
   const githubToken = core.getInput("github-token", { required: true });
   const actorName = core.getInput("actor-name", { required: true });
   const actorEmail = core.getInput("actor-email", { required: true });
-  const interDepsPattern = core.getInput("inter-deps-pattern");
+  const interDepsPattern = core.getInput("inter-deps-pattern", { required: true });
+  const cratesIoToken = core.getInput("crates-io-token", { required: true });
 
   return {
     dryRun,
@@ -36,130 +38,104 @@ export function setup(): Input {
       GIT_COMMITTER_EMAIL: actorEmail,
     },
     interDepsRegExp: interDepsPattern == "" ? undefined : new RegExp(interDepsPattern),
+    cratesIoToken,
   };
 }
 
 export async function main(input: Input) {
+  let registry: estuary.Estuary;
   try {
-    if (input.dryRun) {
-      const registry = await estuary.spawn();
-      core.saveState("estuary-pid", registry.proc.pid);
-      for (const repo of input.repos) {
-        core.startGroup(`Publishing ${repo} to estuary`);
-        clone(repo, input);
-        await publishToEstuary(repo, registry, input);
-        push(repo, input);
-        core.endGroup();
-      }
-    } else {
+    registry = await estuary.spawn();
+    for (const repo of input.repos) {
+      core.startGroup(`Publishing ${repo} to estuary`);
+      clone(repo, input);
+      await publishToEstuary(repo, input, registry);
+      await deleteRepos(input);
+      core.endGroup();
+    }
+
+    if (!input.dryRun) {
       for (const repo of input.repos) {
         core.startGroup(`Publishing ${repo} to crates.io`);
         clone(repo, input);
-        publishToCratesIo(repo);
+        publishToCratesIo(repo, input);
         core.endGroup();
       }
     }
-    await cleanup(input);
+
+    await cleanup(input, registry);
   } catch (error) {
-    await cleanup(input);
+    await cleanup(input, registry);
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-export async function cleanup(input: Input) {
+export async function cleanup(input: Input, registry: estuary.Estuary) {
   if (input.dryRun) {
-    process.kill(Number(core.getState("estuary-pid")));
+    core.info(`Killing estuary process (${registry.proc.pid})`);
+    try {
+      process.kill(registry.proc.pid);
+    } catch (error) {
+      if (error instanceof Error) {
+        core.notice(`Could not kill estuary process (${registry.proc.pid}):\n${error.message}`);
+      }
+    }
   }
 
   await deleteRepos(input);
 }
 
 function clone(repo: string, input: Input): void {
-  const repoRemote = remoteOf(repo, input);
-  const repoPath = pathOf(repo);
-  core.info(`Cloning ${repoRemote} into ${repoPath}`);
-  run("git", [
-    "clone",
-    "--recursive",
-    "--branch",
-    input.branch,
-    "--single-branch",
-    repoRemote,
-    repoPath,
-  ]);
-}
-
-function push(repo: string, input: Input): void {
-  const repoPath = pathOf(repo);
-  core.info(`Pushing ${input.branch} to ${repo}`);
-  run("git", ["push", remoteOf(repo, input), input.branch], { cwd: repoPath });
+  const remote = `https://${input.githubToken}@github.com/${repo}.git`;
+  sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
 }
 
 async function deleteRepos(input: Input) {
   for (const repo of input.repos) {
-    const repoPath = pathOf(repo);
-    core.info(`Deleting repository ${repoPath}`);
-    await rm(pathOf(repo), { recursive: true, force: true });
+    core.info(`Deleting repository ${repoPath(repo)}`);
+    await rm(repoPath(repo), { recursive: true, force: true });
   }
 }
 
-function remoteOf(repo: string, input: Input): string {
-  return `https://${input.githubToken}@github.com/${repo}.git`;
-}
-
-function pathOf(repo: string): string {
+function repoPath(repo: string): string {
   return repo.split("/").at(1);
 }
 
-async function publishToEstuary(
-  repo: string,
-  registry: estuary.Estuary,
-  input: Input,
-): Promise<void> {
-  const repoPath = pathOf(repo);
+async function publishToEstuary(repo: string, input: Input, registry: estuary.Estuary): Promise<void> {
+  const path = repoPath(repo);
 
-  await cargo.configRegistry(repoPath, registry.name, registry.index);
-  run("git", ["add", `.cargo/config.toml`], { cwd: repoPath });
-  run("git", ["commit", "-m", "chore: Configure estuary Cargo registry"], {
-    env: input.actorEnv,
-    cwd: repoPath,
-  });
-
-  await cargo.setRegistry(repoPath, input.interDepsRegExp, registry.name);
-  run("git", ["add", `Cargo.toml`], { cwd: repoPath });
-  run("git", ["commit", "-m", "chore: Set inter-dependencies' Cargo registry to estuary"], {
-    env: input.actorEnv,
-    cwd: repoPath,
-  });
+  await cargo.configRegistry(path, registry.name, registry.index);
+  await cargo.setRegistry(path, input.interDepsRegExp, registry.name);
 
   const env = {
     CARGO_REGISTRY_DEFAULT: registry.name,
     [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
+    ...input.actorEnv,
   };
 
   publish(repo, env);
 }
 
-function publishToCratesIo(repo: string) {
+function publishToCratesIo(repo: string, input: Input) {
   const env = {
-    CARGO_REGISTRY_TOKEN: core.getInput("crates-io-token"),
+    CARGO_REGISTRY_TOKEN: input.cratesIoToken,
   };
 
   publish(repo, env);
 }
 
 function publish(repo: string, env: NodeJS.ProcessEnv) {
-  const repoPath = pathOf(repo);
+  const path = repoPath(repo);
   const options = {
     env,
-    cwd: pathOf(repo),
+    cwd: path,
     check: true,
   };
 
-  for (const package_ of cargo.packagesOrdered(repoPath)) {
+  for (const package_ of cargo.packagesOrdered(path)) {
     if (package_.publish == undefined || package_.publish) {
-      run("cargo", ["publish", "--manifest-path", package_.manifestPath], options);
+      sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
     }
   }
-  run("cargo", ["clean"], options);
+  sh("cargo clean", options);
 }

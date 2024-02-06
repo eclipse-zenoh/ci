@@ -1,0 +1,32 @@
+name: Publish crates (Debian)
+
+on:
+  workflow_call:
+    inputs:
+      dry-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+
+jobs:
+  publish-crates-debian:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: eclipse-zenoh/ci/publish-crates-debian@main
+        with:
+          dry-run: ${{ inputs.dry-run }}
+          version: ${{ inputs.version }}
+          ssh-host: genie.zenoh@projects-storage.eclipse.org
+          ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}

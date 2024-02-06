@@ -7,13 +7,13 @@ import { mkdtemp, realpath } from "fs/promises";
 import { createWriteStream, rmSync } from "fs";
 import * as https from "https";
 
-import { run } from "../src/run";
+import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
 
-export async function downloadGitHubRepo(repo: string, commit: string): Promise<string> {
-  const url = `https://codeload.github.com/${repo}/tar.gz/${commit}`;
+export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
+  const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
 
-  let tmp = await mkdtemp(join(tmpdir(), commit));
+  let tmp = await mkdtemp(join(tmpdir(), "git"));
   tmp = await realpath(tmp);
 
   return new Promise(resolve => {
@@ -23,9 +23,9 @@ export async function downloadGitHubRepo(repo: string, commit: string): Promise<
       res.pipe(archive);
       archive.on("finish", () => {
         archive.close();
-        run("tar", ["-x", "-z", "-f", archiveName], { cwd: tmp });
+        sh(`tar -x -f ${archiveName}`, { cwd: tmp });
         rmSync(archiveName);
-        resolve(join(tmp, `${repo.split("/").at(1)}-${commit}`));
+        resolve(join(tmp, `${repo.split("/").at(1)}-${ref}`));
       });
     });
   });
@@ -68,10 +68,7 @@ describe("cargo", () => {
   });
 
   test("list packages zenoh-backend-s3", async () => {
-    const tmp = await downloadGitHubRepo(
-      "eclipse-zenoh/zenoh-backend-s3",
-      "3761d5986fa12318e175341bc97524fe5a961cfa",
-    );
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-backend-s3", "3761d5986fa12318e175341bc97524fe5a961cfa");
 
     const packages = cargo.packages(tmp);
     await rm(tmp, { recursive: true, force: true });
@@ -89,10 +86,7 @@ describe("cargo", () => {
   });
 
   test("list packages zenoh", async () => {
-    const tmp = await downloadGitHubRepo(
-      "eclipse-zenoh/zenoh",
-      "8cd786f2192fd2aa7387432ae93cdd78f5db1df2",
-    );
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", "8cd786f2192fd2aa7387432ae93cdd78f5db1df2");
     const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
     await rm(tmp, { recursive: true, force: true });
     const expectedOrder = [
@@ -135,10 +129,7 @@ describe("cargo", () => {
   });
 
   test("bump deps debian zenoh-kotlin", async () => {
-    const tmp = await downloadGitHubRepo(
-      "eclipse-zenoh/zenoh-kotlin",
-      "836d778a515939a469b7c6f05c36a63814e98050",
-    );
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "836d778a515939a469b7c6f05c36a63814e98050");
 
     await cargo.bumpDebianDependencies(join(tmp, "zenoh-jni"), /zenoh.*/g, "1.2.3-beta.0");
   });
