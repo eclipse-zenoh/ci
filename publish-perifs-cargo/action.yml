@@ -1,0 +1,23 @@
+name: Publish a sequence of Cargo workspaces
+
+inputs:
+  dry-run:
+    required: true
+  branch:
+    required: true
+  repos:
+    required: true
+  actor-name:
+    required: true
+  actor-email:
+    required: true
+  github-token:
+    required: true
+  crates-io-token:
+    required: false
+  inter-deps-pattern:
+    required: false
+
+runs:
+  using: node20
+  main: ../dist/publish-perifs-cargo-main.js

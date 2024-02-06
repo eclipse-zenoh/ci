@@ -1,0 +1,9 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["plugin:@typescript-eslint/recommended-type-checked"],
+  "ignorePatterns": ["dist/", "__tests__/", "node_modules/", "build.js"]
+}
