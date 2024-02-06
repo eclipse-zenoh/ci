@@ -92,7 +92,7 @@ function clone(repo: string, input: Input): void {
 function push(repo: string, input: Input): void {
   const repoPath = pathOf(repo);
   core.info(`Pushing ${input.branch} to ${repo}`);
-  run("git", ["push", input.branch, remoteOf(repo, input)], { cwd: repoPath });
+  run("git", ["push", remoteOf(repo, input), input.branch], { cwd: repoPath });
 }
 
 async function deleteRepos(input: Input) {

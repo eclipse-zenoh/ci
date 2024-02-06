@@ -82370,7 +82370,7 @@ function clone(repo, input) {
 function push(repo, input) {
     const repoPath = pathOf(repo);
     lib_core.info(`Pushing ${input.branch} to ${repo}`);
-    run("git", ["push", input.branch, remoteOf(repo, input)], { cwd: repoPath });
+    run("git", ["push", remoteOf(repo, input), input.branch], { cwd: repoPath });
 }
 async function deleteRepos(input) {
     for (const repo of input.repos) {
