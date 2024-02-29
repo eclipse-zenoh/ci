@@ -82334,7 +82334,11 @@ async function main(input) {
             check: false,
         });
         command_sh(`cargo check`, { cwd: repo });
-        command_sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", { cwd: repo, env: input.actorEnv });
+        command_sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+            cwd: repo,
+            env: input.actorEnv,
+            check: false,
+        });
         command_sh(`git tag ${version} --message v${version}`, { cwd: repo, env: input.actorEnv });
         command_sh(`git log -10`, { cwd: repo });
         command_sh(`git show-ref --tags`, { cwd: repo });

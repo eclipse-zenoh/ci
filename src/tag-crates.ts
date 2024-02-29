@@ -107,7 +107,11 @@ export async function main(input: Input) {
     });
 
     sh(`cargo check`, { cwd: repo });
-    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", { cwd: repo, env: input.actorEnv });
+    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+      cwd: repo,
+      env: input.actorEnv,
+      check: false,
+    });
 
     sh(`git tag ${version} --message v${version}`, { cwd: repo, env: input.actorEnv });
     sh(`git log -10`, { cwd: repo });
