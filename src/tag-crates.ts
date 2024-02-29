@@ -103,6 +103,7 @@ export async function main(input: Input) {
     sh(`git commit --message 'chore: Point inter-dependencies to \`${input.interDepsVersion}\`'`, {
       cwd: repo,
       env: input.actorEnv,
+      check: false,
     });
 
     sh(`cargo check`, { cwd: repo });

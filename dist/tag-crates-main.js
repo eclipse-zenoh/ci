@@ -82331,6 +82331,7 @@ async function main(input) {
         command_sh(`git commit --message 'chore: Point inter-dependencies to \`${input.interDepsVersion}\`'`, {
             cwd: repo,
             env: input.actorEnv,
+            check: false,
         });
         command_sh(`cargo check`, { cwd: repo });
         command_sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", { cwd: repo, env: input.actorEnv });
