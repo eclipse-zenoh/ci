@@ -7,10 +7,6 @@ inputs:
     required: true
   repos:
     required: true
-  actor-name:
-    required: true
-  actor-email:
-    required: true
   github-token:
     required: true
   crates-io-token:
