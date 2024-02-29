@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import * as fs from "fs/promises";
 import { platform, arch, homedir } from "os";
 import { join } from "path";
 
@@ -139,7 +139,7 @@ export async function bump(path: string, version: string) {
   if (typeof manifest.package.version == "string") {
     manifest.package.version = version;
 
-    await writeFile(manifestPath, toml.stringify(manifestRaw));
+    await dumpTOML(manifestPath, manifestRaw);
   }
 
   for (const package_ of packages(path)) {
@@ -202,32 +202,6 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
     await dumpTOML(manifestPath, manifestRaw);
   }
   core.endGroup();
-}
-
-type CargoConfig = {
-  registries: {
-    [key: string]: { index: string };
-  };
-};
-
-/**
- * Stores Cargo registry configuration in `.cargo/config.toml`.
- * @param path Path to the Cargo workspace.
- * @param name Name of the Cargo alternative registry.
- * @param index Index of the Cargo alternative registry.
- */
-export async function configRegistry(path: string, name: string, index: string): Promise<void> {
-  const configPath = `${path}/.cargo/config.toml`;
-  const configRaw = await loadTOML(configPath);
-  const config = configRaw as CargoConfig;
-
-  config.registries = {
-    [name]: {
-      index,
-    },
-  };
-
-  await dumpTOML(configPath, config);
 }
 
 /**
@@ -303,10 +277,10 @@ export async function installBinaryCached(name: string) {
 }
 
 async function loadTOML(path: string): Promise<Record<string, toml.TomlPrimitive>> {
-  const contents = await readFile(path, "utf-8");
+  const contents = await fs.readFile(path, "utf-8");
   return toml.parse(contents);
 }
 
 async function dumpTOML(path: string, obj: Record<string, toml.TomlPrimitive>) {
-  await writeFile(path, toml.stringify(obj));
+  await fs.writeFile(path, toml.stringify(obj));
 }

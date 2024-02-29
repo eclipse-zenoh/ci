@@ -82109,7 +82109,7 @@ async function bump(path, version) {
     const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw);
     if (typeof manifest.package.version == "string") {
         manifest.package.version = version;
-        await (0,promises_namespaceObject.writeFile)(manifestPath, stringify(manifestRaw));
+        await dumpTOML(manifestPath, manifestRaw);
     }
     for (const package_ of cargo_packages(path)) {
         const manifestRaw = await loadTOML(package_.manifestPath);
@@ -82164,23 +82164,6 @@ async function bumpDependencies(path, pattern, version, git, branch) {
         await dumpTOML(manifestPath, manifestRaw);
     }
     lib_core.endGroup();
-}
-/**
- * Stores Cargo registry configuration in `.cargo/config.toml`.
- * @param path Path to the Cargo workspace.
- * @param name Name of the Cargo alternative registry.
- * @param index Index of the Cargo alternative registry.
- */
-async function configRegistry(path, name, index) {
-    const configPath = `${path}/.cargo/config.toml`;
-    const configRaw = await loadTOML(configPath);
-    const config = configRaw;
-    config.registries = {
-        [name]: {
-            index,
-        },
-    };
-    await dumpTOML(configPath, config);
 }
 /**
  * Sets the Cargo registry of select dependencies.
@@ -82246,11 +82229,11 @@ async function installBinaryCached(name) {
     }
 }
 async function loadTOML(path) {
-    const contents = await (0,promises_namespaceObject.readFile)(path, "utf-8");
+    const contents = await promises_namespaceObject.readFile(path, "utf-8");
     return parse(contents);
 }
 async function dumpTOML(path, obj) {
-    await (0,promises_namespaceObject.writeFile)(path, stringify(obj));
+    await promises_namespaceObject.writeFile(path, stringify(obj));
 }
 
 ;// CONCATENATED MODULE: ./src/tag-crates.ts
