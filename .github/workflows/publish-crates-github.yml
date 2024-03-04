@@ -1,0 +1,45 @@
+name: Publish crates (GitHub)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      dry-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      dry-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+
+jobs:
+  publish-crates-homebrew:
+    runs-on: macos-latest
+    steps:
+      - uses: eclipse-zenoh/ci/publish-crates-github@main
+        with:
+          repo: ${{ inputs.repo }}
+          dry-run: ${{ inputs.dry-run }}
+          version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
