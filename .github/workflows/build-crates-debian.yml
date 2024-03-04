@@ -1,0 +1,46 @@
+name: Build crates (Debian)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+
+jobs:
+  build-crates-debian:
+    runs-on: ${{ matrix.build.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { target: arm-unknown-linux-gnueabi, os: ubuntu-20.04 }
+          - { target: armv7-unknown-linux-gnueabihf, os: ubuntu-20.04 }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-20.04 }
+    steps:
+      - id: build
+        uses: eclipse-zenoh/ci/build-crates-debian@main
+        with:
+          repo: ${{ inputs.repo }}
+          version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
+          target: ${{ matrix.build.target }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

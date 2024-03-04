@@ -7,6 +7,13 @@ import * as core from "@actions/core";
 
 import * as cargo from "./cargo";
 
+const name = "estuary";
+const baseUrl = "http://localhost:7878";
+const index = `${baseUrl}/git/index`;
+const token = "0000";
+const indexPath = "index";
+const cratePath = "crate";
+
 export type Estuary = {
   name: string;
   index: string;
@@ -17,14 +24,9 @@ export type Estuary = {
 };
 
 export async function spawn(): Promise<Estuary> {
-  const name = "estuary";
-  const baseUrl = "http://localhost:7878";
-  const index = `${baseUrl}/git/index`;
-  const token = "0000";
-
-  const tempDir = await mkdtemp(join(tmpdir(), name));
-  const indexDir = join(tempDir, "index");
-  const crateDir = join(tempDir, "crate");
+  const tmp = await mkdtemp(join(tmpdir(), name));
+  const indexDir = join(tmp, indexPath);
+  const crateDir = join(tmp, cratePath);
 
   const options = {
     env: {
@@ -42,7 +44,7 @@ export async function spawn(): Promise<Estuary> {
     options,
   );
 
-  core.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tempDir}`);
+  core.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
 
   return { name, index, token, crateDir, indexDir, proc };
 }

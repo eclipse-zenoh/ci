@@ -1,4 +1,4 @@
-import { readFile, writeFile } from "fs/promises";
+import * as fs from "fs/promises";
 import { platform, arch, homedir } from "os";
 import { join } from "path";
 
@@ -6,7 +6,7 @@ import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 import * as toml from "smol-toml";
 
-import { run } from "./run";
+import { sh } from "./command";
 
 export type Package = {
   name: string;
@@ -48,10 +48,7 @@ type CargoMetadata = {
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 export function packages(path: string): Package[] {
-  const metadataContents = run("cargo", ["metadata", "--no-deps", "--format-version", "1"], {
-    cwd: path,
-  });
-
+  const metadataContents = sh("cargo metadata --no-deps --format-version '1'", { cwd: path });
   const metadata = JSON.parse(metadataContents) as CargoMetadata;
 
   const result = [] as Package[];
@@ -82,8 +79,7 @@ export function* packagesOrdered(path: string): Generator<Package> {
   const allPackages = packages(path);
   const seen = [];
 
-  const isReady = (package_: Package) =>
-    package_.workspaceDependencies.every(dep => seen.includes(dep.name));
+  const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
 
   while (allPackages.length != 0) {
     for (const [index, package_] of allPackages.entries()) {
@@ -137,16 +133,32 @@ type CargoManifest = {
 export async function bump(path: string, version: string) {
   core.startGroup(`Bumping package versions in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
-  const manifestContents = await readFile(manifestPath, "utf-8");
-  const manifestRaw = toml.parse(manifestContents) as CargoManifest;
+  const manifestRaw = await loadTOML(manifestPath);
+  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
-  const manifest = (
-    "workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw
-  ) as CargoManifest;
   if (typeof manifest.package.version == "string") {
     manifest.package.version = version;
 
-    await writeFile(manifestPath, toml.stringify(manifestRaw));
+    await dumpTOML(manifestPath, manifestRaw);
+  }
+
+  for (const package_ of packages(path)) {
+    const manifestRaw = await loadTOML(package_.manifestPath);
+    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+
+    if (
+      "metadata" in manifest.package &&
+      "deb" in manifest.package.metadata &&
+      "depends" in manifest.package.metadata.deb &&
+      manifest.package.metadata.deb.depends != "$auto"
+    ) {
+      const deb = manifest.package.metadata.deb;
+      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
+      deb.depends = depends;
+
+      await dumpTOML(package_.manifestPath, manifestRaw);
+    }
   }
   core.endGroup();
 }
@@ -167,19 +179,11 @@ export async function bump(path: string, version: string) {
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
-export async function bumpDependencies(
-  path: string,
-  pattern: RegExp,
-  version: string,
-  git?: string,
-  branch?: string,
-) {
+export async function bumpDependencies(path: string, pattern: RegExp, version: string, git?: string, branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = await loadTOML(manifestPath);
-  const manifest = (
-    "workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw
-  ) as CargoManifest;
+  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
   let changed = false;
   for (const dep in manifest.dependencies) {
@@ -201,67 +205,6 @@ export async function bumpDependencies(
 }
 
 /**
- * Bumps select Debian workspace dependencies to @param version.
- *
- * @param path Path to the Cargo workspace.
- * @param version New version.
- * @param pattern A regular expression that matches the Debian dependencies to
- * be bumped to @param version.
- */
-export async function bumpDebianDependencies(path: string, pattern: RegExp, version: string) {
-  core.startGroup(`Bumping ${pattern} Debian package dependencies in ${path} to ${version}`);
-  for (const package_ of packages(path)) {
-    const manifestRaw = await loadTOML(package_.manifestPath);
-
-    const manifest = (
-      "workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw
-    ) as CargoManifest;
-
-    if (
-      "metadata" in manifest.package &&
-      "deb" in manifest.package.metadata &&
-      "depends" in manifest.package.metadata.deb &&
-      manifest.package.metadata.deb.depends != "$auto" &&
-      pattern.test(manifest.package.metadata.deb.name)
-    ) {
-      const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version}-1)`);
-      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-      deb.depends = depends;
-
-      await dumpTOML(package_.manifestPath, manifestRaw);
-    }
-  }
-  core.endGroup();
-}
-
-type CargoConfig = {
-  registries: {
-    [key: string]: { index: string };
-  };
-};
-
-/**
- * Stores Cargo registry configuration in `.cargo/config.toml`.
- * @param path Path to the Cargo workspace.
- * @param name Name of the Cargo alternative registry.
- * @param index Index of the Cargo alternative registry.
- */
-export async function configRegistry(path: string, name: string, index: string): Promise<void> {
-  const configPath = `${path}/.cargo/config.toml`;
-  const configRaw = await loadTOML(configPath);
-  const config = configRaw as CargoConfig;
-
-  config.registries = {
-    [name]: {
-      index,
-    },
-  };
-
-  await dumpTOML(configPath, config);
-}
-
-/**
  * Sets the Cargo registry of select dependencies.
  *
  * @param path Path to the Cargo workspace.
@@ -273,9 +216,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
   core.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
   const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = await loadTOML(manifestPath);
-  const manifest = (
-    "workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw
-  ) as CargoManifest;
+  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
   let changed = false;
   for (const dep in manifest.dependencies) {
@@ -292,15 +233,17 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
   core.endGroup();
 }
 
+/**
+ * Returns a list of all workspace packages which contain Debian package metadata.
+ * @param path Path to the Cargo workspace.
+ */
 export async function packagesDebian(path: string): Promise<Package[]> {
   const result = [] as Package[];
 
   for (const package_ of packages(path)) {
     const manifestRaw = await loadTOML(package_.manifestPath);
 
-    const manifest = (
-      "workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw
-    ) as CargoManifest;
+    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
     if ("metadata" in manifest.package && "deb" in manifest.package.metadata) {
       result.push(package_);
@@ -318,29 +261,26 @@ export async function packagesDebian(path: string): Promise<Package[]> {
 export async function installBinaryCached(name: string) {
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(homedir(), ".cargo", "bin")];
-    const version = run("cargo", ["search", name])
-      .split("\n")
-      .at(0)
-      .match(/".*"/g)
-      .at(0)
-      .slice(1, -1);
+    const version = sh(`cargo search ${name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
     const key = `${platform()}-${arch()}-${name}-${version}`;
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      run("cargo", ["install", name, "--force"]);
+      sh(`rustup default stable`);
+      sh(`cargo install ${name} --force`);
       await cache.saveCache(paths, key);
     }
   } else {
-    run("cargo", ["install", name]);
+    sh(`rustup default stable`);
+    sh(`cargo install ${name}`);
   }
 }
 
 async function loadTOML(path: string): Promise<Record<string, toml.TomlPrimitive>> {
-  const contents = await readFile(path, "utf-8");
+  const contents = await fs.readFile(path, "utf-8");
   return toml.parse(contents);
 }
 
 async function dumpTOML(path: string, obj: Record<string, toml.TomlPrimitive>) {
-  await writeFile(path, toml.stringify(obj));
+  await fs.writeFile(path, toml.stringify(obj));
 }

@@ -1,0 +1,19 @@
+name: Publish crates (Debian)
+
+inputs:
+  dry-run:
+    required: true
+  version:
+    required: true
+  ssh-host:
+    required: true
+  ssh-host-path:
+    required: true
+  ssh-private-key:
+    required: true
+  ssh-passphrase:
+    required: true
+
+runs:
+  using: node20
+  main: ../dist/publish-crates-debian-main.js

@@ -1,0 +1,21 @@
+name: Build crates (Debian)
+
+inputs:
+  repo:
+    required: true
+  version:
+    required: true
+  branch:
+    required: true
+  target:
+    required: true
+  github-token:
+    required: true
+
+outputs:
+  artifact-id:
+    description: Artifact id
+
+runs:
+  using: node20
+  main: ../dist/build-crates-debian-main.js

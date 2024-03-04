@@ -1,0 +1,37 @@
+name: Publish crates (Homebrew)
+
+inputs:
+  dry-run:
+    required: true
+  version:
+    required: true
+  repo:
+    required: true
+  branch:
+    required: true
+  artifact-patterns:
+    required: true
+  formulae:
+    required: true
+  tap:
+    required: true
+  ssh-host:
+    required: true
+  ssh-host-url:
+    required: true
+  ssh-host-path:
+    required: true
+  ssh-private-key:
+    required: true
+  ssh-passphrase:
+    required: true
+  github-token:
+    required: true
+  actor-name:
+    required: true
+  actor-email:
+    required: true
+
+runs:
+  using: node20
+  main: ../dist/publish-crates-homebrew-main.js
