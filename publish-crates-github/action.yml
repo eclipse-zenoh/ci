@@ -1,0 +1,21 @@
+name: Publish crates (GitHub)
+
+inputs:
+  dry-run:
+    required: true
+  version:
+    required: true
+  repo:
+    required: true
+  branch:
+    required: true
+  ssh-private-key:
+    required: true
+  ssh-passphrase:
+    required: true
+  github-token:
+    required: true
+
+runs:
+  using: node20
+  main: ../dist/publish-crates-github-main.js
