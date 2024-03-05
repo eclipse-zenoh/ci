@@ -82245,7 +82245,7 @@ async function dumpTOML(path, obj) {
 const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
 function setup() {
     const version = lib_core.getInput("version");
-    const dryRun = lib_core.getBooleanInput("dry-run", { required: true });
+    const liveRun = lib_core.getInput("live-run");
     const dryRunHistorySize = lib_core.getInput("dry-run-history-size");
     const repo = lib_core.getInput("repo", { required: true });
     const path = lib_core.getInput("path");
@@ -82256,7 +82256,7 @@ function setup() {
     const interDepsVersion = lib_core.getInput("inter-deps-version");
     return {
         version,
-        dryRun: dryRun,
+        liveRun: liveRun == "" ? false : lib_core.getBooleanInput("live-run"),
         dryRunHistorySize: dryRunHistorySize == "" ? undefined : Number(dryRunHistorySize),
         repo,
         path: path == "" ? undefined : path,
@@ -82279,18 +82279,21 @@ async function main(input) {
         command_sh(`git clone --recursive ${remote}`);
         command_sh(`ls ${workspace}`);
         input.dryRunHistorySize ??= DEFAULT_DRY_RUN_HISTORY_SIZE;
-        let version;
+        input.version ??= command_sh(`git describe`, { cwd: repo }).trimEnd();
+        lib_core.setOutput("version", input.version);
         let branch;
-        if (input.dryRun) {
-            version = command_sh(`git describe`, { cwd: repo }).trimEnd();
-            branch = `release/dry-run/${version}`;
-            lib_core.setOutput("version", version);
+        if (input.liveRun) {
+            branch = `release/${input.version}`;
+            lib_core.setOutput("branch", branch);
+        }
+        else {
+            branch = `release/dry-run/${input.version}`;
             lib_core.setOutput("branch", branch);
             const refsPattern = "refs/remotes/origin/release/dry-run";
             const refsRaw = command_sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
             const refs = refsRaw.split("\n");
             if (refs.includes(`refs/remotes/origin/${branch}`)) {
-                lib_core.info(`Version ${version} has already been tagged`);
+                lib_core.info(`Version ${input.version} has already been tagged`);
                 await cleanup(input);
                 return;
             }
@@ -82298,17 +82301,11 @@ async function main(input) {
                 command_sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
             }
         }
-        else {
-            version = input.version;
-            branch = `release/${version}`;
-            lib_core.setOutput("version", version);
-            lib_core.setOutput("branch", branch);
-        }
-        input.interDepsVersion ??= version;
+        input.interDepsVersion ??= input.version;
         command_sh(`git switch --create ${branch}`, { cwd: repo });
-        await bump(workspace, version);
+        await bump(workspace, input.version);
         command_sh(`git add . `, { cwd: repo });
-        command_sh(`git commit --message 'chore: Bump version to \`${version}\`'`, { cwd: repo, env: input.actorEnv });
+        command_sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: input.actorEnv });
         await bumpDependencies(workspace, input.interDepsRegExp, input.interDepsVersion);
         command_sh(`git add . `, { cwd: repo });
         command_sh(`git commit --message 'chore: Point inter-dependencies to \`${input.interDepsVersion}\`'`, {
@@ -82322,10 +82319,10 @@ async function main(input) {
             env: input.actorEnv,
             check: false,
         });
-        command_sh(`git tag ${version} --message v${version}`, { cwd: repo, env: input.actorEnv });
+        command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: input.actorEnv });
         command_sh(`git log -10`, { cwd: repo });
         command_sh(`git show-ref --tags`, { cwd: repo });
-        command_sh(`git push ${remote} ${branch} ${version}`, { cwd: repo });
+        command_sh(`git push ${remote} ${branch} ${input.version}`, { cwd: repo });
         await cleanup(input);
     }
     catch (error) {

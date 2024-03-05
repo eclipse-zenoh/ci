@@ -9,7 +9,7 @@ import * as ssh from "./ssh";
 import * as zip from "./zip";
 
 export type Input = {
-  dryRun: boolean;
+  liveRun: boolean;
   version: string;
   repo: string;
   branch: string;
@@ -26,7 +26,7 @@ export type Input = {
 };
 
 export function setup(): Input {
-  const dryRun = core.getBooleanInput("dry-run", { required: true });
+  const liveRun = core.getInput("live-run");
   const version = core.getInput("version", { required: true });
   const repo = core.getInput("repo", { required: true });
   const branch = core.getInput("branch", { required: true });
@@ -43,7 +43,7 @@ export function setup(): Input {
   const actorEmail = core.getInput("actor-email", { required: true });
 
   return {
-    dryRun,
+    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     version,
     repo,
     branch,
@@ -104,7 +104,7 @@ export async function main(input: Input) {
       const outputArchive = `${repo}-${input.version}-${target}.zip`;
       await zip.fromDirectory(outputArchive, path.join(repo, "target", target, "release"), input.artifactRegExp);
 
-      if (!input.dryRun) {
+      if (input.liveRun) {
         await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
           sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${input.sshHostPath}`, { env });
           sh(`scp -v -o StrictHostKeyChecking=no -r ${outputArchive} ${input.sshHost}:${input.sshHostPath}`, { env });
@@ -126,7 +126,7 @@ export async function main(input: Input) {
     };
 
     const url = (target: string): string => {
-      const baseUrl = input.dryRun ? `file://${process.cwd()}` : input.sshHostUrl;
+      const baseUrl = input.liveRun ? input.sshHostUrl : `file://${process.cwd()}`;
       return `${baseUrl}/${repo}-${input.version}-${target}.zip`;
     };
 
@@ -149,7 +149,7 @@ export async function main(input: Input) {
       sh(`brew uninstall --force --ignore-dependencies ${formula}`);
     }
 
-    if (!input.dryRun) {
+    if (input.liveRun) {
       sh(`git push ${tapUrl}`, { cwd: tapPath });
     }
 

@@ -7,7 +7,7 @@ import * as cargo from "./cargo";
 import { sh } from "./command";
 
 export type Input = {
-  dryRun: boolean;
+  liveRun: boolean;
   branch: string;
   repos: string[];
   githubToken: string;
@@ -16,7 +16,7 @@ export type Input = {
 };
 
 export function setup(): Input {
-  const dryRun = core.getBooleanInput("dry-run", { required: true });
+  const liveRun = core.getInput("live-run");
   const branch = core.getInput("branch", { required: true });
   const repos = core.getInput("repos", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
@@ -24,7 +24,7 @@ export function setup(): Input {
   const cratesIoToken = core.getInput("crates-io-token", { required: true });
 
   return {
-    dryRun,
+    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     branch,
     repos: repos.split("\n"),
     githubToken,
@@ -45,7 +45,7 @@ export async function main(input: Input) {
       core.endGroup();
     }
 
-    if (!input.dryRun) {
+    if (input.liveRun) {
       for (const repo of input.repos) {
         core.startGroup(`Publishing ${repo} to crates.io`);
         clone(repo, input);
@@ -62,7 +62,7 @@ export async function main(input: Input) {
 }
 
 export async function cleanup(input: Input, registry: estuary.Estuary) {
-  if (input.dryRun) {
+  if (input.liveRun) {
     core.info(`Killing estuary process (${registry.proc.pid})`);
     try {
       process.kill(registry.proc.pid);

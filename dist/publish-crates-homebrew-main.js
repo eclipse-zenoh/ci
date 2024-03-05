@@ -24835,7 +24835,7 @@ function fromFiles(output, ...files) {
 
 
 function setup() {
-    const dryRun = core.getBooleanInput("dry-run", { required: true });
+    const liveRun = core.getInput("live-run");
     const version = core.getInput("version", { required: true });
     const repo = core.getInput("repo", { required: true });
     const branch = core.getInput("branch", { required: true });
@@ -24851,7 +24851,7 @@ function setup() {
     const actorName = core.getInput("actor-name", { required: true });
     const actorEmail = core.getInput("actor-email", { required: true });
     return {
-        dryRun,
+        liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
         version,
         repo,
         branch,
@@ -24894,7 +24894,7 @@ async function main(input) {
         for (const target of TARGETS) {
             const outputArchive = `${repo}-${input.version}-${target}.zip`;
             await fromDirectory(outputArchive, external_path_.join(repo, "target", target, "release"), input.artifactRegExp);
-            if (!input.dryRun) {
+            if (input.liveRun) {
                 await withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
                     sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${input.sshHostPath}`, { env });
                     sh(`scp -v -o StrictHostKeyChecking=no -r ${outputArchive} ${input.sshHost}:${input.sshHostPath}`, { env });
@@ -24912,7 +24912,7 @@ async function main(input) {
             return external_crypto_.createHash("sha256").update(contents).digest("hex");
         };
         const url = (target) => {
-            const baseUrl = input.dryRun ? `file://${process.cwd()}` : input.sshHostUrl;
+            const baseUrl = input.liveRun ? input.sshHostUrl : `file://${process.cwd()}`;
             return `${baseUrl}/${repo}-${input.version}-${target}.zip`;
         };
         for (const formula of input.formulae) {
@@ -24931,7 +24931,7 @@ async function main(input) {
             sh(`brew install --force ${formula}`);
             sh(`brew uninstall --force --ignore-dependencies ${formula}`);
         }
-        if (!input.dryRun) {
+        if (input.liveRun) {
             sh(`git push ${tapUrl}`, { cwd: tapPath });
         }
         cleanup(input);

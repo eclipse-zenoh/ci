@@ -7,7 +7,7 @@ import { sh } from "./command";
 const artifact = new DefaultArtifactClient();
 
 export type Input = {
-  dryRun: boolean;
+  liveRun: boolean;
   version: string;
   sshHost: string;
   sshHostPath: string;
@@ -16,7 +16,7 @@ export type Input = {
 };
 
 export function setup(): Input {
-  const dryRun = core.getBooleanInput("dry-run", { required: true });
+  const liveRun = core.getInput("live-run");
   const version = core.getInput("version", { required: true });
   const sshHost = core.getInput("ssh-host", { required: true });
   const sshHostPath = core.getInput("ssh-host-path", { required: true });
@@ -24,7 +24,7 @@ export function setup(): Input {
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
 
   return {
-    dryRun,
+    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     version,
     sshHost,
     sshHostPath,
@@ -43,7 +43,7 @@ export async function main(input: Input) {
         const sshTarget = `${input.sshHost}:${input.sshHostPath}/${input.version}`;
 
         core.info(`Uploading ${archive} to eclipse.org`);
-        if (!input.dryRun) {
+        if (input.liveRun) {
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
             sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${sshTarget}`, { env });
           });

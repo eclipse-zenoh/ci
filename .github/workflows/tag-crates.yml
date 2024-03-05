@@ -6,12 +6,12 @@ on:
       repo:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: boolean
-        required: true
+        required: false
       version:
         type: string
-        required: true
+        required: false
       inter-deps-pattern:
         type: string
         required: true
@@ -28,12 +28,12 @@ on:
       repo:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: boolean
-        required: true
+        required: false
       version:
         type: string
-        required: true
+        required: false
       inter-deps-pattern:
         type: string
         required: true
@@ -52,7 +52,7 @@ jobs:
         uses: eclipse-zenoh/ci/tag-crates@main
         with:
           repo: ${{ inputs.repo }}
-          dry-run: ${{ inputs.dry-run }}
+          live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
           inter-deps-pattern: ${{ inputs.inter-deps-pattern }}
           inter-deps-version: ${{ inputs.inter-deps-version }}
