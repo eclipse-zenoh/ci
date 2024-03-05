@@ -10,7 +10,7 @@ const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
 
 export type Input = {
   version?: string;
-  dryRun: boolean;
+  liveRun: boolean;
   dryRunHistorySize?: number;
   repo: string;
   path?: string;
@@ -22,7 +22,7 @@ export type Input = {
 
 export function setup(): Input {
   const version = core.getInput("version");
-  const dryRun = core.getBooleanInput("dry-run", { required: true });
+  const liveRun = core.getInput("live-run");
   const dryRunHistorySize = core.getInput("dry-run-history-size");
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
@@ -34,7 +34,7 @@ export function setup(): Input {
 
   return {
     version,
-    dryRun: dryRun,
+    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     dryRunHistorySize: dryRunHistorySize == "" ? undefined : Number(dryRunHistorySize),
     repo,
     path: path == "" ? undefined : path,
@@ -60,14 +60,15 @@ export async function main(input: Input) {
     sh(`ls ${workspace}`);
 
     input.dryRunHistorySize ??= DEFAULT_DRY_RUN_HISTORY_SIZE;
+    input.version ??= sh(`git describe`, { cwd: repo }).trimEnd();
+    core.setOutput("version", input.version);
 
-    let version: string;
     let branch: string;
-    if (input.dryRun) {
-      version = sh(`git describe`, { cwd: repo }).trimEnd();
-      branch = `release/dry-run/${version}`;
-
-      core.setOutput("version", version);
+    if (input.liveRun) {
+      branch = `release/${input.version}`;
+      core.setOutput("branch", branch);
+    } else {
+      branch = `release/dry-run/${input.version}`;
       core.setOutput("branch", branch);
 
       const refsPattern = "refs/remotes/origin/release/dry-run";
@@ -75,7 +76,7 @@ export async function main(input: Input) {
       const refs = refsRaw.split("\n");
 
       if (refs.includes(`refs/remotes/origin/${branch}`)) {
-        core.info(`Version ${version} has already been tagged`);
+        core.info(`Version ${input.version} has already been tagged`);
         await cleanup(input);
         return;
       }
@@ -83,20 +84,14 @@ export async function main(input: Input) {
       if (refs.length >= input.dryRunHistorySize) {
         sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
       }
-    } else {
-      version = input.version!;
-      branch = `release/${version}`;
-
-      core.setOutput("version", version);
-      core.setOutput("branch", branch);
     }
 
-    input.interDepsVersion ??= version;
+    input.interDepsVersion ??= input.version;
     sh(`git switch --create ${branch}`, { cwd: repo });
 
-    await cargo.bump(workspace, version);
+    await cargo.bump(workspace, input.version);
     sh(`git add . `, { cwd: repo });
-    sh(`git commit --message 'chore: Bump version to \`${version}\`'`, { cwd: repo, env: input.actorEnv });
+    sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: input.actorEnv });
 
     await cargo.bumpDependencies(workspace, input.interDepsRegExp, input.interDepsVersion);
     sh(`git add . `, { cwd: repo });
@@ -113,10 +108,10 @@ export async function main(input: Input) {
       check: false,
     });
 
-    sh(`git tag ${version} --message v${version}`, { cwd: repo, env: input.actorEnv });
+    sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: input.actorEnv });
     sh(`git log -10`, { cwd: repo });
     sh(`git show-ref --tags`, { cwd: repo });
-    sh(`git push ${remote} ${branch} ${version}`, { cwd: repo });
+    sh(`git push ${remote} ${branch} ${input.version}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {

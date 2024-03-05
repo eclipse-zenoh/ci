@@ -3,7 +3,7 @@ name: Publish crates (Debian)
 on:
   workflow_call:
     inputs:
-      dry-run:
+      live-run:
         type: string
         required: true
       version:
@@ -11,7 +11,7 @@ on:
         required: true
   workflow_dispatch:
     inputs:
-      dry-run:
+      live-run:
         type: string
         required: true
       version:
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: eclipse-zenoh/ci/publish-crates-debian@main
         with:
-          dry-run: ${{ inputs.dry-run }}
+          live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
           ssh-host: genie.zenoh@projects-storage.eclipse.org
           ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/debian-repo

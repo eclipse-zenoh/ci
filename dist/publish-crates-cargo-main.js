@@ -82273,14 +82273,14 @@ async function spawn() {
 
 
 function setup() {
-    const dryRun = lib_core.getBooleanInput("dry-run", { required: true });
+    const liveRun = lib_core.getInput("live-run");
     const branch = lib_core.getInput("branch", { required: true });
     const repos = lib_core.getInput("repos", { required: true });
     const githubToken = lib_core.getInput("github-token", { required: true });
     const interDepsPattern = lib_core.getInput("inter-deps-pattern", { required: true });
     const cratesIoToken = lib_core.getInput("crates-io-token", { required: true });
     return {
-        dryRun,
+        liveRun: liveRun == "" ? false : lib_core.getBooleanInput("live-run"),
         branch,
         repos: repos.split("\n"),
         githubToken,
@@ -82299,7 +82299,7 @@ async function main(input) {
             await deleteRepos(input);
             lib_core.endGroup();
         }
-        if (!input.dryRun) {
+        if (input.liveRun) {
             for (const repo of input.repos) {
                 lib_core.startGroup(`Publishing ${repo} to crates.io`);
                 clone(repo, input);
@@ -82316,7 +82316,7 @@ async function main(input) {
     }
 }
 async function cleanup(input, registry) {
-    if (input.dryRun) {
+    if (input.liveRun) {
         lib_core.info(`Killing estuary process (${registry.proc.pid})`);
         try {
             process.kill(registry.proc.pid);

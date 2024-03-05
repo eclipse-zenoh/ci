@@ -6,7 +6,7 @@ on:
       repo:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: string
         required: true
       version:
@@ -20,7 +20,7 @@ on:
       repo:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: string
         required: true
       version:
@@ -37,7 +37,7 @@ jobs:
       - uses: eclipse-zenoh/ci/publish-crates-github@main
         with:
           repo: ${{ inputs.repo }}
-          dry-run: ${{ inputs.dry-run }}
+          live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
           branch: ${{ inputs.branch }}
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}

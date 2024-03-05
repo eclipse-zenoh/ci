@@ -7,7 +7,7 @@ import path from "path";
 const artifact = new DefaultArtifactClient();
 
 export type Input = {
-  dryRun: boolean;
+  liveRun: boolean;
   repo: string;
   version: string;
   branch: string;
@@ -17,7 +17,7 @@ export type Input = {
 };
 
 export function setup(): Input {
-  const dryRun = core.getBooleanInput("dry-run", { required: true });
+  const liveRun = core.getInput("live-run");
   const repo = core.getInput("repo", { required: true });
   const version = core.getInput("version", { required: true });
   const branch = core.getInput("branch", { required: true });
@@ -26,7 +26,7 @@ export function setup(): Input {
   const githubToken = core.getInput("github-token", { required: true });
 
   return {
-    dryRun,
+    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     version,
     branch,
     repo,
@@ -42,10 +42,10 @@ export async function main(input: Input) {
       GH_TOKEN: input.githubToken,
     };
     const startTag = sh("git describe --tags --abbrev=0");
-    if (!input.dryRun) {
+    if (input.liveRun) {
       sh(
         `gh release create ${input.version} --repo ${input.repo} --target ${input.branch} \
-      --notes-start-tag ${startTag} --verify-tag --generate-notes`,
+        --notes-start-tag ${startTag} --verify-tag --generate-notes`,
         { env },
       );
     }
@@ -57,7 +57,7 @@ export async function main(input: Input) {
         const archive = path.join(downloadPath, `${result.name}.zip`);
 
         core.info(`Uploading ${archive} to github.com/${input.repo}`);
-        if (!input.dryRun) {
+        if (input.liveRun) {
           sh(`gh release upload ${input.version} ${archive} --repo ${input.repo} --clobber`, { env });
         }
       }

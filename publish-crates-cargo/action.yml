@@ -1,8 +1,8 @@
 name: Publish crates (Cargo)
 
 inputs:
-  dry-run:
-    required: true
+  live-run:
+    required: false
   branch:
     required: true
   repos:

@@ -6,7 +6,7 @@ on:
       repos:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: string
         required: true
       branch:
@@ -20,7 +20,7 @@ on:
       repos:
         type: string
         required: true
-      dry-run:
+      live-run:
         type: string
         required: true
       branch:
@@ -37,7 +37,7 @@ jobs:
       - uses: eclipse-zenoh/ci/publish-crates-cargo@main
         with:
           repos: ${{ inputs.repos }}
-          dry-run: ${{ inputs.dry-run }}
+          live-run: ${{ inputs.live-run }}
           branch: ${{ inputs.branch }}
           inter-deps-pattern: ${{ inputs.inter-deps-pattern }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

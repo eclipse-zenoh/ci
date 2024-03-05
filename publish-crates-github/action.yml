@@ -1,8 +1,8 @@
 name: Publish crates (GitHub)
 
 inputs:
-  dry-run:
-    required: true
+  live-run:
+    required: false
   version:
     required: true
   repo:
