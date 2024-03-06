@@ -42,7 +42,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        exclude: ${{ inputs.exclude-builds }}
+        exclude: ${{ fromJson(inputs.exclude-builds) }}
         build:
           - { target: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
           - { target: x86_64-unknown-linux-musl, os: ubuntu-20.04 }
