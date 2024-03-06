@@ -49,6 +49,8 @@ export async function main(input: Input) {
     const crossContents = await fs.readFile(path.join(repo, "Cross.toml"), "utf-8");
     const crossManifest = toml.parse(crossContents) as CrossManifest;
 
+    sh(`rustup target add ${input.target}`);
+
     if (input.target in crossManifest.target) {
       sh(`cross build --release --bins --lib --target ${input.target}`, {
         cwd: repo,
