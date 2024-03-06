@@ -43,7 +43,7 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
     sh(`git clone --recursive --branch ${input.branch} --single-branch ${remote}`);
 
-    sh(`rustup target add ${input.target}`);
+    sh(`rustup target add ${input.target}`, { cwd: repo });
 
     sh(`cross build --release --bins --lib --target ${input.target}`, {
       cwd: repo,
