@@ -8,6 +8,8 @@ import * as ssh from "./ssh";
 import { sh } from "./command";
 import path from "path";
 
+import { artifactRegExp } from "./build-crates-debian";
+
 const artifact = new DefaultArtifactClient();
 
 const sourcesListName = "publish-crates-debian.list";
@@ -56,7 +58,7 @@ export async function main(input: Input) {
   try {
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
-      if (/^.*-debian$/g.test(result.name)) {
+      if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         sh(`unzip ${downloadPath}/${result.name}.zip -d ${input.version}`);
       }

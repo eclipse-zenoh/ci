@@ -82331,7 +82331,7 @@ async function main(input) {
     }
 }
 async function cleanup(input, registry) {
-    if (input.liveRun) {
+    if (!input.liveRun) {
         lib_core.info(`Killing estuary process (${registry.proc.pid})`);
         try {
             process.kill(registry.proc.pid);

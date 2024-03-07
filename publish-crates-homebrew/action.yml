@@ -7,10 +7,6 @@ inputs:
     required: true
   repo:
     required: true
-  branch:
-    required: true
-  artifact-patterns:
-    required: true
   formulae:
     required: true
   tap:

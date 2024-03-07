@@ -25,7 +25,7 @@ on:
         required: true
 
 jobs:
-  build-crates-debian:
+  build:
     runs-on: ${{ matrix.build.os }}
     strategy:
       fail-fast: false

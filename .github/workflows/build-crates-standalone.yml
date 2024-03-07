@@ -1,0 +1,67 @@
+name: Build crates (Standalone)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+
+jobs:
+  build:
+    runs-on: ${{ matrix.build.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        exclude: ${{ fromJson(inputs.exclude-builds) }}
+        build:
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-20.04 }
+          - { target: arm-unknown-linux-gnueabi, os: ubuntu-20.04 }
+          - { target: arm-unknown-linux-gnueabihf, os: ubuntu-20.04 }
+          - { target: armv7-unknown-linux-gnueabihf, os: ubuntu-20.04 }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-20.04 }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-20.04 }
+          - { target: x86_64-apple-darwin, os: macos-11 }
+          - { target: aarch64-apple-darwin, os: macos-11 }
+          - { target: x86_64-pc-windows-msvc, os: windows-2019 }
+          - { target: x86_64-pc-windows-gnu, os: windows-2019 }
+    steps:
+      - id: build
+        uses: eclipse-zenoh/ci/build-crates-standalone@main
+        with:
+          repo: ${{ inputs.repo }}
+          version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
+          target: ${{ matrix.build.target }}
+          artifact-patterns: ${{ inputs.artifact-patterns }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

@@ -64,11 +64,10 @@ export async function main(input: Input) {
       );
     }
 
-    const output = `${repo}-${input.version}-${input.target}-debian`;
-    const outputArchive = output.concat(".zip");
-    await zip.fromDirectory(outputArchive, path.join(repo, "target", input.target, "debian"), /.*deb/);
+    const output = artifactName(repo, input.version, input.target);
+    await zip.fromDirectory(output, path.join(repo, "target", input.target, "debian"), /.*deb/);
 
-    const { id } = await artifact.uploadArtifact(output, [outputArchive], process.cwd());
+    const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
 
     await cleanup(input);
@@ -77,6 +76,12 @@ export async function main(input: Input) {
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
+
+export function artifactName(repo: string, version: string, target: string): string {
+  return `${repo}-${version}-${target}-debian.zip`;
+}
+
+export const artifactRegExp: RegExp = /^.*-debian\.zip$/;
 
 export async function cleanup(input: Input) {
   const repoPath = input.repo.split("/")[1];
