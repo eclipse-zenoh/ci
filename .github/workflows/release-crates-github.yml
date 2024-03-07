@@ -1,0 +1,84 @@
+name: Publish crates (GitHub)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+      no-build:
+        type: boolean
+        required: false
+        default: false
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+      no-build:
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build-standalone:
+    if: ${{ !inputs.no-build }}
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-standalone.yml@main
+    with:
+      repo: ${{ inputs.repo }}
+      version: ${{ inputs.version }}
+      branch: ${{ inputs.branch }}
+      artifact-patterns: ${{ inputs.artifact-patterns }}
+      exclude-builds: ${{ inputs.exclude-builds }}
+
+  build-debian:
+    if: ${{ !inputs.no-build }}
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-debian.yml@main
+    with:
+      repo: ${{ inputs.repo }}
+      version: ${{ inputs.version }}
+      branch: ${{ inputs.branch }}
+
+  publish:
+    needs: [build-standalone, build-debian]
+    runs-on: macos-latest
+    steps:
+      - uses: eclipse-zenoh/ci/publish-crates-github@main
+        with:
+          repo: ${{ inputs.repo }}
+          live-run: ${{ inputs.live-run }}
+          version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

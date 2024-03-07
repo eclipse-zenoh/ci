@@ -1,0 +1,81 @@
+name: Publish crates (Eclipse)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+      name:
+        type: string
+        required: true
+      no-build:
+        type: boolean
+        required: false
+        default: false
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      exclude-builds:
+        type: string
+        required: false
+      name:
+        type: string
+        required: true
+      no-build:
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build:
+    if: ${{ !inputs.no-build }}
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-standalone.yml@main
+    with:
+      repo: ${{ inputs.repo }}
+      version: ${{ inputs.version }}
+      branch: ${{ inputs.branch }}
+      artifact-patterns: ${{ inputs.artifact-patterns }}
+      exclude-builds: ${{ inputs.exclude-builds }}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: eclipse-zenoh/ci/publish-crates-eclipse@main
+        with:
+          live-run: ${{ inputs.live-run }}
+          version: ${{ inputs.version }}
+          ssh-host: genie.zenoh@projects-storage.eclipse.org
+          ssh-host-path: /home/data/httpd/download.eclipse.org/${{ inputs.name }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}

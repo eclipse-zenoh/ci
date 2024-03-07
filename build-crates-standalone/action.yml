@@ -1,0 +1,23 @@
+name: Build crates (Standalone)
+
+inputs:
+  repo:
+    required: true
+  version:
+    required: true
+  branch:
+    required: true
+  target:
+    required: true
+  artifact-patterns:
+    required: true
+  github-token:
+    required: true
+
+outputs:
+  artifact-id:
+    description: Artifact id
+
+runs:
+  using: node20
+  main: ../dist/build-crates-artifacts-main.js

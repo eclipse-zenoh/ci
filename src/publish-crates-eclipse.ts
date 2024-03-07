@@ -4,6 +4,8 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import * as ssh from "./ssh";
 import { sh } from "./command";
 
+import { artifactRegExp } from "./build-crates-standalone";
+
 const artifact = new DefaultArtifactClient();
 
 export type Input = {
@@ -37,7 +39,7 @@ export async function main(input: Input) {
   try {
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
-      if (/^.*-artifacts$/g.test(result.name)) {
+      if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = `${downloadPath}/${result.name}.zip`;
         const sshTarget = `${input.sshHost}:${input.sshHostPath}/${input.version}`;

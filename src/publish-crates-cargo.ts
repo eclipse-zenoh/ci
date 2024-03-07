@@ -63,7 +63,7 @@ export async function main(input: Input) {
 }
 
 export async function cleanup(input: Input, registry: estuary.Estuary) {
-  if (input.liveRun) {
+  if (!input.liveRun) {
     core.info(`Killing estuary process (${registry.proc.pid})`);
     try {
       process.kill(registry.proc.pid);

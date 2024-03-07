@@ -1,0 +1,89 @@
+name: Publish crates (Homebrew)
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      formulae:
+        type: string
+        required: true
+      no-build:
+        type: boolean
+        required: false
+        default: false
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      live-run:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      branch:
+        type: string
+        required: true
+      artifact-patterns:
+        type: string
+        required: true
+      formulae:
+        type: string
+        required: true
+      no-build:
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  build:
+    if: ${{ !inputs.no-build }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+    steps:
+      - uses: eclipse-zenoh/ci/build-crates-standalone@main
+        with:
+          repo: ${{ inputs.repo }}
+          version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
+          target: ${{ matrix.target }}
+          artifact-patterns: ${{ inputs.artifact-patterns }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+  publish:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - uses: eclipse-zenoh/ci/publish-crates-homebrew@main
+        with:
+          repo: ${{ inputs.repo }}
+          live-run: ${{ inputs.live-run }}
+          version: ${{ inputs.version }}
+          formulae: ${{ inputs.formulae }}
+          tap: eclipse-zenoh/homebrew-zenoh
+          ssh-host: genie.zenoh@projects-storage.eclipse.org
+          ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/homebrew-tap
+          ssh-host-url: https://download.eclipse.org/zenoh/homebrew-tap
+          actor-name: eclipse-zenoh-bot
+          actor-email: eclipse-zenoh-bot@users.noreply.github.com
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

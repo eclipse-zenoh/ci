@@ -4,6 +4,9 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import { sh } from "./command";
 import path from "path";
 
+import { artifactRegExp as artfifactRegExpDebain } from "./build-crates-debian";
+import { artifactRegExp as artfifactRegExpStandalone } from "./build-crates-standalone";
+
 const artifact = new DefaultArtifactClient();
 
 export type Input = {
@@ -52,7 +55,7 @@ export async function main(input: Input) {
 
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
-      if (/^.*-artifacts$/g.test(result.name)) {
+      if (artfifactRegExpStandalone.test(result.name) || artfifactRegExpDebain.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, `${result.name}.zip`);
 
