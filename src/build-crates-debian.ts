@@ -53,9 +53,15 @@ export async function main(input: Input) {
     core.info(`Building ${packages.map(p => p.name).join(", ")}`);
 
     for (const package_ of packages) {
-      sh(`cargo deb --no-build --target ${input.target} --package ${package_.name} --deb-version ${input.version}`, {
-        cwd: repo,
-      });
+      sh(
+        `cargo deb --no-build --no-strip \
+        --target ${input.target} \
+        --package ${package_.name} \
+        --deb-version ${input.version}`,
+        {
+          cwd: repo,
+        },
+      );
     }
 
     const output = `${repo}-${input.version}-${input.target}-debian`;
