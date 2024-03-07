@@ -66,6 +66,7 @@ jobs:
       branch: ${{ inputs.branch }}
       artifact-patterns: ${{ inputs.artifact-patterns }}
       exclude-builds: ${{ inputs.exclude-builds }}
+    secrets: inherit
 
   publish:
     needs: build
