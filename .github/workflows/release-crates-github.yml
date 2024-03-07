@@ -1,4 +1,4 @@
-name: Publish crates (GitHub)
+name: Release crates (GitHub)
 
 on:
   workflow_call:

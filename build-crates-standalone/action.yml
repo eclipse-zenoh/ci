@@ -20,4 +20,4 @@ outputs:
 
 runs:
   using: node20
-  main: ../dist/build-crates-artifacts-main.js
+  main: ../dist/build-crates-standalone-main.js

@@ -1,4 +1,4 @@
-name: Publish crates (Cargo)
+name: Release crates (Cargo)
 
 on:
   workflow_call:

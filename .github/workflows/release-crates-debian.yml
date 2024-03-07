@@ -1,4 +1,4 @@
-name: Publish crates (Debian)
+name: Release crates (Debian)
 
 on:
   workflow_call:
