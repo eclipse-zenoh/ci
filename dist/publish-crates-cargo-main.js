@@ -82192,6 +82192,23 @@ async function setRegistry(path, pattern, registry) {
     lib_core.endGroup();
 }
 /**
+ * Stores Cargo registry configuration in `.cargo/config.toml`.
+ * @param path Path to the Cargo workspace.
+ * @param name Name of the Cargo alternative registry.
+ * @param index Index of the Cargo alternative registry.
+ */
+async function configRegistry(path, name, index) {
+    const configPath = `${path}/.cargo/config.toml`;
+    const configRaw = await loadTOML(configPath);
+    const config = configRaw;
+    config.registries = {
+        [name]: {
+            index,
+        },
+    };
+    await dumpTOML(configPath, config);
+}
+/**
  * Returns a list of all workspace packages which contain Debian package metadata.
  * @param path Path to the Cargo workspace.
  */
@@ -82218,14 +82235,12 @@ async function installBinaryCached(name) {
         const key = `${(0,external_os_.platform)()}-${(0,external_os_.arch)()}-${name}-${version}`;
         const hit = await cache.restoreCache(paths, key);
         if (hit == undefined) {
-            sh(`rustup default stable`);
-            sh(`cargo install ${name} --force`);
+            sh(`cargo +stable install ${name} --force`);
             await cache.saveCache(paths, key);
         }
     }
     else {
-        sh(`rustup default stable`);
-        sh(`cargo install ${name}`);
+        sh(`cargo +stable install ${name}`);
     }
 }
 async function loadTOML(path) {
@@ -82296,9 +82311,9 @@ async function main(input) {
             lib_core.startGroup(`Publishing ${repo} to estuary`);
             clone(repo, input);
             await publishToEstuary(repo, input, registry);
-            await deleteRepos(input);
             lib_core.endGroup();
         }
+        await deleteRepos(input);
         if (input.liveRun) {
             for (const repo of input.repos) {
                 lib_core.startGroup(`Publishing ${repo} to crates.io`);
@@ -82344,11 +82359,11 @@ function repoPath(repo) {
 }
 async function publishToEstuary(repo, input, registry) {
     const path = repoPath(repo);
+    await configRegistry(path, registry.name, registry.index);
     await setRegistry(path, input.interDepsRegExp, registry.name);
     const env = {
         CARGO_REGISTRY_DEFAULT: registry.name,
         [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-        [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_INDEX`]: registry.index,
     };
     publish(repo, env);
 }

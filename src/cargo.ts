@@ -234,6 +234,24 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
 }
 
 /**
+ * Stores Cargo registry configuration in `.cargo/config.toml`.
+ * @param path Path to the Cargo workspace.
+ * @param name Name of the Cargo alternative registry.
+ * @param index Index of the Cargo alternative registry.
+ */
+export async function configRegistry(path: string, name: string, index: string) {
+  const configPath = `${path}/.cargo/config.toml`;
+  const configRaw = await loadTOML(configPath);
+  const config = configRaw;
+  config.registries = {
+    [name]: {
+      index,
+    },
+  };
+  await dumpTOML(configPath, config);
+}
+
+/**
  * Returns a list of all workspace packages which contain Debian package metadata.
  * @param path Path to the Cargo workspace.
  */
@@ -266,13 +284,11 @@ export async function installBinaryCached(name: string) {
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      sh(`rustup default stable`);
-      sh(`cargo install ${name} --force`);
+      sh(`cargo +stable install ${name} --force`);
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`rustup default stable`);
-    sh(`cargo install ${name}`);
+    sh(`cargo +stable install ${name}`);
   }
 }
 
