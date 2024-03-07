@@ -1,4 +1,4 @@
-name: Publish crates (Homebrew)
+name: Release crates (Homebrew)
 
 on:
   workflow_call:

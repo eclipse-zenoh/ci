@@ -1,4 +1,4 @@
-name: Publish crates (Eclipse)
+name: Release crates (Eclipse)
 
 on:
   workflow_call:
