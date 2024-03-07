@@ -41,9 +41,10 @@ export async function main(input: Input) {
       core.startGroup(`Publishing ${repo} to estuary`);
       clone(repo, input);
       await publishToEstuary(repo, input, registry);
-      await deleteRepos(input);
       core.endGroup();
     }
+
+    await deleteRepos(input);
 
     if (input.liveRun) {
       for (const repo of input.repos) {
@@ -95,12 +96,12 @@ function repoPath(repo: string): string {
 async function publishToEstuary(repo: string, input: Input, registry: estuary.Estuary): Promise<void> {
   const path = repoPath(repo);
 
+  await cargo.configRegistry(path, registry.name, registry.index);
   await cargo.setRegistry(path, input.interDepsRegExp, registry.name);
 
   const env = {
     CARGO_REGISTRY_DEFAULT: registry.name,
     [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_INDEX`]: registry.index,
   };
 
   publish(repo, env);
