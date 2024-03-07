@@ -60,6 +60,7 @@ jobs:
       branch: ${{ inputs.branch }}
       artifact-patterns: ${{ inputs.artifact-patterns }}
       exclude-builds: ${{ inputs.exclude-builds }}
+    secrets: inherit
 
   build-debian:
     if: ${{ !inputs.no-build }}
@@ -68,6 +69,7 @@ jobs:
       repo: ${{ inputs.repo }}
       version: ${{ inputs.version }}
       branch: ${{ inputs.branch }}
+    secrets: inherit
 
   publish:
     needs: [build-standalone, build-debian]
