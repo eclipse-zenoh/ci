@@ -44,10 +44,16 @@ export async function main(input: Input) {
     const env = {
       GH_TOKEN: input.githubToken,
     };
-    const startTag = sh("git describe --tags --abbrev=0");
+
     if (input.liveRun) {
+      // NOTE: We assume that a `${input.version}-dev` exists in the target
+      // branch and that it represents the starting tag of the release. If such
+      // a tag does not exist, the GitHub release creation will fail
+      const startTag = input.version.concat("-dev");
       sh(
-        `gh release create ${input.version} --repo ${input.repo} --target ${input.branch} \
+        `gh release create ${input.version} \
+        --repo ${input.repo} \
+        --target ${input.branch} \
         --notes-start-tag ${startTag} --verify-tag --generate-notes`,
         { env },
       );
