@@ -122,6 +122,6 @@ export async function main(input: Input) {
 }
 
 export function cleanup() {
-  sh(`rm -r *`);
-  sh(`sudo rm ${sourcesListDir}/${sourcesListName}`);
+  sh("rm -r *");
+  sh(`sudo rm ${sourcesListDir}/${sourcesListName}`, { check: false });
 }
