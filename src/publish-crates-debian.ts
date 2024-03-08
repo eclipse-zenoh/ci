@@ -60,14 +60,15 @@ export async function main(input: Input) {
     for (const result of results.artifacts) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
-        sh(`unzip ${downloadPath}/${result.name}.zip -d ${input.version}`);
+        const archive = path.join(downloadPath, result.name);
+        sh(`unzip ${archive} -d ${input.version}`);
       }
     }
 
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     const packagesPath = `.Packages-${input.version}`;
-    const allPackagesPath = `Packages`;
-    const allPackagesGzippedPath = `Packages.gz`;
+    const allPackagesPath = "Packages";
+    const allPackagesGzippedPath = "Packages.gz";
 
     await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
       sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
@@ -90,7 +91,7 @@ export async function main(input: Input) {
     // that requires sudo
     sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
     sh(`cat ${sourcesListDir}/${sourcesListName}`);
-    sh(`sudo apt-get update`);
+    sh("sudo apt-get update");
 
     const debs: Set<string> = new Set();
     for await (const dirent of await fs.opendir(input.version)) {
