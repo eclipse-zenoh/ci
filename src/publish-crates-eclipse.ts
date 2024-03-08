@@ -1,3 +1,5 @@
+import * as path from "path";
+
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
 
@@ -41,7 +43,7 @@ export async function main(input: Input) {
     for (const result of results.artifacts) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
-        const archive = `${downloadPath}/${result.name}.zip`;
+        const archive = path.join(downloadPath, result.name);
         const sshTarget = `${input.sshHost}:${input.sshHostPath}/${input.version}`;
 
         core.info(`Uploading ${archive} to eclipse.org`);
