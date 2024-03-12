@@ -1,0 +1,79 @@
+name: Publish crates (Docker)
+
+description: Publish crates to a Docker registry
+
+inputs:
+  repo:
+    description: Target GitHub repository
+    required: true
+  version:
+    description: Release tag
+    required: true
+  live-run:
+    description: Whether or not to push the image to the registry
+    required: false
+  binary:
+    description: Name of the executable used as an entrypoint
+    required: true
+  files:
+    description: Files to be copied into the image
+    required: true
+  tags:
+    description: List of Docker tags
+    required: true
+  licenses:
+    description: List of licenses
+    required: true
+  platforms:
+    description: List of target platforms
+    required: true
+  registry:
+    description: Address of Docker registry. Defaults to Docker Hub
+    required: false
+  username:
+    description: Username for authenticating with the registry
+    required: true
+  password:
+    description: Password or token for authenticating with the registry
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: '*-standalone.zip'
+        path: download-path
+        merge-multiple: true
+
+    - run: ls -R
+      shell: bash
+
+    - id: prepare
+      run: bash ${{ github.action_path }}/prepare.bash
+      shell: bash
+      env:
+        DOWNLOAD_PATH: download-path
+        REPO: ${{ inputs.repo }}
+        VERSION: ${{ inputs.version }}
+        PLATFORMS: ${{ inputs.platforms }}
+        FILES: ${{ inputs.files }}
+
+    - uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.username }}
+        password: ${{ inputs.password }}
+
+    - uses: docker/setup-buildx-action@v3
+
+    - uses: docker/build-push-action@v5
+      with:
+        context: ${{ steps.prepare.outputs.context }}
+        file: ${{ github.action_path }}/Dockerfile
+        platforms: ${{ inputs.platforms }}
+        push: ${{ inputs.live-run }}
+        tags: ${{ inputs.tags }}
+        labels: |
+          org.opencontainers.image.source=https://github.com/${{ inputs.repo }}
+          org.opencontainers.image.licenses=${{ inputs.licenses }}
