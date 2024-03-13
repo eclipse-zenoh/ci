@@ -33,7 +33,7 @@ export function setup(): Input {
   const interDepsVersion = core.getInput("inter-deps-version");
 
   return {
-    version,
+    version: version == "" ? undefined : version,
     liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
     dryRunHistorySize: dryRunHistorySize == "" ? undefined : Number(dryRunHistorySize),
     repo,
