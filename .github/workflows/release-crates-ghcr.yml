@@ -84,7 +84,7 @@ jobs:
           branch: ${{ inputs.branch }}
           target: ${{ matrix.target }}
           artifact-patterns: ${{ inputs.files }}
-          github-token: ${{ secrets.BOT_WORKFLOW_TOKEN }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
   publish:
     if: always()
@@ -103,4 +103,4 @@ jobs:
           tags: ${{ inputs.tags }}
           licenses: ${{ inputs.licenses }}
           username: eclipse-zenoh-bot
-          password: ${{ secrets.BOT_WORKFLOW_TOKEN }}
+          password: ${{ secrets.BOT_TOKEN_WORKFLOW }}
