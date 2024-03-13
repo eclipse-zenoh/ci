@@ -82270,7 +82270,7 @@ function setup() {
     const interDepsPattern = lib_core.getInput("inter-deps-pattern", { required: true });
     const interDepsVersion = lib_core.getInput("inter-deps-version");
     return {
-        version,
+        version: version == "" ? undefined : version,
         liveRun: liveRun == "" ? false : lib_core.getBooleanInput("live-run"),
         dryRunHistorySize: dryRunHistorySize == "" ? undefined : Number(dryRunHistorySize),
         repo,
