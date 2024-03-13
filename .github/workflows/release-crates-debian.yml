@@ -49,6 +49,7 @@ jobs:
     secrets: inherit
 
   publish:
+    if: always()
     needs: build
     runs-on: ubuntu-latest
     steps:
