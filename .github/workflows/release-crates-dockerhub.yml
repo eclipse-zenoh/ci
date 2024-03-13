@@ -87,6 +87,7 @@ jobs:
           github-token: ${{ secrets.BOT_WORKFLOW_TOKEN }}
 
   publish:
+    if: always()
     needs: build
     runs-on: ubuntu-latest
     steps:

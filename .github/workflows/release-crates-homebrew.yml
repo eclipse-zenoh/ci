@@ -69,6 +69,7 @@ jobs:
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
   publish:
+    if: always()
     needs: build
     runs-on: macos-latest
     steps:
