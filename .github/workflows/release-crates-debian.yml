@@ -5,7 +5,7 @@ on:
     inputs:
       live-run:
         type: string
-        required: true
+        required: false
       repo:
         type: string
         required: true
@@ -23,7 +23,7 @@ on:
     inputs:
       live-run:
         type: string
-        required: true
+        required: false
       repo:
         type: string
         required: true
