@@ -1,7 +1,8 @@
 import { spawnSync } from "child_process";
 import * as core from "@actions/core";
-// import * as path from "path";
 import * as os from "os";
+
+const MAX_BUFFER = 10 * 1024 * 1024;
 
 export type CommandOptions = {
   env?: NodeJS.ProcessEnv;
@@ -30,6 +31,7 @@ export function sh(cmd: string, options?: CommandOptions): string {
     encoding: "utf-8",
     cwd: options.cwd,
     input: options.input,
+    maxBuffer: MAX_BUFFER,
   });
 
   if (returns.stdout != "") {
