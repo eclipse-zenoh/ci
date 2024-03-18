@@ -82002,8 +82002,8 @@ function stringify(obj) {
 ;// CONCATENATED MODULE: ./src/command.ts
 
 
-// import * as path from "path";
 
+const MAX_BUFFER = 10 * 1024 * 1024;
 function sh(cmd, options) {
     options = options != null ? options : {};
     options.env = options.env != null ? options.env : {};
@@ -82022,6 +82022,7 @@ function sh(cmd, options) {
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,
+        maxBuffer: MAX_BUFFER,
     });
     if (returns.stdout != "") {
         lib_core.info(`\u001b[1mstdout:\u001b[0m`);
