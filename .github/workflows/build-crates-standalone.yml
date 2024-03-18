@@ -18,6 +18,7 @@ on:
       exclude-builds:
         type: string
         required: false
+        default: '[]'
   workflow_dispatch:
     inputs:
       repo:
@@ -35,6 +36,7 @@ on:
       exclude-builds:
         type: string
         required: false
+        default: '[]'
 
 jobs:
   build:
