@@ -1,0 +1,13 @@
+{
+  "git": {
+    "name": "eclipse-zenoh-bot",
+    "email": "eclipse-zenoh-bot@users.noreply.github.com"
+  },
+  "lock": {
+    "cratesio": {
+      "cargo-deb": "2.1.0",
+      "estuary": "0.1.1",
+      "cross": "0.2.5"
+    }
+  }
+}
