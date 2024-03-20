@@ -21,10 +21,12 @@ export function sh(cmd: string, options?: CommandOptions): string {
   core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
 
   const returns = spawnSync(cmd, {
+    // NOTE: Environment variables defined in `options.env` take precedence over
+    // the parent process's environment, thus the destructuring is order is
+    // important
     env: {
-      ...options.env,
-      PATH: process.env.PATH,
-      HOME: os.homedir(),
+      ...process.env,
+      ...options.env
     },
     stdio: "pipe",
     shell: true,

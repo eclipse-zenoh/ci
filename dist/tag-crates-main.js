@@ -80878,10 +80878,7 @@ const promises_namespaceObject = require("fs/promises");
 var lib_core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: external "child_process"
 var external_child_process_ = __nccwpck_require__(2081);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __nccwpck_require__(2037);
 ;// CONCATENATED MODULE: ./src/command.ts
-
 
 
 const MAX_BUFFER = 10 * 1024 * 1024;
@@ -80893,10 +80890,12 @@ function command_sh(cmd, options) {
     options.input = options.input != null ? options.input : "";
     lib_core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,external_child_process_.spawnSync)(cmd, {
+        // NOTE: Environment variables defined in `options.env` take precedence over
+        // the parent process's environment, thus the destructuring is order is
+        // important
         env: {
-            ...options.env,
-            PATH: process.env.PATH,
-            HOME: external_os_.homedir(),
+            ...process.env,
+            ...options.env
         },
         stdio: "pipe",
         shell: true,
@@ -80920,6 +80919,8 @@ function command_sh(cmd, options) {
     return returns.stdout;
 }
 
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require__(2037);
 // EXTERNAL MODULE: ./node_modules/@actions/cache/lib/cache.js
 var lib_cache = __nccwpck_require__(7799);
 ;// CONCATENATED MODULE: ./node_modules/smol-toml/dist/error.js

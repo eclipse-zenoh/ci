@@ -82002,7 +82002,6 @@ function stringify(obj) {
 ;// CONCATENATED MODULE: ./src/command.ts
 
 
-
 const MAX_BUFFER = 10 * 1024 * 1024;
 function sh(cmd, options) {
     options = options != null ? options : {};
@@ -82012,10 +82011,12 @@ function sh(cmd, options) {
     options.input = options.input != null ? options.input : "";
     lib_core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,external_child_process_.spawnSync)(cmd, {
+        // NOTE: Environment variables defined in `options.env` take precedence over
+        // the parent process's environment, thus the destructuring is order is
+        // important
         env: {
-            ...options.env,
-            PATH: process.env.PATH,
-            HOME: external_os_.homedir(),
+            ...process.env,
+            ...options.env
         },
         stdio: "pipe",
         shell: true,
