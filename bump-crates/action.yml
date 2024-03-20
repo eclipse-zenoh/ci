@@ -1,0 +1,27 @@
+name: Bump crates
+
+inputs:
+  version:
+    required: false
+  branch:
+    required: false
+  repo:
+    required: true
+  path:
+    required: false
+  github-token:
+    required: true
+  actor-name:
+    required: true
+  actor-email:
+    required: true
+  bump-deps-pattern:
+    required: true
+  bump-deps-version:
+    required: false
+  bump-deps-branch:
+    required: false
+
+runs:
+  using: node20
+  main: ../dist/bump-crates-main.js

@@ -64,7 +64,8 @@ export async function main(input: Input) {
         sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
       }
     }
-    
+
+    sh(`git switch --create ${branch}`, { cwd: repo });
     sh(`git push ${remote} ${branch} ${version}`, { cwd: repo });
 
     await cleanup(input);

@@ -142,24 +142,6 @@ export async function bump(path: string, version: string) {
     await dumpTOML(manifestPath, manifestRaw);
   }
 
-  for (const package_ of packages(path)) {
-    const manifestRaw = await loadTOML(package_.manifestPath);
-    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
-
-    if (
-      "metadata" in manifest.package &&
-      "deb" in manifest.package.metadata &&
-      "depends" in manifest.package.metadata.deb &&
-      manifest.package.metadata.deb.depends != "$auto"
-    ) {
-      const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
-      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-      deb.depends = depends;
-
-      await dumpTOML(package_.manifestPath, manifestRaw);
-    }
-  }
   core.endGroup();
 }
 
@@ -179,7 +161,7 @@ export async function bump(path: string, version: string) {
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
-export async function bumpDependencies(path: string, pattern: RegExp, version: string, git?: string, branch?: string) {
+export async function bumpDependencies(path: string, pattern: RegExp, version: string, branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = await loadTOML(manifestPath);
@@ -190,8 +172,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
     if (pattern.test(dep)) {
       const table = manifest.dependencies[dep] as CargoManifestDependencyTable;
       table.version = version;
-      if (git != undefined && branch != undefined && !("path" in table)) {
-        table.git = git;
+      if (branch != undefined) {
         table.branch = branch;
       }
       changed = true;
@@ -201,6 +182,27 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   if (changed) {
     await dumpTOML(manifestPath, manifestRaw);
   }
+
+  for (const package_ of packages(path)) {
+    const manifestRaw = await loadTOML(package_.manifestPath);
+    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+
+    if (
+      "metadata" in manifest.package &&
+        "deb" in manifest.package.metadata &&
+        "depends" in manifest.package.metadata.deb &&
+        manifest.package.metadata.deb.depends != "$auto" &&
+        pattern.test(manifest.package.metadata.deb.name)
+    ) {
+      const deb = manifest.package.metadata.deb;
+      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
+      deb.depends = depends;
+
+      await dumpTOML(package_.manifestPath, manifestRaw);
+    }
+  }
+
   core.endGroup();
 }
 
