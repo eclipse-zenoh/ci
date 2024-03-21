@@ -1,7 +1,8 @@
-import { rm } from "fs/promises";
+import * as fs from "fs/promises";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
+import * as toml from "smol-toml";
 
 import * as cargo from "./cargo";
 import { sh } from "./command";
@@ -43,11 +44,20 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
     sh(`git clone --recursive --branch ${input.branch} --single-branch ${remote}`);
 
+    const crossContents = await fs.readFile(path.join(repo, "Cross.toml"), "utf-8");
+    const crossManifest = toml.parse(crossContents) as CrossManifest;
+
     sh(`rustup target add ${input.target}`, { cwd: repo });
 
-    sh(`cross build --release --bins --lib --target ${input.target}`, {
-      cwd: repo,
-    });
+    if (input.target in crossManifest.target) {
+      sh(`cross build --release --bins --lib --target ${input.target}`, {
+        cwd: repo,
+      });
+    } else {
+      sh(`cargo build --release --bins --lib --target ${input.target}`, {
+        cwd: repo,
+      });
+    }
 
     const packages = await cargo.packagesDebian(repo);
     core.info(`Building ${packages.map(p => p.name).join(", ")}`);
@@ -77,6 +87,10 @@ export async function main(input: Input) {
   }
 }
 
+type CrossManifest = {
+  target: { [target: string]: { image: string } };
+};
+
 export function artifactName(repo: string, version: string, target: string): string {
   return `${repo}-${version}-${target}-debian.zip`;
 }
@@ -86,5 +100,5 @@ export const artifactRegExp: RegExp = /^.*-debian\.zip$/;
 export async function cleanup(input: Input) {
   const repoPath = input.repo.split("/")[1];
   core.info(`Deleting repository ${repoPath}`);
-  await rm(repoPath, { recursive: true, force: true });
+  await fs.rm(repoPath, { recursive: true, force: true });
 }
