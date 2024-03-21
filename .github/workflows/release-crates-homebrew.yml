@@ -83,8 +83,6 @@ jobs:
           ssh-host: genie.zenoh@projects-storage.eclipse.org
           ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/homebrew-tap
           ssh-host-url: https://download.eclipse.org/zenoh/homebrew-tap
-          actor-name: eclipse-zenoh-bot
-          actor-email: eclipse-zenoh-bot@users.noreply.github.com
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

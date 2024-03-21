@@ -7,6 +7,7 @@ import * as cache from "@actions/cache";
 import * as toml from "smol-toml";
 
 import { sh } from "./command";
+import { config } from "./config";
 
 export type Package = {
   name: string;
@@ -142,24 +143,6 @@ export async function bump(path: string, version: string) {
     await dumpTOML(manifestPath, manifestRaw);
   }
 
-  for (const package_ of packages(path)) {
-    const manifestRaw = await loadTOML(package_.manifestPath);
-    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
-
-    if (
-      "metadata" in manifest.package &&
-      "deb" in manifest.package.metadata &&
-      "depends" in manifest.package.metadata.deb &&
-      manifest.package.metadata.deb.depends != "$auto"
-    ) {
-      const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
-      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-      deb.depends = depends;
-
-      await dumpTOML(package_.manifestPath, manifestRaw);
-    }
-  }
   core.endGroup();
 }
 
@@ -179,7 +162,7 @@ export async function bump(path: string, version: string) {
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
-export async function bumpDependencies(path: string, pattern: RegExp, version: string, git?: string, branch?: string) {
+export async function bumpDependencies(path: string, pattern: RegExp, version: string, branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = await loadTOML(manifestPath);
@@ -190,8 +173,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
     if (pattern.test(dep)) {
       const table = manifest.dependencies[dep] as CargoManifestDependencyTable;
       table.version = version;
-      if (git != undefined && branch != undefined && !("path" in table)) {
-        table.git = git;
+      if (branch != undefined) {
         table.branch = branch;
       }
       changed = true;
@@ -201,6 +183,27 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   if (changed) {
     await dumpTOML(manifestPath, manifestRaw);
   }
+
+  for (const package_ of packages(path)) {
+    const manifestRaw = await loadTOML(package_.manifestPath);
+    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+
+    if (
+      "metadata" in manifest.package &&
+        "deb" in manifest.package.metadata &&
+        "depends" in manifest.package.metadata.deb &&
+        manifest.package.metadata.deb.depends != "$auto" &&
+        pattern.test(manifest.package.metadata.deb.name)
+    ) {
+      const deb = manifest.package.metadata.deb;
+      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+      core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
+      deb.depends = depends;
+
+      await dumpTOML(package_.manifestPath, manifestRaw);
+    }
+  }
+
   core.endGroup();
 }
 
@@ -279,8 +282,13 @@ export async function packagesDebian(path: string): Promise<Package[]> {
 export async function installBinaryCached(name: string) {
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(homedir(), ".cargo", "bin")];
-    const version = sh(`cargo search ${name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+    const version = config.lock.cratesio[name];
     const key = `${platform()}-${arch()}-${name}-${version}`;
+
+    // NOTE: We specify the Stable toolchain to override the current Rust
+    // toolchain file in the current directory, as the caller can use this
+    // function with an arbitrary Rust toolchain, often resulting in build
+    // failure
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {

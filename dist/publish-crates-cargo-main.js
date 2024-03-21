@@ -80848,7 +80848,7 @@ module.exports.implForWrapper = function (wrapper) {
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(450);
+/* harmony import */ var _publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1635);
 
 await (0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
 
@@ -80857,7 +80857,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 450:
+/***/ 1635:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -82040,7 +82040,17 @@ function sh(cmd, options) {
     return returns.stdout;
 }
 
+;// CONCATENATED MODULE: ./src/config.ts
+const config = __nccwpck_require__(6035);
+const gitEnv = {
+    GIT_AUTHOR_NAME: config.git.user.name,
+    GIT_AUTHOR_EMAIL: config.git.user.email,
+    GIT_COMMITTER_NAME: config.git.user.name,
+    GIT_COMMITTER_EMAIL: config.git.user.email
+};
+
 ;// CONCATENATED MODULE: ./src/cargo.ts
+
 
 
 
@@ -82113,20 +82123,6 @@ async function bump(path, version) {
         manifest.package.version = version;
         await dumpTOML(manifestPath, manifestRaw);
     }
-    for (const package_ of cargo_packages(path)) {
-        const manifestRaw = await loadTOML(package_.manifestPath);
-        const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw);
-        if ("metadata" in manifest.package &&
-            "deb" in manifest.package.metadata &&
-            "depends" in manifest.package.metadata.deb &&
-            manifest.package.metadata.deb.depends != "$auto") {
-            const deb = manifest.package.metadata.deb;
-            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
-            core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-            deb.depends = depends;
-            await dumpTOML(package_.manifestPath, manifestRaw);
-        }
-    }
     core.endGroup();
 }
 /**
@@ -82145,7 +82141,7 @@ async function bump(path, version) {
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
-async function bumpDependencies(path, pattern, version, git, branch) {
+async function bumpDependencies(path, pattern, version, branch) {
     core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = await loadTOML(manifestPath);
@@ -82155,8 +82151,7 @@ async function bumpDependencies(path, pattern, version, git, branch) {
         if (pattern.test(dep)) {
             const table = manifest.dependencies[dep];
             table.version = version;
-            if (git != undefined && branch != undefined && !("path" in table)) {
-                table.git = git;
+            if (branch != undefined) {
                 table.branch = branch;
             }
             changed = true;
@@ -82164,6 +82159,21 @@ async function bumpDependencies(path, pattern, version, git, branch) {
     }
     if (changed) {
         await dumpTOML(manifestPath, manifestRaw);
+    }
+    for (const package_ of cargo_packages(path)) {
+        const manifestRaw = await loadTOML(package_.manifestPath);
+        const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw);
+        if ("metadata" in manifest.package &&
+            "deb" in manifest.package.metadata &&
+            "depends" in manifest.package.metadata.deb &&
+            manifest.package.metadata.deb.depends != "$auto" &&
+            pattern.test(manifest.package.metadata.deb.name)) {
+            const deb = manifest.package.metadata.deb;
+            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+            core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
+            deb.depends = depends;
+            await dumpTOML(package_.manifestPath, manifestRaw);
+        }
     }
     core.endGroup();
 }
@@ -82233,8 +82243,12 @@ async function packagesDebian(path) {
 async function installBinaryCached(name) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,external_path_.join)((0,external_os_.homedir)(), ".cargo", "bin")];
-        const version = sh(`cargo search ${name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+        const version = config.lock.cratesio[name];
         const key = `${(0,external_os_.platform)()}-${(0,external_os_.arch)()}-${name}-${version}`;
+        // NOTE: We specify the Stable toolchain to override the current Rust
+        // toolchain file in the current directory, as the caller can use this
+        // function with an arbitrary Rust toolchain, often resulting in build
+        // failure
         const hit = await cache.restoreCache(paths, key);
         if (hit == undefined) {
             sh(`cargo +stable install ${name} --force`);
@@ -84265,6 +84279,14 @@ function parseParams (str) {
 
 module.exports = parseParams
 
+
+/***/ }),
+
+/***/ 6035:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5"}}}');
 
 /***/ }),
 

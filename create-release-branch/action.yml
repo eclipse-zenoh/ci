@@ -1,0 +1,23 @@
+name: Create release branch
+
+inputs:
+  version:
+    required: false
+  live-run:
+    required: true
+  dry-run-history-size:
+    required: false
+  repo:
+    required: true
+  github-token:
+    required: true
+
+outputs:
+  version:
+    description: Release number
+  branch:
+    description: Release branch
+
+runs:
+  using: node20
+  main: ../dist/create-release-branch-main.js
