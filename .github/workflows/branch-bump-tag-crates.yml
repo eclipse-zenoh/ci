@@ -1,0 +1,80 @@
+name: Branch, bump & tag crates
+
+on:
+  workflow_call:
+    inputs:
+      repo:
+        type: string
+        required: true
+      path:
+        type: string
+        required: false
+      live-run:
+        type: boolean
+        required: false
+      version:
+        type: string
+        required: false
+      bump-deps-pattern:
+        type: string
+        required: true
+      bump-deps-version:
+        type: string
+        required: false
+    outputs:
+      branch:
+        value: ${{ jobs.main.outputs.branch }}
+      version:
+        value: ${{ jobs.main.outputs.version }}
+  workflow_dispatch:
+    inputs:
+      repo:
+        type: string
+        required: true
+      path:
+        type: string
+        required: false
+      live-run:
+        type: boolean
+        required: false
+      version:
+        type: string
+        required: false
+      bump-deps-pattern:
+        type: string
+        required: true
+      bump-deps-version:
+        type: string
+        required: false
+      bump-deps-branch:
+        type: string
+        required: false
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.create-release-branch.outputs.version }}
+      branch: ${{ steps.create-release-branch.outputs.branch }}
+    steps:
+      - id: create-release-branch
+        uses: eclipse-zenoh/ci/create-release-branch@main
+        with:
+          repo: ${{ inputs.repo }}
+          path: ${{ inputs.path }}
+          live-run: ${{ inputs.live-run }}
+          version: ${{ inputs.version }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - uses: eclipse-zenoh/ci/bump-crates@main
+        with:
+          repo: ${{ inputs.repo }}
+          path: ${{ inputs.path }}
+          live-run: ${{ inputs.live-run }}
+          version: ${{ inputs.version }}
+          bump-deps-pattern: ${{ inputs.bump-deps-pattern }}
+          bump-deps-version: ${{ inputs.bump-deps-version }}
+          bump-deps-branch: ${{ inputs.bump-deps-branch }}
+          actor-name: eclipse-zenoh-bot
+          actor-email: eclipse-zenoh-bot@users.noreply.github.com
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
