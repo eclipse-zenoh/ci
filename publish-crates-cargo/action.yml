@@ -2,17 +2,19 @@ name: Publish crates (Cargo)
 
 inputs:
   live-run:
-    required: false
+    required: true
   branch:
     required: true
-  repos:
+  repo:
     required: true
   github-token:
     required: true
   crates-io-token:
     required: true
-  inter-deps-pattern:
-    required: true
+  unpublished-deps-patterns:
+    required: false
+  unpublished-deps-repos:
+    required: false
 
 runs:
   using: node20
