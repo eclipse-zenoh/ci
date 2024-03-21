@@ -82040,7 +82040,17 @@ function stringify(obj) {
 
 
 
+;// CONCATENATED MODULE: ./src/config.ts
+const config_config = __nccwpck_require__(6035);
+const gitEnv = {
+    GIT_AUTHOR_NAME: config_config.git.user.name,
+    GIT_AUTHOR_EMAIL: config_config.git.user.email,
+    GIT_COMMITTER_NAME: config_config.git.user.name,
+    GIT_COMMITTER_EMAIL: config_config.git.user.email
+};
+
 ;// CONCATENATED MODULE: ./src/cargo.ts
+
 
 
 
@@ -82233,8 +82243,12 @@ async function packagesDebian(path) {
 async function installBinaryCached(name) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [join(homedir(), ".cargo", "bin")];
-        const version = sh(`cargo search ${name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+        const version = config.lock.cratesio[name];
         const key = `${platform()}-${arch()}-${name}-${version}`;
+        // NOTE: We specify the Stable toolchain to override the current Rust
+        // toolchain file in the current directory, as the caller can use this
+        // function with an arbitrary Rust toolchain, often resulting in build
+        // failure
         const hit = await cache.restoreCache(paths, key);
         if (hit == undefined) {
             sh(`cargo +stable install ${name} --force`);
@@ -82252,15 +82266,6 @@ async function loadTOML(path) {
 async function dumpTOML(path, obj) {
     await promises_namespaceObject.writeFile(path, stringify(obj));
 }
-
-;// CONCATENATED MODULE: ./src/config.ts
-const config = __nccwpck_require__(6035);
-const gitEnv = {
-    GIT_AUTHOR_NAME: config.git.user.name,
-    GIT_AUTHOR_EMAIL: config.git.user.email,
-    GIT_COMMITTER_NAME: config.git.user.name,
-    GIT_COMMITTER_EMAIL: config.git.user.email
-};
 
 ;// CONCATENATED MODULE: ./src/bump-crates.ts
 

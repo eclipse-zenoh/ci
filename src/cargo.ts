@@ -7,6 +7,7 @@ import * as cache from "@actions/cache";
 import * as toml from "smol-toml";
 
 import { sh } from "./command";
+import { config } from "./config";
 
 export type Package = {
   name: string;
@@ -281,8 +282,13 @@ export async function packagesDebian(path: string): Promise<Package[]> {
 export async function installBinaryCached(name: string) {
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(homedir(), ".cargo", "bin")];
-    const version = sh(`cargo search ${name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+    const version = config.lock.cratesio[name];
     const key = `${platform()}-${arch()}-${name}-${version}`;
+
+    // NOTE: We specify the Stable toolchain to override the current Rust
+    // toolchain file in the current directory, as the caller can use this
+    // function with an arbitrary Rust toolchain, often resulting in build
+    // failure
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
