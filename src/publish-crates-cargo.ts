@@ -9,26 +9,29 @@ import { sh } from "./command";
 export type Input = {
   liveRun: boolean;
   branch: string;
-  repos: string[];
+  repo: string;
   githubToken: string;
-  interDepsRegExp: RegExp;
+  unpublishedDepsRegExp: RegExp;
+  unpublishedDepsRepos: string[];
   cratesIoToken?: string;
 };
 
 export function setup(): Input {
-  const liveRun = core.getInput("live-run");
+  const liveRun = core.getBooleanInput("live-run", { required: true });
   const branch = core.getInput("branch", { required: true });
-  const repos = core.getInput("repos", { required: true });
+  const repo = core.getInput("repo", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
-  const interDepsPattern = core.getInput("inter-deps-pattern", { required: true });
+  const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns", { required: true });
+  const unpublishedDepsRepos = core.getInput("unpublished-deps-repos", { required: true });
   const cratesIoToken = core.getInput("crates-io-token", { required: true });
 
   return {
-    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
+    liveRun,
     branch,
-    repos: repos.split("\n"),
+    repo,
     githubToken,
-    interDepsRegExp: interDepsPattern == "" ? undefined : new RegExp(interDepsPattern),
+    unpublishedDepsRegExp: new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
+    unpublishedDepsRepos: unpublishedDepsRepos.split("\n"),
     cratesIoToken,
   };
 }
@@ -37,22 +40,21 @@ export async function main(input: Input) {
   let registry: estuary.Estuary;
   try {
     registry = await estuary.spawn();
-    for (const repo of input.repos) {
-      core.startGroup(`Publishing ${repo} to estuary`);
-      clone(repo, input);
-      await publishToEstuary(repo, input, registry);
-      core.endGroup();
+
+    for (const repo of input.unpublishedDepsRepos) {
+      await publishToEstuary(input, repo, registry, /^$/);
     }
+
+    await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp);
 
     await deleteRepos(input);
 
     if (input.liveRun) {
-      for (const repo of input.repos) {
-        core.startGroup(`Publishing ${repo} to crates.io`);
-        clone(repo, input);
-        publishToCratesIo(repo, input);
-        core.endGroup();
+      for (const repo of input.unpublishedDepsRepos) {
+        publishToCratesIo(input, repo);
       }
+
+      publishToCratesIo(input, input.repo);
     }
 
     await cleanup(input, registry);
@@ -77,14 +79,17 @@ export async function cleanup(input: Input, registry: estuary.Estuary) {
   await deleteRepos(input);
 }
 
-function clone(repo: string, input: Input): void {
+function clone(input: Input, repo: string): void {
   const remote = `https://${input.githubToken}@github.com/${repo}.git`;
   sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
 }
 
 async function deleteRepos(input: Input) {
-  for (const repo of input.repos) {
-    core.info(`Deleting repository ${repoPath(repo)}`);
+  core.info(`Deleting repository clone ${repoPath(input.repo)}`);
+  await rm(repoPath(input.repo), { recursive: true, force: true });
+
+  for (const repo of input.unpublishedDepsRepos) {
+    core.info(`Deleting repository clone ${repoPath(repo)}`);
     await rm(repoPath(repo), { recursive: true, force: true });
   }
 }
@@ -93,30 +98,38 @@ function repoPath(repo: string): string {
   return repo.split("/").at(1);
 }
 
-async function publishToEstuary(repo: string, input: Input, registry: estuary.Estuary): Promise<void> {
-  const path = repoPath(repo);
+async function publishToEstuary(
+  input: Input,
+  repo: string,
+  registry: estuary.Estuary,
+  registryDepsRegExp: RegExp,
+): Promise<void> {
+  clone(input, repo);
+  const path = repoPath(input.repo);
 
   await cargo.configRegistry(path, registry.name, registry.index);
-  await cargo.setRegistry(path, input.interDepsRegExp, registry.name);
+  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
 
   const env = {
     CARGO_REGISTRY_DEFAULT: registry.name,
     [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
   };
 
-  publish(repo, env);
+  publish(path, env);
 }
 
-function publishToCratesIo(repo: string, input: Input) {
+function publishToCratesIo(input: Input, repo: string) {
+  clone(input, repo);
+  const path = repoPath(input.repo);
+
   const env = {
     CARGO_REGISTRY_TOKEN: input.cratesIoToken,
   };
 
-  publish(repo, env);
+  publish(path, env);
 }
 
-function publish(repo: string, env: NodeJS.ProcessEnv) {
-  const path = repoPath(repo);
+function publish(path: string, env: NodeJS.ProcessEnv) {
   const options = {
     env,
     cwd: path,
@@ -128,5 +141,6 @@ function publish(repo: string, env: NodeJS.ProcessEnv) {
       sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
     }
   }
+
   sh("cargo clean", options);
 }

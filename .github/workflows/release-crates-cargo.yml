@@ -3,7 +3,7 @@ name: Release crates (Cargo)
 on:
   workflow_call:
     inputs:
-      repos:
+      repo:
         type: string
         required: true
       live-run:
@@ -12,12 +12,15 @@ on:
       branch:
         type: string
         required: true
-      inter-deps-pattern:
+      unpublished-deps-patterns:
         type: string
-        required: true
+        required: false
+      unpublished-deps-repos:
+        type: string
+        required: false
   workflow_dispatch:
     inputs:
-      repos:
+      repo:
         type: string
         required: true
       live-run:
@@ -26,9 +29,12 @@ on:
       branch:
         type: string
         required: true
-      inter-deps-pattern:
+      unpublished-deps-patterns:
         type: string
-        required: true
+        required: false
+      unpublished-deps-repos:
+        type: string
+        required: false
 
 jobs:
   publish:
@@ -36,9 +42,10 @@ jobs:
     steps:
       - uses: eclipse-zenoh/ci/publish-crates-cargo@main
         with:
-          repos: ${{ inputs.repos }}
+          repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}
           branch: ${{ inputs.branch }}
-          inter-deps-pattern: ${{ inputs.inter-deps-pattern }}
+          unpublished-deps-pattern: ${{ inputs.unpublished-deps-pattern }}
+          unpublished-deps-repos: ${{ inputs.unpublished-deps-repos }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
           crates-io-token: ${{ secrets.CRATES_IO_TOKEN }}
