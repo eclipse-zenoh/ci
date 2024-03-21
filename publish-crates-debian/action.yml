@@ -2,7 +2,7 @@ name: Publish crates (Debian)
 
 inputs:
   live-run:
-    required: false
+    required: true
   version:
     required: true
   ssh-host:
@@ -12,6 +12,8 @@ inputs:
   ssh-private-key:
     required: true
   ssh-passphrase:
+    required: true
+  installation-test:
     required: true
 
 runs:

@@ -22,23 +22,26 @@ export type Input = {
   sshHostPath: string;
   sshPrivateKey: string;
   sshPassphrase: string;
+  installationTest: boolean;
 };
 
 export function setup(): Input {
-  const liveRun = core.getInput("live-run");
+  const liveRun = core.getBooleanInput("live-run", { required: true });
   const version = core.getInput("version", { required: true });
   const sshHost = core.getInput("ssh-host", { required: true });
   const sshHostPath = core.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
+  const installationTest = core.getBooleanInput("installation-test", { required: true });
 
   return {
-    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
+    liveRun,
     version,
     sshHost,
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
+    installationTest
   };
 }
 
@@ -93,18 +96,22 @@ export async function main(input: Input) {
     sh(`cat ${sourcesListDir}/${sourcesListName}`);
     sh("sudo apt-get update");
 
-    const debs: Set<string> = new Set();
-    for await (const dirent of await fs.opendir(input.version)) {
-      const debPath = path.join(dirent.path, dirent.name);
-      const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
-      debs.add(package_);
+    if (input.installationTest) {
+      const debs: Set<string> = new Set();
+      for await (const dirent of await fs.opendir(input.version)) {
+        const debPath = path.join(dirent.path, dirent.name);
+        const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
+        debs.add(package_);
+      }
+
+      debs.forEach(deb => {
+        sh(`sudo apt-get install -y ${deb}`);
+      });
+
+      debs.forEach(deb => {
+        sh(`sudo dpkg --purge --force-all ${deb}`);
+      });
     }
-    debs.forEach(deb => {
-      sh(`sudo apt-get install -y ${deb}`);
-    });
-    debs.forEach(deb => {
-      sh(`sudo dpkg --purge --force-all ${deb}`);
-    });
 
     if (input.liveRun) {
       await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
