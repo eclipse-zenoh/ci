@@ -4,8 +4,8 @@ on:
   workflow_call:
     inputs:
       live-run:
-        type: string
-        required: false
+        type: boolean
+        required: true
       repo:
         type: string
         required: true
@@ -15,6 +15,10 @@ on:
       branch:
         type: string
         required: true
+      installation-test:
+        type: boolean
+        required: false
+        default: true
       no-build:
         type: boolean
         required: false
@@ -22,8 +26,8 @@ on:
   workflow_dispatch:
     inputs:
       live-run:
-        type: string
-        required: false
+        type: boolean
+        required: true
       repo:
         type: string
         required: true
@@ -33,6 +37,10 @@ on:
       branch:
         type: string
         required: true
+      installation-test:
+        type: boolean
+        required: false
+        default: true
       no-build:
         type: boolean
         required: false
@@ -57,6 +65,7 @@ jobs:
         with:
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
+          installation-test: ${{ inputs.installation-test }}
           ssh-host: genie.zenoh@projects-storage.eclipse.org
           ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
