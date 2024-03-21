@@ -75,6 +75,4 @@ jobs:
           bump-deps-pattern: ${{ inputs.bump-deps-pattern }}
           bump-deps-version: ${{ inputs.bump-deps-version }}
           bump-deps-branch: ${{ inputs.bump-deps-branch }}
-          actor-name: eclipse-zenoh-bot
-          actor-email: eclipse-zenoh-bot@users.noreply.github.com
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}

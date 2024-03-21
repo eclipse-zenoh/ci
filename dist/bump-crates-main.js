@@ -80848,7 +80848,7 @@ module.exports.implForWrapper = function (wrapper) {
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _bump_crates__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1336);
+/* harmony import */ var _bump_crates__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1033);
 
 await (0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
 
@@ -80857,7 +80857,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 1336:
+/***/ 1033:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -82253,7 +82253,17 @@ async function dumpTOML(path, obj) {
     await promises_namespaceObject.writeFile(path, stringify(obj));
 }
 
+;// CONCATENATED MODULE: ./src/config.ts
+const config = __nccwpck_require__(6035);
+const gitEnv = {
+    GIT_AUTHOR_NAME: config.git.user.name,
+    GIT_AUTHOR_EMAIL: config.git.user.email,
+    GIT_COMMITTER_NAME: config.git.user.name,
+    GIT_COMMITTER_EMAIL: config.git.user.email
+};
+
 ;// CONCATENATED MODULE: ./src/bump-crates.ts
+
 
 
 
@@ -82265,8 +82275,6 @@ function setup() {
     const repo = lib_core.getInput("repo", { required: true });
     const path = lib_core.getInput("path");
     const githubToken = lib_core.getInput("github-token", { required: true });
-    const actorName = lib_core.getInput("actor-name", { required: true });
-    const actorEmail = lib_core.getInput("actor-email", { required: true });
     const bumpDepsPattern = lib_core.getInput("bump-deps-pattern");
     const bumpDepsVersion = lib_core.getInput("bump-deps-version");
     const bumpDepsBranch = lib_core.getInput("bump-deps-branch");
@@ -82276,12 +82284,6 @@ function setup() {
         repo,
         path: path === "" ? undefined : path,
         githubToken,
-        actorEnv: {
-            GIT_AUTHOR_NAME: actorName,
-            GIT_AUTHOR_EMAIL: actorEmail,
-            GIT_COMMITTER_NAME: actorName,
-            GIT_COMMITTER_EMAIL: actorEmail,
-        },
         bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
         bumpDepsVersion: bumpDepsVersion === "" ? undefined : bumpDepsVersion,
         bumpDepsBranch: bumpDepsBranch === "" ? undefined : bumpDepsBranch,
@@ -82296,23 +82298,23 @@ async function main(input) {
         command_sh(`ls ${workspace}`);
         await bump(workspace, input.version);
         command_sh("git add .", { cwd: repo });
-        command_sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: input.actorEnv });
+        command_sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
         if (input.bumpDepsRegExp != undefined) {
             await bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
             command_sh("git add .", { cwd: repo });
             command_sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
                 cwd: repo,
-                env: input.actorEnv,
+                env: gitEnv,
                 check: false,
             });
             command_sh("cargo check", { cwd: repo });
             command_sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
                 cwd: repo,
-                env: input.actorEnv,
+                env: gitEnv,
                 check: false,
             });
         }
-        command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: input.actorEnv });
+        command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
         command_sh("git log -10", { cwd: repo });
         command_sh("git show-ref --tags", { cwd: repo });
         command_sh(`git push ${remote} ${input.branch} ${input.version}`, { cwd: repo });
@@ -84205,6 +84207,14 @@ function parseParams (str) {
 
 module.exports = parseParams
 
+
+/***/ }),
+
+/***/ 6035:
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5"}}}');
 
 /***/ }),
 

@@ -1,7 +1,9 @@
 {
   "git": {
-    "name": "eclipse-zenoh-bot",
-    "email": "eclipse-zenoh-bot@users.noreply.github.com"
+    "user": {
+      "name": "eclipse-zenoh-bot",
+      "email": "eclipse-zenoh-bot@users.noreply.github.com"
+    }
   },
   "lock": {
     "cratesio": {

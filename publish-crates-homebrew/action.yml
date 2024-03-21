@@ -23,10 +23,6 @@ inputs:
     required: true
   github-token:
     required: true
-  actor-name:
-    required: true
-  actor-email:
-    required: true
 
 runs:
   using: node20

@@ -11,10 +11,6 @@ inputs:
     required: false
   github-token:
     required: true
-  actor-name:
-    required: true
-  actor-email:
-    required: true
   bump-deps-pattern:
     required: true
   bump-deps-version:

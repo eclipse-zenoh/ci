@@ -8,6 +8,7 @@ import { sh } from "./command";
 import * as ssh from "./ssh";
 
 import { artifactName } from "./build-crates-standalone";
+import { gitEnv } from "./config";
 
 const artifact = new DefaultArtifactClient();
 
@@ -23,7 +24,6 @@ export type Input = {
   sshPrivateKey: string;
   sshPassphrase: string;
   githubToken: string;
-  actorEnv: NodeJS.ProcessEnv;
 };
 
 export function setup(): Input {
@@ -38,8 +38,6 @@ export function setup(): Input {
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
-  const actorName = core.getInput("actor-name", { required: true });
-  const actorEmail = core.getInput("actor-email", { required: true });
 
   return {
     liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
@@ -53,12 +51,6 @@ export function setup(): Input {
     sshPrivateKey,
     sshPassphrase,
     githubToken,
-    actorEnv: {
-      GIT_AUTHOR_NAME: actorName,
-      GIT_AUTHOR_EMAIL: actorEmail,
-      GIT_COMMITTER_NAME: actorName,
-      GIT_COMMITTER_EMAIL: actorEmail,
-    },
   };
 }
 
@@ -126,7 +118,7 @@ export async function main(input: Input) {
 
     await fs.writeFile(releasePath, JSON.stringify(release, null, 2));
     const message = `chore: Bump ${input.formulae.join(", ")} to \`${input.version}\``;
-    sh(`git commit ${releasePath} --message '${message}'`, { cwd: tapPath, env: input.actorEnv });
+    sh(`git commit ${releasePath} --message '${message}'`, { cwd: tapPath, env: gitEnv });
 
     for (const formula of input.formulae) {
       sh(`brew audit ${formula}`);

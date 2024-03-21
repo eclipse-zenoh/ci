@@ -5,6 +5,7 @@ import * as core from "@actions/core";
 
 import { sh } from "./command";
 import * as cargo from "./cargo";
+import { gitEnv } from "./config";
 
 export type Input = {
   version: string;
@@ -12,7 +13,6 @@ export type Input = {
   repo: string;
   path?: string;
   githubToken: string;
-  actorEnv: NodeJS.ProcessEnv;
   bumpDepsRegExp?: RegExp;
   bumpDepsVersion?: string;
   bumpDepsBranch?: string;
@@ -24,8 +24,6 @@ export function setup(): Input {
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
   const githubToken = core.getInput("github-token", { required: true });
-  const actorName = core.getInput("actor-name", { required: true });
-  const actorEmail = core.getInput("actor-email", { required: true });
   const bumpDepsPattern = core.getInput("bump-deps-pattern");
   const bumpDepsVersion = core.getInput("bump-deps-version");
   const bumpDepsBranch = core.getInput("bump-deps-branch");
@@ -36,12 +34,6 @@ export function setup(): Input {
     repo,
     path: path === "" ? undefined : path,
     githubToken,
-    actorEnv: {
-      GIT_AUTHOR_NAME: actorName,
-      GIT_AUTHOR_EMAIL: actorEmail,
-      GIT_COMMITTER_NAME: actorName,
-      GIT_COMMITTER_EMAIL: actorEmail,
-    },
     bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
     bumpDepsVersion: bumpDepsVersion === "" ? undefined : bumpDepsVersion,
     bumpDepsBranch: bumpDepsBranch === "" ? undefined : bumpDepsBranch,
@@ -59,26 +51,26 @@ export async function main(input: Input) {
 
     await cargo.bump(workspace, input.version);
     sh("git add .", { cwd: repo });
-    sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: input.actorEnv });
+    sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
 
     if (input.bumpDepsRegExp != undefined) {
       await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion!, input.bumpDepsBranch);
       sh("git add .", { cwd: repo });
       sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion!}\`'`, {
         cwd: repo,
-        env: input.actorEnv,
+        env: gitEnv,
         check: false,
       });
 
       sh("cargo check", { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
-        env: input.actorEnv,
+        env: gitEnv,
         check: false,
       });
     }
 
-    sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: input.actorEnv });
+    sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
     sh(`git push ${remote} ${input.branch} ${input.version}`, { cwd: repo });
