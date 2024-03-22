@@ -21,6 +21,9 @@ on:
       bump-deps-version:
         type: string
         required: false
+      bump-deps-branch:
+        type: string
+        required: false
     outputs:
       branch:
         value: ${{ jobs.main.outputs.branch }}
@@ -61,7 +64,6 @@ jobs:
         uses: eclipse-zenoh/ci/create-release-branch@main
         with:
           repo: ${{ inputs.repo }}
-          path: ${{ inputs.path }}
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
@@ -70,7 +72,6 @@ jobs:
         with:
           repo: ${{ inputs.repo }}
           path: ${{ inputs.path }}
-          live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
           bump-deps-pattern: ${{ inputs.bump-deps-pattern }}
           bump-deps-version: ${{ inputs.bump-deps-version }}
