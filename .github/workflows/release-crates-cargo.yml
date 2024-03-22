@@ -45,7 +45,7 @@ jobs:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}
           branch: ${{ inputs.branch }}
-          unpublished-deps-pattern: ${{ inputs.unpublished-deps-pattern }}
+          unpublished-deps-patterns: ${{ inputs.unpublished-deps-patterns }}
           unpublished-deps-repos: ${{ inputs.unpublished-deps-repos }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
           crates-io-token: ${{ secrets.CRATES_IO_TOKEN }}
