@@ -14,7 +14,7 @@ on:
         required: true
       branch:
         type: string
-        required: false
+        required: true
       binary:
         type: string
         required: true
@@ -29,7 +29,7 @@ on:
         required: true
       licenses:
         type: string
-        required: false
+        required: true
       no-build:
         type: boolean
         required: false
@@ -47,7 +47,7 @@ on:
         required: true
       branch:
         type: string
-        required: false
+        required: true
       binary:
         type: string
         required: true
@@ -62,7 +62,7 @@ on:
         required: true
       licenses:
         type: string
-        required: false
+        required: true
       no-build:
         type: boolean
         required: false

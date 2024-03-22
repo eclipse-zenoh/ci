@@ -5,12 +5,12 @@ inputs:
     required: false
   live-run:
     required: true
-  dry-run-history-size:
-    required: false
   repo:
     required: true
   github-token:
     required: true
+  dry-run-history-size:
+    required: false
 
 outputs:
   version:

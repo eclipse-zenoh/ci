@@ -2,7 +2,7 @@ name: Publish crates (Eclipse)
 
 inputs:
   live-run:
-    required: false
+    required: true
   version:
     required: true
   ssh-host:

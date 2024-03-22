@@ -20,7 +20,7 @@ export type Input = {
 };
 
 export function setup(): Input {
-  const liveRun = core.getInput("live-run");
+  const liveRun = core.getBooleanInput("live-run", { required: true });
   const repo = core.getInput("repo", { required: true });
   const version = core.getInput("version", { required: true });
   const branch = core.getInput("branch", { required: true });
@@ -29,7 +29,7 @@ export function setup(): Input {
   const githubToken = core.getInput("github-token", { required: true });
 
   return {
-    liveRun: liveRun == "" ? false : core.getBooleanInput("live-run"),
+    liveRun,
     version,
     branch,
     repo,

@@ -2,7 +2,7 @@ name: Publish crates (Homebrew)
 
 inputs:
   live-run:
-    required: false
+    required: true
   version:
     required: true
   repo:

@@ -1,10 +1,8 @@
-import { join } from "path";
 import { rm } from "fs/promises";
 
 import * as core from "@actions/core";
 
 import { sh } from "./command";
-import * as cargo from "./cargo";
 
 const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
 

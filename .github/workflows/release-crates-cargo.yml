@@ -8,7 +8,7 @@ on:
         required: true
       live-run:
         type: string
-        required: false
+        required: true
       branch:
         type: string
         required: true
@@ -25,7 +25,7 @@ on:
         required: true
       live-run:
         type: string
-        required: false
+        required: true
       branch:
         type: string
         required: true
