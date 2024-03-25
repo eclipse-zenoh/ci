@@ -64,7 +64,7 @@ export async function main(input: Input) {
     }
 
     sh(`git switch --create ${branch}`, { cwd: repo });
-    sh(`git push ${remote} ${branch} ${version}`, { cwd: repo });
+    sh(`git push ${remote} ${branch}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {
