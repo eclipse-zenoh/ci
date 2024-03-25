@@ -82308,16 +82308,16 @@ function setup() {
     const branch = lib_core.getInput("branch", { required: true });
     const repo = lib_core.getInput("repo", { required: true });
     const githubToken = lib_core.getInput("github-token", { required: true });
-    const unpublishedDepsPatterns = lib_core.getInput("unpublished-deps-patterns", { required: true });
-    const unpublishedDepsRepos = lib_core.getInput("unpublished-deps-repos", { required: true });
     const cratesIoToken = lib_core.getInput("crates-io-token", { required: true });
+    const unpublishedDepsPatterns = lib_core.getInput("unpublished-deps-patterns");
+    const unpublishedDepsRepos = lib_core.getInput("unpublished-deps-repos");
     return {
         liveRun,
         branch,
         repo,
         githubToken,
-        unpublishedDepsRegExp: new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
-        unpublishedDepsRepos: unpublishedDepsRepos.split("\n"),
+        unpublishedDepsRegExp: unpublishedDepsPatterns == "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
+        unpublishedDepsRepos: unpublishedDepsRepos == "" ? [] : unpublishedDepsRepos.split("\n"),
         cratesIoToken,
     };
 }

@@ -12,7 +12,7 @@ inputs:
   github-token:
     required: true
   bump-deps-pattern:
-    required: true
+    required: false
   bump-deps-version:
     required: false
   bump-deps-branch:

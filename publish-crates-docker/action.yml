@@ -11,7 +11,7 @@ inputs:
     required: true
   live-run:
     description: Whether or not to push the image to the registry
-    required: false
+    required: true
   binary:
     description: Name of the executable used as an entrypoint
     required: true

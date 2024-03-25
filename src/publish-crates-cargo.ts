@@ -21,17 +21,18 @@ export function setup(): Input {
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
-  const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns", { required: true });
-  const unpublishedDepsRepos = core.getInput("unpublished-deps-repos", { required: true });
   const cratesIoToken = core.getInput("crates-io-token", { required: true });
+  const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns");
+  const unpublishedDepsRepos = core.getInput("unpublished-deps-repos");
 
   return {
     liveRun,
     branch,
     repo,
     githubToken,
-    unpublishedDepsRegExp: new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
-    unpublishedDepsRepos: unpublishedDepsRepos.split("\n"),
+    unpublishedDepsRegExp:
+      unpublishedDepsPatterns == "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
+    unpublishedDepsRepos: unpublishedDepsRepos == "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
   };
 }
