@@ -73,6 +73,7 @@ jobs:
           repo: ${{ inputs.repo }}
           path: ${{ inputs.path }}
           version: ${{ steps.create-release-branch.outputs.version }}
+          branch: ${{ steps.create-release-branch.outputs.branch }}
           bump-deps-pattern: ${{ inputs.bump-deps-pattern }}
           bump-deps-version: ${{ inputs.bump-deps-version }}
           bump-deps-branch: ${{ inputs.bump-deps-branch }}

@@ -2,9 +2,9 @@ name: Bump crates
 
 inputs:
   version:
-    required: false
+    required: true
   branch:
-    required: false
+    required: true
   repo:
     required: true
   path:
