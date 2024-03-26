@@ -46,7 +46,7 @@ export async function main(input: Input) {
       await publishToEstuary(input, repo, registry, /^$/);
     }
 
-    await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp);
+    await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
 
     await deleteRepos(input);
 
@@ -55,7 +55,7 @@ export async function main(input: Input) {
         publishToCratesIo(input, repo);
       }
 
-      publishToCratesIo(input, input.repo);
+      publishToCratesIo(input, input.repo, input.branch);
     }
 
     await cleanup(input, registry);
@@ -80,9 +80,14 @@ export async function cleanup(input: Input, registry: estuary.Estuary) {
   await deleteRepos(input);
 }
 
-function clone(input: Input, repo: string): void {
+function clone(input: Input, repo: string, branch?: string): void {
   const remote = `https://${input.githubToken}@github.com/${repo}.git`;
-  sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
+
+  if (branch == undefined) {
+    sh(`git clone --recursive ${remote}`);
+  } else {
+    sh(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
+  }
 }
 
 async function deleteRepos(input: Input) {
@@ -104,8 +109,9 @@ async function publishToEstuary(
   repo: string,
   registry: estuary.Estuary,
   registryDepsRegExp: RegExp,
+  branch?: string,
 ): Promise<void> {
-  clone(input, repo);
+  clone(input, repo, branch);
   const path = repoPath(input.repo);
 
   await cargo.configRegistry(path, registry.name, registry.index);
@@ -119,8 +125,8 @@ async function publishToEstuary(
   publish(path, env);
 }
 
-function publishToCratesIo(input: Input, repo: string) {
-  clone(input, repo);
+function publishToCratesIo(input: Input, repo: string, branch?: string) {
+  clone(input, repo, branch);
   const path = repoPath(input.repo);
 
   const env = {
