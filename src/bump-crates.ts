@@ -49,7 +49,7 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
     sh(`ls ${workspace}`);
 
-    const tags = sh("git tag").split("\n");
+    const tags = sh("git tag", { cwd: repo }).split("\n");
     if (tags.includes(input.version)) {
       core.info(`Tag ${input.version} has already been created`);
       await cleanup(input);
