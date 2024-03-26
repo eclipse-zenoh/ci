@@ -82328,13 +82328,13 @@ async function main(input) {
         for (const repo of input.unpublishedDepsRepos) {
             await publishToEstuary(input, repo, registry, /^$/);
         }
-        await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp);
+        await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
         await deleteRepos(input);
         if (input.liveRun) {
             for (const repo of input.unpublishedDepsRepos) {
                 publishToCratesIo(input, repo);
             }
-            publishToCratesIo(input, input.repo);
+            publishToCratesIo(input, input.repo, input.branch);
         }
         await cleanup(input, registry);
     }
@@ -82358,9 +82358,14 @@ async function cleanup(input, registry) {
     }
     await deleteRepos(input);
 }
-function clone(input, repo) {
+function clone(input, repo, branch) {
     const remote = `https://${input.githubToken}@github.com/${repo}.git`;
-    sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
+    if (branch == undefined) {
+        sh(`git clone --recursive ${remote}`);
+    }
+    else {
+        sh(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
+    }
 }
 async function deleteRepos(input) {
     lib_core.info(`Deleting repository clone ${repoPath(input.repo)}`);
@@ -82373,8 +82378,8 @@ async function deleteRepos(input) {
 function repoPath(repo) {
     return repo.split("/").at(1);
 }
-async function publishToEstuary(input, repo, registry, registryDepsRegExp) {
-    clone(input, repo);
+async function publishToEstuary(input, repo, registry, registryDepsRegExp, branch) {
+    clone(input, repo, branch);
     const path = repoPath(input.repo);
     await configRegistry(path, registry.name, registry.index);
     await setRegistry(path, registryDepsRegExp, registry.name);
@@ -82384,8 +82389,8 @@ async function publishToEstuary(input, repo, registry, registryDepsRegExp) {
     };
     publish(path, env);
 }
-function publishToCratesIo(input, repo) {
-    clone(input, repo);
+function publishToCratesIo(input, repo, branch) {
+    clone(input, repo, branch);
     const path = repoPath(input.repo);
     const env = {
         CARGO_REGISTRY_TOKEN: input.cratesIoToken,
