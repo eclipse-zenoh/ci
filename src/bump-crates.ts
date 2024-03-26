@@ -46,7 +46,7 @@ export async function main(input: Input) {
     const workspace = input.path === undefined ? repo : join(repo, input.path);
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
 
-    sh(`git clone --recursive ${remote}`);
+    sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
     sh(`ls ${workspace}`);
 
     await cargo.bump(workspace, input.version);

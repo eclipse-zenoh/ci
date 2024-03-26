@@ -82299,7 +82299,7 @@ async function main(input) {
         const repo = input.repo.split("/")[1];
         const workspace = input.path === undefined ? repo : (0,external_path_.join)(repo, input.path);
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
-        command_sh(`git clone --recursive ${remote}`);
+        command_sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
         command_sh(`ls ${workspace}`);
         await bump(workspace, input.version);
         command_sh("git add .", { cwd: repo });
