@@ -49,6 +49,13 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
     sh(`ls ${workspace}`);
 
+    const tags = sh("git tag").split("\n");
+    if (tags.includes(input.version)) {
+      core.info(`Tag ${input.version} has already been created`);
+      await cleanup(input);
+      return;
+    }
+
     await cargo.bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
