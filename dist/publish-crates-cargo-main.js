@@ -82380,7 +82380,7 @@ function repoPath(repo) {
 }
 async function publishToEstuary(input, repo, registry, registryDepsRegExp, branch) {
     clone(input, repo, branch);
-    const path = repoPath(input.repo);
+    const path = repoPath(repo);
     await configRegistry(path, registry.name, registry.index);
     await setRegistry(path, registryDepsRegExp, registry.name);
     const env = {
@@ -82391,7 +82391,7 @@ async function publishToEstuary(input, repo, registry, registryDepsRegExp, branc
 }
 function publishToCratesIo(input, repo, branch) {
     clone(input, repo, branch);
-    const path = repoPath(input.repo);
+    const path = repoPath(repo);
     const env = {
         CARGO_REGISTRY_TOKEN: input.cratesIoToken,
     };
