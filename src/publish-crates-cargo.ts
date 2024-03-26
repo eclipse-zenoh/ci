@@ -112,7 +112,7 @@ async function publishToEstuary(
   branch?: string,
 ): Promise<void> {
   clone(input, repo, branch);
-  const path = repoPath(input.repo);
+  const path = repoPath(repo);
 
   await cargo.configRegistry(path, registry.name, registry.index);
   await cargo.setRegistry(path, registryDepsRegExp, registry.name);
@@ -127,7 +127,7 @@ async function publishToEstuary(
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
   clone(input, repo, branch);
-  const path = repoPath(input.repo);
+  const path = repoPath(repo);
 
   const env = {
     CARGO_REGISTRY_TOKEN: input.cratesIoToken,
