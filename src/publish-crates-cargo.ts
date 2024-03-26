@@ -43,7 +43,7 @@ export async function main(input: Input) {
     registry = await estuary.spawn();
 
     for (const repo of input.unpublishedDepsRepos) {
-      await publishToEstuary(input, repo, registry, /^$/);
+      await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
     }
 
     await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
