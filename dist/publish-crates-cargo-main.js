@@ -82326,7 +82326,7 @@ async function main(input) {
     try {
         registry = await spawn();
         for (const repo of input.unpublishedDepsRepos) {
-            await publishToEstuary(input, repo, registry, /^$/);
+            await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
         }
         await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
         await deleteRepos(input);
