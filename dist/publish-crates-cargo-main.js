@@ -82003,7 +82003,7 @@ function stringify(obj) {
 
 
 const MAX_BUFFER = 10 * 1024 * 1024;
-function sh(cmd, options) {
+function command_sh(cmd, options) {
     options = options != null ? options : {};
     options.env = options.env != null ? options.env : {};
     options.cwd = options.cwd != null ? options.cwd : ".";
@@ -82064,7 +82064,7 @@ const gitEnv = {
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 function cargo_packages(path) {
-    const metadataContents = sh("cargo metadata --no-deps --format-version '1'", { cwd: path });
+    const metadataContents = command_sh("cargo metadata --no-deps --format-version '1'", { cwd: path });
     const metadata = JSON.parse(metadataContents);
     const result = [];
     for (const elem of metadata.packages) {
@@ -82251,13 +82251,29 @@ async function installBinaryCached(name) {
         // failure
         const hit = await cache.restoreCache(paths, key);
         if (hit == undefined) {
-            sh(`cargo +stable install ${name} --force`);
+            command_sh(`cargo +stable install ${name} --force`);
             await cache.saveCache(paths, key);
         }
     }
     else {
-        sh(`cargo +stable install ${name}`);
+        command_sh(`cargo +stable install ${name}`);
     }
+}
+async function build(path, target) {
+    const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
+    const crossManifest = toml.parse(crossContents);
+    if (target == undefined) {
+        target ??= hostTarget();
+    }
+    else {
+        sh(`rustup target add ${target}`, { cwd: path });
+    }
+    const command = target in crossManifest ? ["cross"] : ["cargo"];
+    command.concat("cross", "build", "--release", "--bins", "--lib", "--target", target);
+    sh(command.join(" "), { cwd: path });
+}
+function hostTarget() {
+    return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
 async function loadTOML(path) {
     const contents = await promises_namespaceObject.readFile(path, "utf-8");
@@ -82361,10 +82377,10 @@ async function cleanup(input, registry) {
 function clone(input, repo, branch) {
     const remote = `https://${input.githubToken}@github.com/${repo}.git`;
     if (branch == undefined) {
-        sh(`git clone --recursive ${remote}`);
+        command_sh(`git clone --recursive ${remote}`);
     }
     else {
-        sh(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
+        command_sh(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
     }
 }
 async function deleteRepos(input) {
@@ -82405,10 +82421,10 @@ function publish(path, env) {
     };
     for (const package_ of packagesOrdered(path)) {
         if (package_.publish == undefined || package_.publish) {
-            sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
+            command_sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
         }
     }
-    sh("cargo clean", options);
+    command_sh("cargo clean", options);
 }
 
 

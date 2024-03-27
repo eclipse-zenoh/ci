@@ -82259,6 +82259,22 @@ async function installBinaryCached(name) {
         sh(`cargo +stable install ${name}`);
     }
 }
+async function build(path, target) {
+    const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
+    const crossManifest = toml.parse(crossContents);
+    if (target == undefined) {
+        target ??= hostTarget();
+    }
+    else {
+        sh(`rustup target add ${target}`, { cwd: path });
+    }
+    const command = target in crossManifest ? ["cross"] : ["cargo"];
+    command.concat("cross", "build", "--release", "--bins", "--lib", "--target", target);
+    sh(command.join(" "), { cwd: path });
+}
+function hostTarget() {
+    return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
+}
 async function loadTOML(path) {
     const contents = await promises_namespaceObject.readFile(path, "utf-8");
     return parse(contents);
