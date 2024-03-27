@@ -12,11 +12,11 @@ export function cloneFromGitHub(repo: string, options: CloneFromGitHubOptions) {
 
   const command = ["git", "clone", "--recursive", "--single-branch"];
   if (options.branch != undefined) {
-    command.concat("--branch", options.branch);
+    command.push("--branch", options.branch);
   }
-  command.concat(remote);
+  command.push(remote);
   if (options.path != undefined) {
-    command.concat(options.path);
+    command.push(options.path);
   }
 
   sh(command.join(" "));

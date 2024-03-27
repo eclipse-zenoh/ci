@@ -82262,14 +82262,10 @@ async function installBinaryCached(name) {
 async function build(path, target) {
     const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
     const crossManifest = toml.parse(crossContents);
-    if (target == undefined) {
-        target ??= hostTarget();
-    }
-    else {
-        sh(`rustup target add ${target}`, { cwd: path });
-    }
+    target ??= hostTarget();
+    sh(`rustup target add ${target}`, { cwd: path });
     const command = target in crossManifest ? ["cross"] : ["cargo"];
-    command.concat("cross", "build", "--release", "--bins", "--lib", "--target", target);
+    command.push("build", "--release", "--bins", "--lib", "--target", target);
     sh(command.join(" "), { cwd: path });
 }
 function hostTarget() {
