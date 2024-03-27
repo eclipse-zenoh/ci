@@ -190,10 +190,10 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
 
     if (
       "metadata" in manifest.package &&
-        "deb" in manifest.package.metadata &&
-        "depends" in manifest.package.metadata.deb &&
-        manifest.package.metadata.deb.depends != "$auto" &&
-        pattern.test(manifest.package.metadata.deb.name)
+      "deb" in manifest.package.metadata &&
+      "depends" in manifest.package.metadata.deb &&
+      manifest.package.metadata.deb.depends != "$auto" &&
+      pattern.test(manifest.package.metadata.deb.name)
     ) {
       const deb = manifest.package.metadata.deb;
       const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
@@ -298,6 +298,29 @@ export async function installBinaryCached(name: string) {
   } else {
     sh(`cargo +stable install ${name}`);
   }
+}
+
+type CrossManifest = {
+  target: { [target: string]: { image: string } };
+};
+
+export async function build(path: string, target?: string) {
+  const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
+  const crossManifest = toml.parse(crossContents) as CrossManifest;
+
+  if (target == undefined) {
+    target ??= hostTarget();
+  } else {
+    sh(`rustup target add ${target}`, { cwd: path });
+  }
+
+  const command = target in crossManifest ? ["cross"] : ["cargo"];
+  command.concat("cross", "build", "--release", "--bins", "--lib", "--target", target);
+  sh(command.join(" "), { cwd: path });
+}
+
+function hostTarget(): string {
+  return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
 
 async function loadTOML(path: string): Promise<Record<string, toml.TomlPrimitive>> {

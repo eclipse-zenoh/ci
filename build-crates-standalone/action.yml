@@ -4,19 +4,21 @@ inputs:
   repo:
     required: true
   version:
-    required: true
+    required: false
   branch:
-    required: true
+    required: false
   target:
-    required: true
+    required: false
   artifact-patterns:
     required: true
   github-token:
-    required: true
+    required: false
 
 outputs:
   artifact-id:
     description: Artifact id
+  artifact-name:
+    description: Artifact name
 
 runs:
   using: node20

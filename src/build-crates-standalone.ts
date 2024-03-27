@@ -3,38 +3,37 @@ import * as path from "path";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
-import * as toml from "smol-toml";
 
 import * as cargo from "./cargo";
-import { sh } from "./command";
 import * as zip from "./zip";
+import * as git from "./git";
 
 const artifact = new DefaultArtifactClient();
 
 export type Input = {
   repo: string;
-  version: string;
-  branch: string;
-  target: string;
+  version?: string;
+  branch?: string;
+  target?: string;
   artifactRegExp: RegExp;
-  githubToken: string;
+  githubToken?: string;
 };
 
 export function setup(): Input {
   const repo = core.getInput("repo", { required: true });
-  const version = core.getInput("version", { required: true });
-  const branch = core.getInput("branch", { required: true });
-  const target = core.getInput("target", { required: true });
+  const version = core.getInput("version");
+  const branch = core.getInput("branch");
+  const target = core.getInput("target");
   const artifactPatterns = core.getInput("artifact-patterns", { required: true });
-  const githubToken = core.getInput("github-token", { required: true });
+  const githubToken = core.getInput("github-token");
 
   return {
     repo,
-    version,
-    branch,
-    target,
+    version: version == "" ? undefined : version,
+    branch: branch == "" ? undefined : branch,
+    target: target == "" ? undefined : target,
     artifactRegExp: new RegExp(artifactPatterns.split("\n").join("|")),
-    githubToken,
+    githubToken: githubToken == "" ? undefined : githubToken,
   };
 }
 
@@ -43,29 +42,19 @@ export async function main(input: Input) {
     await cargo.installBinaryCached("cross");
 
     const repo = input.repo.split("/")[1];
-    const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
-    sh(`git clone --recursive --branch ${input.branch} --single-branch ${remote}`);
 
-    const crossContents = await fs.readFile(path.join(repo, "Cross.toml"), "utf-8");
-    const crossManifest = toml.parse(crossContents) as CrossManifest;
+    git.cloneFromGitHub(input.repo, { branch: input.branch, token: input.githubToken });
 
-    sh(`rustup target add ${input.target}`, { cwd: repo });
+    input.version ??= git.describe(repo);
 
-    if (input.target in crossManifest.target) {
-      sh(`cross build --release --bins --lib --target ${input.target}`, {
-        cwd: repo,
-      });
-    } else {
-      sh(`cargo build --release --bins --lib --target ${input.target}`, {
-        cwd: repo,
-      });
-    }
+    await cargo.build(repo, input.target);
 
     const output = artifactName(repo, input.version, input.target);
     await zip.fromDirectory(output, path.join(repo, "target", input.target, "release"), input.artifactRegExp);
 
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
+    core.setOutput("artifact-name", output);
 
     await cleanup(input);
   } catch (error) {
@@ -73,10 +62,6 @@ export async function main(input: Input) {
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
-
-type CrossManifest = {
-  target: { [target: string]: { image: string } };
-};
 
 export function artifactName(repo: string, version: string, target: string): string {
   return `${repo}-${version}-${target}-standalone.zip`;
