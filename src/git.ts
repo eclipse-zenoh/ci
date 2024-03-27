@@ -23,5 +23,5 @@ export function cloneFromGitHub(repo: string, options: CloneFromGitHubOptions) {
 }
 
 export function describe(path: string = process.cwd()): string {
-  return sh("git describe", { cwd: path });
+  return sh("git describe", { cwd: path }).trim();
 }
