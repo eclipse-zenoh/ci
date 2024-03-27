@@ -304,11 +304,9 @@ type CrossManifest = {
   target: { [target: string]: { image: string } };
 };
 
-export async function build(path: string, target?: string) {
+export async function build(path: string, target: string) {
   const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
   const crossManifest = toml.parse(crossContents) as CrossManifest;
-
-  target ??= hostTarget();
 
   sh(`rustup target add ${target}`, { cwd: path });
 
@@ -317,7 +315,7 @@ export async function build(path: string, target?: string) {
   sh(command.join(" "), { cwd: path });
 }
 
-function hostTarget(): string {
+export function hostTarget(): string {
   return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
 

@@ -46,6 +46,7 @@ export async function main(input: Input) {
     git.cloneFromGitHub(input.repo, { branch: input.branch, token: input.githubToken });
 
     input.version ??= git.describe(repo);
+    input.target ??= cargo.hostTarget();
 
     await cargo.build(repo, input.target);
 
