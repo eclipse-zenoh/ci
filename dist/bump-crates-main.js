@@ -82064,7 +82064,7 @@ const gitEnv = {
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 function cargo_packages(path) {
-    const metadataContents = command_sh("cargo metadata --no-deps --format-version '1'", { cwd: path });
+    const metadataContents = command_sh("cargo metadata --no-deps --format-version=1", { cwd: path });
     const metadata = JSON.parse(metadataContents);
     const result = [];
     for (const elem of metadata.packages) {
