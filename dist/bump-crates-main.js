@@ -82195,6 +82195,8 @@ async function setRegistry(path, pattern, registry) {
         if (pattern.test(dep)) {
             const table = manifest.dependencies[dep];
             table.registry = registry;
+            // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
+            delete table.git;
             changed = true;
         }
     }
