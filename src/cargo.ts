@@ -49,7 +49,7 @@ type CargoMetadata = {
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 export function packages(path: string): Package[] {
-  const metadataContents = sh("cargo metadata --no-deps --format-version '1'", { cwd: path });
+  const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path });
   const metadata = JSON.parse(metadataContents) as CargoMetadata;
 
   const result = [] as Package[];
