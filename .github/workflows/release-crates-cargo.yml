@@ -38,7 +38,7 @@ on:
 
 jobs:
   publish:
-    runs-on: windows-latest
+    runs-on: macos-latest
     steps:
       - uses: eclipse-zenoh/ci/publish-crates-cargo@main
         with:
