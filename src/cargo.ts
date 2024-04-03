@@ -310,7 +310,7 @@ export async function build(path: string, target: string) {
 
   sh(`rustup target add ${target}`, { cwd: path });
 
-  const command = target in crossManifest ? ["cross"] : ["cargo"];
+  const command = target in crossManifest.target ? ["cross"] : ["cargo"];
   command.push("build", "--release", "--bins", "--lib", "--target", target);
   sh(command.join(" "), { cwd: path });
 }
