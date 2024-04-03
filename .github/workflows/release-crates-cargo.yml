@@ -38,10 +38,8 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - uses: easimon/maximize-build-space@master
-
       - uses: eclipse-zenoh/ci/publish-crates-cargo@main
         with:
           repo: ${{ inputs.repo }}
