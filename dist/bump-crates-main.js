@@ -82197,6 +82197,7 @@ async function setRegistry(path, pattern, registry) {
             table.registry = registry;
             // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
             delete table.git;
+            delete table.branch;
             changed = true;
         }
     }

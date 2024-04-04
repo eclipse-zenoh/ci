@@ -228,6 +228,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
       table.registry = registry;
       // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
       delete table.git;
+      delete table.branch;
       changed = true;
     }
   }
