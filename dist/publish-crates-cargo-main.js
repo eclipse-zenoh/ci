@@ -82401,7 +82401,7 @@ async function publishToEstuary(input, repo, registry, registryDepsRegExp, branc
         CARGO_REGISTRY_DEFAULT: registry.name,
         [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
     };
-    publish(path, env);
+    publish(path, env, true);
 }
 function publishToCratesIo(input, repo, branch) {
     clone(input, repo, branch);
@@ -82411,7 +82411,7 @@ function publishToCratesIo(input, repo, branch) {
     };
     publish(path, env);
 }
-function publish(path, env) {
+function publish(path, env, allowDirty = false) {
     const options = {
         env,
         cwd: path,
@@ -82419,7 +82419,11 @@ function publish(path, env) {
     };
     for (const package_ of packagesOrdered(path)) {
         if (package_.publish == undefined || package_.publish) {
-            command_sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
+            const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
+            if (allowDirty) {
+                command.push("--allow-dirty");
+            }
+            command_sh(command.join(" "), options);
         }
     }
     command_sh("cargo clean", options);

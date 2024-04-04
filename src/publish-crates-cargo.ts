@@ -122,7 +122,7 @@ async function publishToEstuary(
     [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
   };
 
-  publish(path, env);
+  publish(path, env, true);
 }
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
@@ -136,7 +136,7 @@ function publishToCratesIo(input: Input, repo: string, branch?: string) {
   publish(path, env);
 }
 
-function publish(path: string, env: NodeJS.ProcessEnv) {
+function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = false) {
   const options = {
     env,
     cwd: path,
@@ -145,7 +145,11 @@ function publish(path: string, env: NodeJS.ProcessEnv) {
 
   for (const package_ of cargo.packagesOrdered(path)) {
     if (package_.publish == undefined || package_.publish) {
-      sh(`cargo publish --manifest-path ${package_.manifestPath}`, options);
+      const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
+      if (allowDirty) {
+        command.push("--allow-dirty");
+      }
+      sh(command.join(" "), options);
     }
   }
 
