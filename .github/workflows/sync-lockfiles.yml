@@ -121,7 +121,7 @@ jobs:
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request
-        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated' }} 
+        if: ${{ steps.cpr.outputs.pull-request-operation != 'closed' }}
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
           --subject "build: Sync `Cargo.lock` with eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }} from ${{ needs.fetch.outputs.zenoh-head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
