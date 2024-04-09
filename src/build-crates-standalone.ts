@@ -43,7 +43,15 @@ export async function main(input: Input) {
 
     const repo = input.repo.split("/")[1];
 
-    git.cloneFromGitHub(input.repo, { branch: input.branch, token: input.githubToken });
+    git.cloneFromGitHub(input.repo, {
+      branch: input.branch,
+      token: input.githubToken,
+      // NOTE(fuzzypixelz): We clone the repository into the current directory
+      // to avoid long paths on Windows, where MSBuild fails on the windows-2019
+      // GitHub-hosted runner because it doesn't support paths longer than 260
+      // characters.
+      path: process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : undefined,
+    });
 
     input.version ??= git.describe(repo);
     input.target ??= cargo.hostTarget();
