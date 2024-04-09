@@ -33,7 +33,7 @@ jobs:
         name: Get HEAD info
         run: |
           echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
-          echo "head-date=$(git log -1 --format=%ah)" >> $GITHUB_OUTPUT
+          echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
 
       - name: Upload lockfile
         uses: actions/upload-artifact@v3
@@ -104,14 +104,13 @@ jobs:
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
         uses: peter-evans/create-pull-request@v6
         with:
-          title: Sync `Cargo.lock` with Zenoh `${{ needs.fetch.outputs.zenoh-head-hash }}` from `${{needs.fetch.outputs.zenoh-head-date }}`"
+          title: Sync `Cargo.lock` with Zenoh `${{ needs.fetch.outputs.zenoh-head-hash }}` from `${{needs.fetch.outputs.zenoh-head-date }}`
           body: |
-            This pull request synchronizes ${{ matrix.dependant }}'s Cargo lockfile with Zenoh's.
-            This is done to ensure ABI compatibility between Zenoh applications, backends & plugins.
+            This pull request synchronizes ${{ matrix.dependant }}'s Cargo lockfile with Zenoh's. This is done to ensure ABI compatibility between Zenoh applications, backends & plugins.
 
             - **sha**: eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }}
             - **date**: ${{ needs.fetch.outputs.zenoh-head-date }}
-            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/zenoh/actions/runs/${{ github.run_id }})
+            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
           commit-message: "build: Sync Cargo lockfile with Zenoh's"
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
           author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
@@ -122,11 +121,12 @@ jobs:
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request
-        if: steps.cpr.outputs.pull-request-operation == 'created'
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated' }} 
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
           --subject "build: Sync `Cargo.lock` with eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }} from ${{ needs.fetch.outputs.zenoh-head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
           --repo "eclipse-zenoh/${{ matrix.dependant }}"
-          --squash --auto
+          --squash
+          --auto
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
