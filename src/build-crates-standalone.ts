@@ -1,4 +1,3 @@
-import * as fs from "fs/promises";
 import * as path from "path";
 
 import * as core from "@actions/core";
@@ -65,10 +64,7 @@ export async function main(input: Input) {
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
     core.setOutput("artifact-name", output);
-
-    await cleanup(input);
   } catch (error) {
-    await cleanup(input);
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
@@ -78,10 +74,3 @@ export function artifactName(repo: string, version: string, target: string): str
 }
 
 export const artifactRegExp: RegExp = /^.*-standalone\.zip$/;
-
-export async function cleanup(input: Input) {
-  const repoName = input.repo.split("/").at(1);
-  const repoPath = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : repoName;
-  core.info(`Deleting repository ${repoPath}`);
-  await fs.rm(repoPath, { recursive: true, force: true });
-}
