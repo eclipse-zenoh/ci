@@ -41,16 +41,16 @@ export async function main(input: Input) {
   try {
     await cargo.installBinaryCached("cross");
 
-    const repo = input.repo.split("/")[1];
+    // NOTE(fuzzypixelz): We clone the repository into the current directory
+    // to avoid long paths on Windows, where MSBuild fails on the windows-2019
+    // GitHub-hosted runner because it doesn't support paths longer than 260
+    // characters.
+    const repo = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : input.repo.split("/").at(1);
 
     git.cloneFromGitHub(input.repo, {
       branch: input.branch,
       token: input.githubToken,
-      // NOTE(fuzzypixelz): We clone the repository into the current directory
-      // to avoid long paths on Windows, where MSBuild fails on the windows-2019
-      // GitHub-hosted runner because it doesn't support paths longer than 260
-      // characters.
-      path: process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : undefined,
+      path: repo,
     });
 
     input.version ??= git.describe(repo);
