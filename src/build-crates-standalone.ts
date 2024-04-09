@@ -45,21 +45,22 @@ export async function main(input: Input) {
     // to avoid long paths on Windows, where MSBuild fails on the windows-2019
     // GitHub-hosted runner because it doesn't support paths longer than 260
     // characters.
-    const repo = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : input.repo.split("/").at(1);
+    const repoName = input.repo.split("/").at(1);
+    const repoPath = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : repoName;
 
     git.cloneFromGitHub(input.repo, {
       branch: input.branch,
       token: input.githubToken,
-      path: repo,
+      path: repoPath,
     });
 
-    input.version ??= git.describe(repo);
+    input.version ??= git.describe(repoPath);
     input.target ??= cargo.hostTarget();
 
-    await cargo.build(repo, input.target);
+    await cargo.build(repoPath, input.target);
 
-    const output = artifactName(repo, input.version, input.target);
-    await zip.fromDirectory(output, path.join(repo, "target", input.target, "release"), input.artifactRegExp);
+    const output = artifactName(repoName, input.version, input.target);
+    await zip.fromDirectory(output, path.join(repoPath, "target", input.target, "release"), input.artifactRegExp);
 
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
@@ -79,7 +80,8 @@ export function artifactName(repo: string, version: string, target: string): str
 export const artifactRegExp: RegExp = /^.*-standalone\.zip$/;
 
 export async function cleanup(input: Input) {
-  const repoPath = input.repo.split("/")[1];
+  const repoName = input.repo.split("/").at(1);
+  const repoPath = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : repoName;
   core.info(`Deleting repository ${repoPath}`);
   await fs.rm(repoPath, { recursive: true, force: true });
 }
