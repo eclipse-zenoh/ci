@@ -62,17 +62,7 @@ export async function main(input: Input) {
     const packages = await cargo.packagesDebian(repo);
     core.info(`Building ${packages.map(p => p.name).join(", ")}`);
 
-    for (const package_ of packages) {
-      sh(
-        `cargo deb --no-build --no-strip \
-        --target ${input.target} \
-        --package ${package_.name} \
-        --deb-version ${input.version}`,
-        {
-          cwd: repo,
-        },
-      );
-    }
+    await cargo.buildDebian(repo, input.target, input.version);
 
     const output = artifactName(repo, input.version, input.target);
     await zip.fromDirectory(output, path.join(repo, "target", input.target, "debian"), /.*deb/);
