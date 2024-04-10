@@ -96,11 +96,13 @@ export function* packagesOrdered(path: string): Generator<Package> {
 type CargoManifestPackage = {
   version: string | { workspace: boolean };
   metadata?: {
-    deb?: {
-      name: string;
-      depends?: string;
-    };
+    deb?: CargoManifestMetadataDebianVariant | { variants: { [key: string]: CargoManifestMetadataDebianVariant } };
   };
+};
+
+type CargoManifestMetadataDebianVariant = {
+  name: string;
+  depends?: string;
 };
 
 type CargoManifestDependencyTable = {
@@ -320,6 +322,37 @@ export async function build(path: string, target: string) {
 
 export function hostTarget(): string {
   return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
+}
+
+export async function buildDebian(path: string, target: string, version: string) {
+  for (const package_ of await packagesDebian(path)) {
+    const manifest = (await loadTOML(package_.manifestPath)) as CargoManifest;
+
+    if ("variants" in manifest.package.metadata.deb) {
+      for (const variant in manifest.package.metadata.deb.variants) {
+        sh(
+          `cargo deb --no-build --no-strip \
+          --target ${target} \
+          --package ${package_.name} \
+          --deb-version ${version}
+          --variant ${variant}`,
+          {
+            cwd: path,
+          },
+        );
+      }
+    } else {
+      sh(
+        `cargo deb --no-build --no-strip \
+        --target ${target} \
+        --package ${package_.name} \
+        --deb-version ${version}`,
+        {
+          cwd: path,
+        },
+      );
+    }
+  }
 }
 
 async function loadTOML(path: string): Promise<Record<string, toml.TomlPrimitive>> {

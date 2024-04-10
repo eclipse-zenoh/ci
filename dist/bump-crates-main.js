@@ -82273,6 +82273,30 @@ async function build(path, target) {
 function hostTarget() {
     return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
+async function buildDebian(path, target, version) {
+    for (const package_ of await packagesDebian(path)) {
+        const manifest = (await loadTOML(package_.manifestPath));
+        if ("variants" in manifest.package.metadata.deb) {
+            for (const variant in manifest.package.metadata.deb.variants) {
+                sh(`cargo deb --no-build --no-strip \
+          --target ${target} \
+          --package ${package_.name} \
+          --deb-version ${version}
+          --variant ${variant}`, {
+                    cwd: path,
+                });
+            }
+        }
+        else {
+            sh(`cargo deb --no-build --no-strip \
+        --target ${target} \
+        --package ${package_.name} \
+        --deb-version ${version}`, {
+                cwd: path,
+            });
+        }
+    }
+}
 async function loadTOML(path) {
     const contents = await promises_namespaceObject.readFile(path, "utf-8");
     return parse(contents);
