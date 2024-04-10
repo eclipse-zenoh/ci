@@ -6,9 +6,7 @@ import { sh } from "./command";
 
 export async function fromDirectory(output: string, dir: string, pattern: RegExp) {
   const dirents = await fs.readdir(dir, { withFileTypes: true });
-  const files = dirents
-    .filter(d => d.isFile() && pattern.test(d.name))
-    .map(d => path.resolve(path.join(d.path, d.name)));
+  const files = dirents.filter(d => pattern.test(d.name)).map(d => path.resolve(path.join(d.path, d.name)));
 
   fromFiles(output, ...files);
 }
