@@ -1,6 +1,5 @@
 import { spawnSync } from "child_process";
 import * as core from "@actions/core";
-import * as os from "os";
 
 const MAX_BUFFER = 10 * 1024 * 1024;
 
@@ -26,7 +25,7 @@ export function sh(cmd: string, options?: CommandOptions): string {
     // important
     env: {
       ...process.env,
-      ...options.env
+      ...options.env,
     },
     stdio: "pipe",
     shell: true,
