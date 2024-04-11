@@ -80895,7 +80895,7 @@ function command_sh(cmd, options) {
         // important
         env: {
             ...process.env,
-            ...options.env
+            ...options.env,
         },
         stdio: "pipe",
         shell: true,
@@ -82339,12 +82339,6 @@ async function main(input) {
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         command_sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
         command_sh(`ls ${workspace}`);
-        const tags = command_sh("git tag", { cwd: repo }).split("\n");
-        if (tags.includes(input.version)) {
-            lib_core.info(`Tag ${input.version} has already been created`);
-            await cleanup(input);
-            return;
-        }
         await bump(workspace, input.version);
         command_sh("git add .", { cwd: repo });
         command_sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
@@ -82363,10 +82357,19 @@ async function main(input) {
                 check: false,
             });
         }
-        command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+        command_sh(`git push ${remote} ${input.branch}`, { cwd: repo });
+        const tagExists = command_sh("git tag", { cwd: repo }).split("\n").includes(input.version);
+        if (tagExists) {
+            lib_core.info(`Tag ${input.version} already exists and will be replaced`);
+            command_sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+            command_sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+        }
+        else {
+            command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+            command_sh(`git push ${remote} ${input.version}`, { cwd: repo });
+        }
         command_sh("git log -10", { cwd: repo });
         command_sh("git show-ref --tags", { cwd: repo });
-        command_sh(`git push ${remote} ${input.branch} ${input.version}`, { cwd: repo });
         await cleanup(input);
     }
     catch (error) {

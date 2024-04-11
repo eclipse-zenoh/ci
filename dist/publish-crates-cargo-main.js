@@ -82016,7 +82016,7 @@ function command_sh(cmd, options) {
         // important
         env: {
             ...process.env,
-            ...options.env
+            ...options.env,
         },
         stdio: "pipe",
         shell: true,

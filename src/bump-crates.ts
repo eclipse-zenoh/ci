@@ -49,13 +49,6 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
     sh(`ls ${workspace}`);
 
-    const tags = sh("git tag", { cwd: repo }).split("\n");
-    if (tags.includes(input.version)) {
-      core.info(`Tag ${input.version} has already been created`);
-      await cleanup(input);
-      return;
-    }
-
     await cargo.bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
@@ -77,10 +70,20 @@ export async function main(input: Input) {
       });
     }
 
-    sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+    sh(`git push ${remote} ${input.branch}`, { cwd: repo });
+
+    const tagExists = sh("git tag", { cwd: repo }).split("\n").includes(input.version);
+    if (tagExists) {
+      core.info(`Tag ${input.version} already exists and will be replaced`);
+      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+    } else {
+      sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      sh(`git push ${remote} ${input.version}`, { cwd: repo });
+    }
+
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
-    sh(`git push ${remote} ${input.branch} ${input.version}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {
