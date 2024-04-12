@@ -24824,7 +24824,7 @@ async function main(input) {
         const branchExists = refs.includes(`refs/remotes/origin/${branch}`);
         if (branchExists) {
             core.info(`Release branch for ${version} already exists and will be updated`);
-            sh(`git switch ${branch}`, { cwd: repo });
+            sh(`git switch --force-create ${branch}`, { cwd: repo });
             sh(`git push --force ${remote} ${branch}`, { cwd: repo });
         }
         else {
