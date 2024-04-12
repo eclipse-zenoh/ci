@@ -6,7 +6,8 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import * as ssh from "./ssh";
 import { sh } from "./command";
 
-import { artifactRegExp } from "./build-crates-standalone";
+import { artifactRegExp as artfifactRegExpDebain } from "./build-crates-debian";
+import { artifactRegExp as artfifactRegExpStandalone } from "./build-crates-standalone";
 
 const artifact = new DefaultArtifactClient();
 
@@ -17,6 +18,7 @@ export type Input = {
   sshHostPath: string;
   sshPrivateKey: string;
   sshPassphrase: string;
+  archiveRegExp?: RegExp;
 };
 
 export function setup(): Input {
@@ -26,6 +28,7 @@ export function setup(): Input {
   const sshHostPath = core.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
+  const archivePatterns = core.getInput("archive-patterns", { required: false });
 
   return {
     liveRun,
@@ -34,19 +37,28 @@ export function setup(): Input {
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
+    archiveRegExp: archivePatterns == "" ? undefined : new RegExp(archivePatterns.split("\n").join("|")),
   };
 }
 
 export async function main(input: Input) {
   try {
+    const shouldPublishArtifact = (name: string): boolean => {
+      if (input.archiveRegExp == undefined) {
+        return artfifactRegExpStandalone.test(name) || artfifactRegExpDebain.test(name);
+      } else {
+        return input.archiveRegExp.test(name);
+      }
+    };
+
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
-      if (artifactRegExp.test(result.name)) {
+      if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
         const sshTarget = `${input.sshHost}:${input.sshHostPath}/${input.version}`;
 
-        core.info(`Uploading ${archive} to eclipse.org`);
+        core.info(`Uploading ${archive} to download.eclipse.org`);
         if (input.liveRun) {
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
             sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${sshTarget}`, { env });
