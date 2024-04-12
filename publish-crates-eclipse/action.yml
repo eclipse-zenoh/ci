@@ -13,6 +13,8 @@ inputs:
     required: true
   ssh-passphrase:
     required: true
+  archive-patterns:
+    required: false
 
 runs:
   using: node20

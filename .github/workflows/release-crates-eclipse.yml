@@ -68,6 +68,15 @@ jobs:
       exclude-builds: ${{ inputs.exclude-builds }}
     secrets: inherit
 
+  build-debian:
+    if: ${{ !inputs.no-build }}
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-debian.yml@main
+    with:
+      repo: ${{ inputs.repo }}
+      version: ${{ inputs.version }}
+      branch: ${{ inputs.branch }}
+    secrets: inherit
+
   publish:
     if: always()
     needs: build

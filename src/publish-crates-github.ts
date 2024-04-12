@@ -17,6 +17,7 @@ export type Input = {
   sshPrivateKey: string;
   sshPassphrase: string;
   githubToken: string;
+  archiveRegExp?: RegExp;
 };
 
 export function setup(): Input {
@@ -27,6 +28,7 @@ export function setup(): Input {
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
+  const archivePatterns = core.getInput("archive-patterns", { required: false });
 
   return {
     liveRun,
@@ -36,6 +38,7 @@ export function setup(): Input {
     sshPrivateKey,
     sshPassphrase,
     githubToken,
+    archiveRegExp: archivePatterns == "" ? undefined : new RegExp(archivePatterns.split("\n").join("|")),
   };
 }
 
@@ -59,9 +62,17 @@ export async function main(input: Input) {
       );
     }
 
+    const shouldPublishArtifact = (name: string): boolean => {
+      if (input.archiveRegExp == undefined) {
+        return artfifactRegExpStandalone.test(name) || artfifactRegExpDebain.test(name);
+      } else {
+        return input.archiveRegExp.test(name);
+      }
+    };
+
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
-      if (artfifactRegExpStandalone.test(result.name) || artfifactRegExpDebain.test(result.name)) {
+      if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
 
