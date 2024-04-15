@@ -70,14 +70,15 @@ export async function main(input: Input) {
       });
     }
 
-    sh(`git push ${remote} ${input.branch}`, { cwd: repo });
-
     const tagExists = sh("git tag", { cwd: repo }).split("\n").includes(input.version);
     if (tagExists) {
       core.info(`Tag ${input.version} already exists and will be replaced`);
+      // NOTE(fuzzypixelz): If the tag exists, then the branch exists too nad has to be pushed
+      sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
       sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
       sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
     } else {
+      sh(`git push ${remote} ${input.branch}`, { cwd: repo });
       sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
       sh(`git push ${remote} ${input.version}`, { cwd: repo });
     }
