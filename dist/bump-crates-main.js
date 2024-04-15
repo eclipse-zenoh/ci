@@ -82357,14 +82357,16 @@ async function main(input) {
                 check: false,
             });
         }
-        command_sh(`git push ${remote} ${input.branch}`, { cwd: repo });
         const tagExists = command_sh("git tag", { cwd: repo }).split("\n").includes(input.version);
         if (tagExists) {
             lib_core.info(`Tag ${input.version} already exists and will be replaced`);
+            // NOTE(fuzzypixelz): If the tag exists, then the branch exists too nad has to be pushed
+            command_sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
             command_sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
             command_sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
         }
         else {
+            command_sh(`git push ${remote} ${input.branch}`, { cwd: repo });
             command_sh(`git tag ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
             command_sh(`git push ${remote} ${input.version}`, { cwd: repo });
         }
