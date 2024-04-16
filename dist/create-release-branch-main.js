@@ -24801,9 +24801,6 @@ function main(input) {
         sh(`git clone --recursive ${remote}`);
         const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
         core.setOutput("version", version);
-        const refsPattern = "refs/remotes/origin/release/dry-run";
-        const refsRaw = sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
-        const refs = refsRaw.split("\n");
         let branch;
         if (input.liveRun) {
             branch = `release/${version}`;
@@ -24812,20 +24809,15 @@ function main(input) {
         else {
             branch = `release/dry-run/${version}`;
             core.setOutput("branch", branch);
+            const refsPattern = "refs/remotes/origin/release/dry-run";
+            const refsRaw = sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
+            const refs = refsRaw.split("\n");
             if (refs.length >= input.dryRunHistorySize) {
                 sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
             }
         }
-        const branchExists = refs.includes(`refs/remotes/origin/${branch}`);
-        if (branchExists) {
-            core.info(`Release branch for ${version} already exists and will be updated`);
-            sh(`git switch --force-create ${branch}`, { cwd: repo });
-            sh(`git push --force ${remote} ${branch}`, { cwd: repo });
-        }
-        else {
-            sh(`git switch --create ${branch}`, { cwd: repo });
-            sh(`git push ${remote} ${branch}`, { cwd: repo });
-        }
+        sh(`git switch --force-create ${branch}`, { cwd: repo });
+        sh(`git push --force ${remote} ${branch}`, { cwd: repo });
     }
     catch (error) {
         if (error instanceof Error)
