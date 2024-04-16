@@ -56,12 +56,13 @@ export async function main(input: Input) {
       if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
-        const sshTarget = `${input.sshHost}:${input.sshHostPath}/${input.version}`;
+        const archiveDir = `${input.sshHostPath}/${input.version}`;
 
         core.info(`Uploading ${archive} to download.eclipse.org`);
         if (input.liveRun) {
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
-            sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${sshTarget}`, { env });
+            sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${archiveDir}`, { env });
+            sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${input.sshHost}:${archiveDir}`, { env });
           });
         }
       }
