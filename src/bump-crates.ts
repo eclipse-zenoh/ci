@@ -69,10 +69,6 @@ export async function main(input: Input) {
       });
     }
 
-    if (sh("git tag", { cwd: repo }).split("\n").includes(input.version)) {
-      core.info(`Tag ${input.version} already exists and will be replaced`);
-    }
-
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
     sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
     sh(`git push --force ${remote} ${input.version}`, { cwd: repo });

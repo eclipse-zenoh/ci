@@ -82354,9 +82354,6 @@ async function main(input) {
                 check: false,
             });
         }
-        if (command_sh("git tag", { cwd: repo }).split("\n").includes(input.version)) {
-            lib_core.info(`Tag ${input.version} already exists and will be replaced`);
-        }
         command_sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
         command_sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
         command_sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
