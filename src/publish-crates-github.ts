@@ -50,7 +50,7 @@ export async function main(input: Input) {
     const releaseLatest = releases.at(0);
 
     if (input.liveRun) {
-      const command = ["gh", "release", "create"];
+      const command = ["gh", "release", "create", input.version];
       command.push("--repo", input.repo);
       command.push("--target", input.branch);
       command.push("--verify-tag");
