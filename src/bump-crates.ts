@@ -1,5 +1,4 @@
 import { join } from "path";
-import { rm } from "fs/promises";
 
 import * as core from "@actions/core";
 
@@ -80,16 +79,7 @@ export async function main(input: Input) {
 
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
-
-    await cleanup(input);
   } catch (error) {
-    await cleanup(input);
     if (error instanceof Error) core.setFailed(error.message);
   }
-}
-
-export async function cleanup(input: Input) {
-  const repo = input.repo.split("/")[1];
-  core.info(`Deleting repository clone ${repo}`);
-  await rm(repo, { recursive: true, force: true });
 }

@@ -1,5 +1,3 @@
-import { rm } from "fs/promises";
-
 import * as core from "@actions/core";
 
 import { sh } from "./command";
@@ -30,7 +28,7 @@ export function setup(): Input {
   };
 }
 
-export async function main(input: Input) {
+export function main(input: Input) {
   try {
     const repo = input.repo.split("/")[1];
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
@@ -66,16 +64,7 @@ export async function main(input: Input) {
       sh(`git switch --create ${branch}`, { cwd: repo });
       sh(`git push ${remote} ${branch}`, { cwd: repo });
     }
-
-    await cleanup(input);
   } catch (error) {
-    await cleanup(input);
     if (error instanceof Error) core.setFailed(error.message);
   }
-}
-
-export async function cleanup(input: Input) {
-  const repo = input.repo.split("/")[1];
-  core.info(`Deleting repository ${repo}`);
-  await rm(repo, { recursive: true, force: true });
 }
