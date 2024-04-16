@@ -46,16 +46,18 @@ export async function main(input: Input) {
     const releaseTags = JSON.parse(releaseTagsRaw) as GitHubRelease[];
     // NOTE: We use compute the latest release (or pre-release) and use its tag name as the starting
     // tag for the next release.
-    const startTag = releaseTags.at(0).tagName;
+    const latestRelease = releaseTags.at(0);
 
     if (input.liveRun) {
-      sh(
-        `gh release create ${input.version} \
-        --repo ${input.repo} \
-        --target ${input.branch} \
-        --notes-start-tag ${startTag} --verify-tag --generate-notes`,
-        { env },
-      );
+      const command = ["gh", "release", "create"];
+      command.push("--repo", input.repo);
+      command.push("--target", input.branch);
+      command.push("--verify-tag");
+      command.push("--generate-notes");
+      if (latestRelease != undefined) {
+        command.push("--notes-start-tag", latestRelease.tagName);
+      }
+      sh(command.join(" "), { env });
     }
 
     const shouldPublishArtifact = (name: string): boolean => {
