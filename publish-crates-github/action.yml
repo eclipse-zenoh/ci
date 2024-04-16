@@ -9,10 +9,6 @@ inputs:
     required: true
   branch:
     required: true
-  ssh-private-key:
-    required: true
-  ssh-passphrase:
-    required: true
   github-token:
     required: true
   archive-patterns:
