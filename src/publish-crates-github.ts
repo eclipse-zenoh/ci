@@ -42,11 +42,13 @@ export async function main(input: Input) {
       GH_TOKEN: input.githubToken,
     };
 
+    const releaseTagsRaw = sh(`gh release list --repo ${input.repo} --exclude-drafts --order desc --json tagName`);
+    const releaseTags = JSON.parse(releaseTagsRaw) as GitHubRelease[];
+    // NOTE: We use compute the latest release (or pre-release) and use its tag name as the starting
+    // tag for the next release.
+    const startTag = releaseTags.at(0).tagName;
+
     if (input.liveRun) {
-      // NOTE: We assume that a `${input.version}-dev` exists in the target
-      // branch and that it represents the starting tag of the release. If such
-      // a tag does not exist, the GitHub release creation will fail
-      const startTag = input.version.concat("-dev");
       sh(
         `gh release create ${input.version} \
         --repo ${input.repo} \
@@ -80,3 +82,7 @@ export async function main(input: Input) {
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
+
+type GitHubRelease = {
+  tagName: string;
+};
