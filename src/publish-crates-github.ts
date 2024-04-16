@@ -14,8 +14,6 @@ export type Input = {
   repo: string;
   version: string;
   branch: string;
-  sshPrivateKey: string;
-  sshPassphrase: string;
   githubToken: string;
   archiveRegExp?: RegExp;
 };
@@ -25,8 +23,6 @@ export function setup(): Input {
   const repo = core.getInput("repo", { required: true });
   const version = core.getInput("version", { required: true });
   const branch = core.getInput("branch", { required: true });
-  const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
-  const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
   const archivePatterns = core.getInput("archive-patterns", { required: false });
 
@@ -35,8 +31,6 @@ export function setup(): Input {
     version,
     branch,
     repo,
-    sshPrivateKey,
-    sshPassphrase,
     githubToken,
     archiveRegExp: archivePatterns == "" ? undefined : new RegExp(archivePatterns.split("\n").join("|")),
   };
