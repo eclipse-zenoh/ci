@@ -69,10 +69,7 @@ export async function main(input: Input) {
 
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
-
-    await cleanup(input);
   } catch (error) {
-    await cleanup(input);
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
@@ -86,9 +83,3 @@ export function artifactName(repo: string, version: string, target: string): str
 }
 
 export const artifactRegExp: RegExp = /^.*-debian\.zip$/;
-
-export async function cleanup(input: Input) {
-  const repoPath = input.repo.split("/")[1];
-  core.info(`Deleting repository ${repoPath}`);
-  await fs.rm(repoPath, { recursive: true, force: true });
-}

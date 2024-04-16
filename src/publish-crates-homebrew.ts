@@ -130,18 +130,7 @@ export async function main(input: Input) {
     if (input.liveRun) {
       sh(`git push ${tapUrl}`, { cwd: tapPath });
     }
-
-    cleanup(input);
   } catch (error) {
-    cleanup(input);
     if (error instanceof Error) core.setFailed(error.message);
   }
-}
-
-export function cleanup(input: Input) {
-  for (const formula of input.formulae) {
-    sh(`brew uninstall --force --ignore-dependencies ${formula}`, { check: false });
-  }
-  sh(`brew untap ${input.tap}`, { check: false });
-  sh(`rm -r *`);
 }

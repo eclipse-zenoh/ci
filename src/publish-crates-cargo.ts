@@ -58,14 +58,14 @@ export async function main(input: Input) {
       publishToCratesIo(input, input.repo, input.branch);
     }
 
-    await cleanup(input, registry);
+    cleanup(input, registry);
   } catch (error) {
-    await cleanup(input, registry);
+    cleanup(input, registry);
     if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-export async function cleanup(input: Input, registry: estuary.Estuary) {
+export function cleanup(input: Input, registry: estuary.Estuary) {
   if (!input.liveRun) {
     core.info(`Killing estuary process (${registry.proc.pid})`);
     try {
@@ -76,8 +76,6 @@ export async function cleanup(input: Input, registry: estuary.Estuary) {
       }
     }
   }
-
-  await deleteRepos(input);
 }
 
 function clone(input: Input, repo: string, branch?: string): void {

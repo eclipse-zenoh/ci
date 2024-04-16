@@ -76,14 +76,7 @@ export async function main(input: Input) {
         }
       }
     }
-
-    cleanup();
   } catch (error) {
-    cleanup();
     if (error instanceof Error) core.setFailed(error.message);
   }
-}
-
-export function cleanup() {
-  sh(`rm -r *`);
 }
