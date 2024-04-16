@@ -42,11 +42,12 @@ export async function main(input: Input) {
       GH_TOKEN: input.githubToken,
     };
 
-    const releaseTagsRaw = sh(`gh release list --repo ${input.repo} --exclude-drafts --order desc --json tagName`);
-    const releaseTags = JSON.parse(releaseTagsRaw) as GitHubRelease[];
-    // NOTE: We use compute the latest release (or pre-release) and use its tag name as the starting
-    // tag for the next release.
-    const latestRelease = releaseTags.at(0);
+    const releasesRaw =
+      // NOTE: We use compute the latest release (or pre-release) and use its tag name as the
+      // starting tag for the next release.
+      sh(`gh release list --repo ${input.repo} --exclude-drafts --order desc --json tagName`, { env });
+    const releases = JSON.parse(releasesRaw) as GitHubRelease[];
+    const releaseLatest = releases.at(0);
 
     if (input.liveRun) {
       const command = ["gh", "release", "create"];
@@ -54,8 +55,8 @@ export async function main(input: Input) {
       command.push("--target", input.branch);
       command.push("--verify-tag");
       command.push("--generate-notes");
-      if (latestRelease != undefined) {
-        command.push("--notes-start-tag", latestRelease.tagName);
+      if (releaseLatest != undefined) {
+        command.push("--notes-start-tag", releaseLatest.tagName);
       }
       sh(command.join(" "), { env });
     }
