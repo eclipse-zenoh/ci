@@ -82374,15 +82374,15 @@ async function main(input) {
             }
             publishToCratesIo(input, input.repo, input.branch);
         }
-        cleanup(input, registry);
+        await cleanup(input, registry);
     }
     catch (error) {
-        cleanup(input, registry);
+        await cleanup(input, registry);
         if (error instanceof Error)
             lib_core.setFailed(error.message);
     }
 }
-function cleanup(input, registry) {
+async function cleanup(input, registry) {
     if (!input.liveRun) {
         lib_core.info(`Killing estuary process (${registry.proc.pid})`);
         try {
@@ -82394,6 +82394,7 @@ function cleanup(input, registry) {
             }
         }
     }
+    await deleteRepos(input);
 }
 function clone(input, repo, branch) {
     const remote = `https://${input.githubToken}@github.com/${repo}.git`;

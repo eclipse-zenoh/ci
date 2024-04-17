@@ -80850,7 +80850,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 __nccwpck_require__.r(__webpack_exports__);
 /* harmony import */ var _bump_crates__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1033);
 
-await (0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .main */ .D)((0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .c)());
+await (0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_bump_crates__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
@@ -80864,12 +80864,16 @@ __webpack_async_result__();
 
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
-  "D": () => (/* binding */ main),
-  "c": () => (/* binding */ setup)
+  "DH": () => (/* binding */ main),
+  "cY": () => (/* binding */ setup)
 });
+
+// UNUSED EXPORTS: cleanup
 
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(1017);
+;// CONCATENATED MODULE: external "fs/promises"
+const promises_namespaceObject = require("fs/promises");
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var lib_core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: external "child_process"
@@ -80915,8 +80919,6 @@ function command_sh(cmd, options) {
     return returns.stdout;
 }
 
-;// CONCATENATED MODULE: external "fs/promises"
-const promises_namespaceObject = require("fs/promises");
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(2037);
 // EXTERNAL MODULE: ./node_modules/@actions/cache/lib/cache.js
@@ -82309,6 +82311,7 @@ async function dumpTOML(path, obj) {
 
 
 
+
 function setup() {
     const version = lib_core.getInput("version", { required: true });
     const branch = lib_core.getInput("branch", { required: true });
@@ -82359,11 +82362,18 @@ async function main(input) {
         command_sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
         command_sh("git log -10", { cwd: repo });
         command_sh("git show-ref --tags", { cwd: repo });
+        await cleanup(input);
     }
     catch (error) {
+        await cleanup(input);
         if (error instanceof Error)
             lib_core.setFailed(error.message);
     }
+}
+async function cleanup(input) {
+    const repo = input.repo.split("/")[1];
+    lib_core.info(`Deleting repository clone ${repo}`);
+    await (0,promises_namespaceObject.rm)(repo, { recursive: true, force: true });
 }
 
 

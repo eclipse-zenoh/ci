@@ -120,7 +120,14 @@ export async function main(input: Input) {
         sh(`scp -v -o StrictHostKeyChecking=no -r ${files} ${debianRepo}`, { env });
       });
     }
+
+    cleanup();
   } catch (error) {
+    cleanup();
     if (error instanceof Error) core.setFailed(error.message);
   }
+}
+
+export function cleanup() {
+  sh(`sudo rm ${sourcesListDir}/${sourcesListName}`, { check: false });
 }
