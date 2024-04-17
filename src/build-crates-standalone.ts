@@ -59,7 +59,11 @@ export async function main(input: Input) {
     await cargo.build(repoPath, input.target);
 
     const output = artifactName(repoName, input.version, input.target);
-    await zip.fromDirectory(output, path.join(repoPath, "target", input.target, "release"), input.artifactRegExp);
+    await zip.fromDirectory(
+      path.join(process.cwd(), output),
+      path.join(repoPath, "target", input.target, "release"),
+      input.artifactRegExp,
+    );
 
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
