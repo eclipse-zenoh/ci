@@ -1,17 +1,19 @@
 import * as fs from "fs/promises";
 import * as os from "os";
-import * as path from "path";
 
 import { sh } from "./command";
 
+/**
+ * Create a ZIP archive archive from a directory.
+ *
+ * @param output Absolute path to the output ZIP archive name.
+ * @param dir Directory containing files to add to the archive.
+ * @param pattern Pattern of files to be added to the archive.
+ */
 export async function fromDirectory(output: string, dir: string, pattern: RegExp) {
   const dirents = await fs.readdir(dir, { withFileTypes: true });
-  const files = dirents.filter(d => pattern.test(d.name)).map(d => path.resolve(path.join(d.path, d.name)));
+  const files = dirents.filter(d => pattern.test(d.name)).map(d => d.name);
 
-  fromFiles(output, ...files);
-}
-
-export function fromFiles(output: string, ...files: string[]) {
   if (files.length === 0) {
     // NOTE: If the files array is empty, 7-Zip will scan the current directory
     // for files and directories to add to the archive, while Info-ZIP will
@@ -21,8 +23,8 @@ export function fromFiles(output: string, ...files: string[]) {
 
   const platform = os.platform();
   if (platform == "linux" || platform == "darwin") {
-    sh(`zip --verbose --junk-paths ${output} ${files.join(" ")}`);
+    sh(`zip --verbose --recurse-paths ${output} ${files.join(" ")}`, { cwd: dir });
   } else if (os.platform() == "win32") {
-    sh(`7z -y a ${output} ${files.join(" ")}`);
+    sh(`7z -y -r a ${output} ${files.join(" ")}`, { cwd: dir });
   }
 }

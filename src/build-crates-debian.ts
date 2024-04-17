@@ -65,7 +65,11 @@ export async function main(input: Input) {
     await cargo.buildDebian(repo, input.target, input.version);
 
     const output = artifactName(repo, input.version, input.target);
-    await zip.fromDirectory(output, path.join(repo, "target", input.target, "debian"), /.*deb/);
+    await zip.fromDirectory(
+      path.join(process.cwd(), output),
+      path.join(repo, "target", input.target, "debian"),
+      /.*deb/,
+    );
 
     const { id } = await artifact.uploadArtifact(output, [output], process.cwd());
     core.setOutput("artifact-id", id);
