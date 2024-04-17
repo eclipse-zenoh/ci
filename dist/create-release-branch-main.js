@@ -24711,26 +24711,30 @@ module.exports = {
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _create_release_branch__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(5733);
+/* harmony import */ var _create_release_branch__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1712);
 
-await (0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .main */ .D)((0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .c)());
+await (0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
-/***/ 5733:
+/***/ 1712:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
 
 // EXPORTS
 __nccwpck_require__.d(__webpack_exports__, {
-  "D": () => (/* binding */ main),
-  "c": () => (/* binding */ setup)
+  "DH": () => (/* binding */ main),
+  "cY": () => (/* binding */ setup)
 });
 
+// UNUSED EXPORTS: cleanup
+
+;// CONCATENATED MODULE: external "fs/promises"
+const promises_namespaceObject = require("fs/promises");
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
 ;// CONCATENATED MODULE: external "child_process"
@@ -24779,6 +24783,7 @@ function sh(cmd, options) {
 ;// CONCATENATED MODULE: ./src/create-release-branch.ts
 
 
+
 const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
 function setup() {
     const version = core.getInput("version");
@@ -24794,7 +24799,7 @@ function setup() {
         dryRunHistorySize: dryRunHistorySize == "" ? DEFAULT_DRY_RUN_HISTORY_SIZE : Number(dryRunHistorySize),
     };
 }
-function main(input) {
+async function main(input) {
     try {
         const repo = input.repo.split("/")[1];
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
@@ -24818,11 +24823,18 @@ function main(input) {
         }
         sh(`git switch --force-create ${branch}`, { cwd: repo });
         sh(`git push --force ${remote} ${branch}`, { cwd: repo });
+        await cleanup(input);
     }
     catch (error) {
+        await cleanup(input);
         if (error instanceof Error)
             core.setFailed(error.message);
     }
+}
+async function cleanup(input) {
+    const repo = input.repo.split("/")[1];
+    core.info(`Deleting repository ${repo}`);
+    await (0,promises_namespaceObject.rm)(repo, { recursive: true, force: true });
 }
 
 
