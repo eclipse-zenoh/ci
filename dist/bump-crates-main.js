@@ -81148,7 +81148,7 @@ async function setRegistry(path, pattern, registry) {
  */
 async function configRegistry(path, name, index) {
     const configPath = `${path}/.cargo/config.toml`;
-    await toml.set(configPath, ["registries", "index", name], index);
+    await toml.set(configPath, ["registries", name, "index"], index);
 }
 /**
  * Returns a list of all workspace packages which contain Debian package metadata.
