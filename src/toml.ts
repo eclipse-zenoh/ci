@@ -1,18 +1,16 @@
 import * as fs from "fs/promises";
 
-import * as core from "@actions/core";
-
 import { sh } from "./command";
 import * as cargo from "./cargo";
 
 export class TOML {
   constructor() {
-    cargo
-      .installBinaryCached("toml-cli2")
-      .then(() => core.info("Successfully installed toml-cli2"))
-      .catch(reason => {
-        throw new Error(`Could not install toml-cli2: ${reason}`);
-      });
+    throw new Error("Use the `init` static method to construct this class");
+  }
+
+  static async init(): Promise<TOML> {
+    await cargo.installBinaryCached("toml-cli2");
+    return new TOML();
   }
 
   get(path: string, key?: string[]): Record<string, unknown> {

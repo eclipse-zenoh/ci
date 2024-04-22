@@ -11,7 +11,7 @@ import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
 import { TOML } from "../src/toml";
 
-const toml = new TOML();
+const toml = await TOML.init();
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
