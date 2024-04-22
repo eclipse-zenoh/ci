@@ -1,15 +1,16 @@
 import * as fs from "fs/promises";
+import path from "path";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
-import * as toml from "smol-toml";
 
 import * as cargo from "./cargo";
 import { sh } from "./command";
 import * as zip from "./zip";
-import path from "path";
+import { TOML } from "./toml";
 
 const artifact = new DefaultArtifactClient();
+const toml = new TOML();
 
 export type Input = {
   repo: string;
@@ -44,8 +45,7 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
     sh(`git clone --recursive --branch ${input.branch} --single-branch ${remote}`);
 
-    const crossContents = await fs.readFile(path.join(repo, "Cross.toml"), "utf-8");
-    const crossManifest = toml.parse(crossContents) as CrossManifest;
+    const crossManifest = toml.get(path.join(repo, "Cross.toml")) as CrossManifest;
 
     sh(`rustup target add ${input.target}`, { cwd: repo });
 
@@ -59,10 +59,10 @@ export async function main(input: Input) {
       });
     }
 
-    const packages = await cargo.packagesDebian(repo);
+    const packages = cargo.packagesDebian(repo);
     core.info(`Building ${packages.map(p => p.name).join(", ")}`);
 
-    await cargo.buildDebian(repo, input.target, input.version);
+    cargo.buildDebian(repo, input.target, input.version);
 
     const output = artifactName(repo, input.version, input.target);
     await zip.fromDirectory(

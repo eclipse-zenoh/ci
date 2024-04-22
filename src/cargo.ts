@@ -4,10 +4,12 @@ import { join } from "path";
 
 import * as core from "@actions/core";
 import * as cache from "@actions/cache";
-import * as toml from "smol-toml";
 
+import { TOML } from "./toml";
 import { sh } from "./command";
 import { config } from "./config";
+
+const toml = new TOML();
 
 export type Package = {
   name: string;
@@ -136,13 +138,12 @@ type CargoManifest = {
 export async function bump(path: string, version: string) {
   core.startGroup(`Bumping package versions in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
-  const manifestRaw = await loadTOML(manifestPath);
-  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+  const manifestRaw = toml.get(manifestPath);
 
-  if (typeof manifest.package.version == "string") {
-    manifest.package.version = version;
-
-    await dumpTOML(manifestPath, manifestRaw);
+  if ("workspace" in manifestRaw) {
+    await toml.set(manifestPath, ["workspace", "package", "version"], version);
+  } else {
+    await toml.set(manifestPath, ["package", "version"], version);
   }
 
   core.endGroup();
@@ -167,28 +168,29 @@ export async function bump(path: string, version: string) {
 export async function bumpDependencies(path: string, pattern: RegExp, version: string, branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   const manifestPath = `${path}/Cargo.toml`;
-  const manifestRaw = await loadTOML(manifestPath);
-  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+  const manifestRaw = toml.get(manifestPath);
 
-  let changed = false;
+  let manifest: CargoManifest;
+  let prefix: string[];
+  if ("workspace" in manifestRaw) {
+    prefix = ["workspace"];
+    manifest = manifestRaw["manifest"] as CargoManifest;
+  } else {
+    prefix = [];
+    manifest = manifestRaw as CargoManifest;
+  }
+
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
-      const table = manifest.dependencies[dep] as CargoManifestDependencyTable;
-      table.version = version;
+      await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
       if (branch != undefined) {
-        table.branch = branch;
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), version);
       }
-      changed = true;
     }
   }
 
-  if (changed) {
-    await dumpTOML(manifestPath, manifestRaw);
-  }
-
   for (const package_ of packages(path)) {
-    const manifestRaw = await loadTOML(package_.manifestPath);
-    const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+    const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
     if (
       "metadata" in manifest.package &&
@@ -200,9 +202,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
       const deb = manifest.package.metadata.deb;
       const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-      deb.depends = depends;
-
-      await dumpTOML(package_.manifestPath, manifestRaw);
+      await toml.set(manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
   }
 
@@ -220,24 +220,27 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
 export async function setRegistry(path: string, pattern: RegExp, registry: string): Promise<void> {
   core.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
   const manifestPath = `${path}/Cargo.toml`;
-  const manifestRaw = await loadTOML(manifestPath);
-  const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
+  const manifestRaw = toml.get(manifestPath);
 
-  let changed = false;
+  let manifest: CargoManifest;
+  let prefix: string[];
+  if ("workspace" in manifestRaw) {
+    prefix = ["workspace"];
+    manifest = manifestRaw["manifest"] as CargoManifest;
+  } else {
+    prefix = [];
+    manifest = manifestRaw as CargoManifest;
+  }
+
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
-      const table = manifest.dependencies[dep] as CargoManifestDependencyTable;
-      table.registry = registry;
+      await toml.set(manifestPath, prefix.concat("dependencies", dep, "registry"), registry);
       // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
-      delete table.git;
-      delete table.branch;
-      changed = true;
+      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
+      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
     }
   }
 
-  if (changed) {
-    await dumpTOML(manifestPath, manifestRaw);
-  }
   core.endGroup();
 }
 
@@ -249,26 +252,18 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
  */
 export async function configRegistry(path: string, name: string, index: string) {
   const configPath = `${path}/.cargo/config.toml`;
-  const configRaw = await loadTOML(configPath);
-  const config = configRaw;
-  config.registries = {
-    [name]: {
-      index,
-    },
-  };
-  await dumpTOML(configPath, config);
+  await toml.set(configPath, ["registries", name], index);
 }
 
 /**
  * Returns a list of all workspace packages which contain Debian package metadata.
  * @param path Path to the Cargo workspace.
  */
-export async function packagesDebian(path: string): Promise<Package[]> {
+export function packagesDebian(path: string): Package[] {
   const result = [] as Package[];
 
   for (const package_ of packages(path)) {
-    const manifestRaw = await loadTOML(package_.manifestPath);
-
+    const manifestRaw = toml.get(package_.manifestPath);
     const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
     if ("metadata" in manifest.package && "deb" in manifest.package.metadata) {
@@ -311,7 +306,7 @@ type CrossManifest = {
 
 export async function build(path: string, target: string) {
   const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
-  const crossManifest = toml.parse(crossContents) as CrossManifest;
+  const crossManifest = toml.get(crossContents) as CrossManifest;
 
   sh(`rustup target add ${target}`, { cwd: path });
 
@@ -324,9 +319,9 @@ export function hostTarget(): string {
   return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
 
-export async function buildDebian(path: string, target: string, version: string) {
-  for (const package_ of await packagesDebian(path)) {
-    const manifest = (await loadTOML(package_.manifestPath)) as CargoManifest;
+export function buildDebian(path: string, target: string, version: string) {
+  for (const package_ of packagesDebian(path)) {
+    const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
     if ("variants" in manifest.package.metadata.deb) {
       for (const variant in manifest.package.metadata.deb.variants) {
@@ -353,13 +348,4 @@ export async function buildDebian(path: string, target: string, version: string)
       );
     }
   }
-}
-
-async function loadTOML(path: string): Promise<Record<string, toml.TomlPrimitive>> {
-  const contents = await fs.readFile(path, "utf-8");
-  return toml.parse(contents);
-}
-
-async function dumpTOML(path: string, obj: Record<string, toml.TomlPrimitive>) {
-  await fs.writeFile(path, toml.stringify(obj));
 }

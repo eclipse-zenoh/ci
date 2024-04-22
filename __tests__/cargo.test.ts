@@ -9,6 +9,9 @@ import * as https from "https";
 
 import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
+import { TOML } from "../src/toml";
+
+const toml = new TOML();
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
@@ -128,9 +131,24 @@ describe("cargo", () => {
     expect(order).toStrictEqual(expectedOrder);
   });
 
-  test("bump deps debian zenoh-kotlin", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "836d778a515939a469b7c6f05c36a63814e98050");
+  test("bump zenoh-kotlin", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681");
 
-    await cargo.bumpDebianDependencies(join(tmp, "zenoh-jni"), /zenoh.*/g, "1.2.3-beta.0");
+    const version = "1.2.3-beta.1";
+    const path = join(tmp, "zenoh-jni");
+    await cargo.bump(path, version);
+
+    expect(toml.get(`${path}/Cargo.toml`, ["package", "version"])).toEqual(version);
+  });
+
+  test("bump deps zenoh-kotlin", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681");
+
+    const version = "1.2.3-beta.1";
+    const path = join(tmp, "zenoh-jni");
+    await cargo.bumpDependencies(path, /zenoh.*/, version);
+
+    expect(toml.get(`${path}/Cargo.toml`, ["dependencies", "zenoh", "version"])).toEqual(version);
+    expect(toml.get(`${path}/Cargo.toml`, ["dependencies", "zenoh-ext", "version"])).toEqual(version);
   });
 });
