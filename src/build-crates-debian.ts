@@ -10,7 +10,7 @@ import * as zip from "./zip";
 import { TOML } from "./toml";
 
 const artifact = new DefaultArtifactClient();
-const toml = new TOML();
+const toml = await TOML.init();
 
 export type Input = {
   repo: string;
