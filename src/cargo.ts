@@ -174,7 +174,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   let prefix: string[];
   if ("workspace" in manifestRaw) {
     prefix = ["workspace"];
-    manifest = manifestRaw["manifest"] as CargoManifest;
+    manifest = manifestRaw["workspace"] as CargoManifest;
   } else {
     prefix = [];
     manifest = manifestRaw as CargoManifest;
@@ -226,7 +226,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
   let prefix: string[];
   if ("workspace" in manifestRaw) {
     prefix = ["workspace"];
-    manifest = manifestRaw["manifest"] as CargoManifest;
+    manifest = manifestRaw["workspace"] as CargoManifest;
   } else {
     prefix = [];
     manifest = manifestRaw as CargoManifest;

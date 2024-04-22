@@ -80970,7 +80970,7 @@ async function bumpDependencies(path, pattern, version, branch) {
     let prefix;
     if ("workspace" in manifestRaw) {
         prefix = ["workspace"];
-        manifest = manifestRaw["manifest"];
+        manifest = manifestRaw["workspace"];
     }
     else {
         prefix = [];
@@ -81015,7 +81015,7 @@ async function setRegistry(path, pattern, registry) {
     let prefix;
     if ("workspace" in manifestRaw) {
         prefix = ["workspace"];
-        manifest = manifestRaw["manifest"];
+        manifest = manifestRaw["workspace"];
     }
     else {
         prefix = [];
