@@ -251,7 +251,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
  */
 export async function configRegistry(path: string, name: string, index: string) {
   const configPath = `${path}/.cargo/config.toml`;
-  await toml.set(configPath, ["registries", "index", name], index);
+  await toml.set(configPath, ["registries", name, "index"], index);
 }
 
 /**
