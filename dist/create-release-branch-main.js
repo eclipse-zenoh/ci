@@ -24795,7 +24795,7 @@ function exec(program, args, options) {
             ...options.env,
         },
         stdio: "pipe",
-        shell: true,
+        shell: false,
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,

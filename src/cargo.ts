@@ -202,7 +202,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
       const deb = manifest.package.metadata.deb;
       const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-      await toml.set(manifestPath, ["package", "metadata", "deb", "depends"], depends);
+      await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
   }
 
