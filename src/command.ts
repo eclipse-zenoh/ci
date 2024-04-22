@@ -72,7 +72,7 @@ export function exec(program: string, args: string[], options?: CommandOptions):
       ...options.env,
     },
     stdio: "pipe",
-    shell: true,
+    shell: false,
     encoding: "utf-8",
     cwd: options.cwd,
     input: options.input,

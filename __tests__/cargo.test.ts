@@ -13,6 +13,9 @@ import { TOML } from "../src/toml";
 
 const toml = await TOML.init();
 
+const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
+const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
+
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
 
@@ -89,32 +92,35 @@ describe("cargo", () => {
   });
 
   test("list packages zenoh", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", "8cd786f2192fd2aa7387432ae93cdd78f5db1df2");
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
     const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
     await rm(tmp, { recursive: true, force: true });
     const expectedOrder = [
       "zenoh-collections",
       "zenoh-result",
-      "zenoh-core",
       "zenoh-crypto",
       "zenoh-buffers",
       "zenoh-keyexpr",
       "zenoh-macros",
       "zenoh-protocol",
-      "zenoh-util",
-      "zenoh-plugin-trait",
+      "zenoh-runtime",
       "zenoh-shm",
+      "zenoh-core",
       "zenoh-sync",
+      "zenoh-util",
+      "zenoh-task",
+      "zenoh-plugin-trait",
       "zenoh-codec",
       "zenoh-link-commons",
-      "zenoh-link-tcp",
+      "zenoh-link-serial",
       "zenoh-link-udp",
       "zenoh-link-unixsock_stream",
+      "zenoh-link-ws",
       "zenoh-config",
       "zenoh-link-quic",
       "zenoh-link-tls",
-      "zenoh-link-ws",
-      "zenoh-link-serial",
+      "zenoh-link-vsock",
+      "zenoh-link-tcp",
       "zenoh-link-unixpipe",
       "zenoh-link",
       "zenoh-transport",
@@ -124,6 +130,7 @@ describe("cargo", () => {
       "zenohd",
       "zenoh-ext",
       "zenoh-plugin-example",
+      "zenoh-ext-examples",
       "zenoh-examples",
       "zenoh-plugin-storage-manager",
       "zenoh-backend-example",
@@ -132,7 +139,7 @@ describe("cargo", () => {
   });
 
   test("bump zenoh-kotlin", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681");
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
 
     const version = "1.2.3-beta.1";
     const path = join(tmp, "zenoh-jni");
@@ -142,7 +149,7 @@ describe("cargo", () => {
   });
 
   test("bump deps zenoh-kotlin", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681");
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
 
     const version = "1.2.3-beta.1";
     const path = join(tmp, "zenoh-jni");
@@ -150,5 +157,17 @@ describe("cargo", () => {
 
     expect(toml.get(`${path}/Cargo.toml`, ["dependencies", "zenoh", "version"])).toEqual(version);
     expect(toml.get(`${path}/Cargo.toml`, ["dependencies", "zenoh-ext", "version"])).toEqual(version);
+  });
+
+  test("bump deps zenoh", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
+
+    const version = "1.2.3-beta.1";
+    await cargo.bumpDependencies(tmp, /zenoh.*/, version);
+
+    expect(toml.get(`${tmp}/Cargo.toml`, ["workspace", "dependencies", "zenoh", "version"])).toEqual(version);
+    expect(toml.get(`${tmp}/zenoh/Cargo.toml`, ["package", "metadata", "deb", "depends"])).toEqual(
+      `zenohd (=${version}), zenoh-plugin-rest (=${version}), zenoh-plugin-storage-manager (=${version})`,
+    );
   });
 });

@@ -81106,7 +81106,7 @@ async function bumpDependencies(path, pattern, version, branch) {
             const deb = manifest.package.metadata.deb;
             const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
             _actions_core__WEBPACK_IMPORTED_MODULE_3__.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
-            await toml.set(manifestPath, ["package", "metadata", "deb", "depends"], depends);
+            await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
         }
     }
     _actions_core__WEBPACK_IMPORTED_MODULE_3__.endGroup();
@@ -81300,7 +81300,7 @@ function exec(program, args, options) {
             ...options.env,
         },
         stdio: "pipe",
-        shell: true,
+        shell: false,
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,
