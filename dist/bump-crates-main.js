@@ -81238,6 +81238,7 @@ __webpack_async_result__();
 
 "use strict";
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "G": () => (/* binding */ exec),
 /* harmony export */   "sh": () => (/* binding */ sh)
 /* harmony export */ });
 /* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2081);
@@ -81280,6 +81281,42 @@ function sh(cmd, options) {
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.endGroup();
     if (options.check && returns.status != 0) {
         throw new Error(`\`${cmd}\` failed with status code ${returns.status}:\n${returns.stderr}`);
+    }
+    return returns.stdout;
+}
+function exec(program, args, options) {
+    options = options != null ? options : {};
+    options.env = options.env != null ? options.env : {};
+    options.cwd = options.cwd != null ? options.cwd : ".";
+    options.check = options.check != null ? options.check : true;
+    options.input = options.input != null ? options.input : "";
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup(`\u001b[1m\u001b[35m${program}(${args.join(", ")})\u001b[0m`);
+    const returns = (0,child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync)(program, args, {
+        // NOTE: Environment variables defined in `options.env` take precedence over
+        // the parent process's environment, thus the destructuring is order is
+        // important
+        env: {
+            ...process.env,
+            ...options.env,
+        },
+        stdio: "pipe",
+        shell: true,
+        encoding: "utf-8",
+        cwd: options.cwd,
+        input: options.input,
+        maxBuffer: MAX_BUFFER,
+    });
+    if (returns.stdout != "") {
+        _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstdout:\u001b[0m`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stdout);
+    }
+    if (returns.stderr != "") {
+        _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstderr:\u001b[0m`);
+        _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stderr);
+    }
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.endGroup();
+    if (options.check && returns.status != 0) {
+        throw new Error(`\`${program}(${args.join(", ")})\` failed with status code ${returns.status}:\n${returns.stderr}`);
     }
     return returns.stdout;
 }
@@ -81337,15 +81374,15 @@ class TOML {
     }
     get(path, key) {
         const query = key == undefined ? "." : key.join(".");
-        return JSON.parse((0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)(`toml get ${path} ${query}`));
+        return JSON.parse((0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["get", path, query]));
     }
     async set(path, key, value) {
         const query = key.join(".");
-        await fs_promises__WEBPACK_IMPORTED_MODULE_0__.writeFile(path, (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)(`toml set ${path} ${query} ${value}`));
+        await fs_promises__WEBPACK_IMPORTED_MODULE_0__.writeFile(path, (0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["set", path, query, value]));
     }
     async unset(path, key) {
         const query = key.join(".");
-        await fs_promises__WEBPACK_IMPORTED_MODULE_0__.writeFile(path, (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)(`toml unset ${path} ${query}`));
+        await fs_promises__WEBPACK_IMPORTED_MODULE_0__.writeFile(path, (0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["unset", path, query]));
     }
 }
 

@@ -24736,7 +24736,7 @@ __nccwpck_require__.d(__webpack_exports__, {
 ;// CONCATENATED MODULE: external "fs/promises"
 const promises_namespaceObject = require("fs/promises");
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
+var lib_core = __nccwpck_require__(2186);
 ;// CONCATENATED MODULE: external "child_process"
 const external_child_process_namespaceObject = require("child_process");
 ;// CONCATENATED MODULE: ./src/command.ts
@@ -24749,8 +24749,44 @@ function sh(cmd, options) {
     options.cwd = options.cwd != null ? options.cwd : ".";
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
-    core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
+    lib_core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,external_child_process_namespaceObject.spawnSync)(cmd, {
+        // NOTE: Environment variables defined in `options.env` take precedence over
+        // the parent process's environment, thus the destructuring is order is
+        // important
+        env: {
+            ...process.env,
+            ...options.env,
+        },
+        stdio: "pipe",
+        shell: true,
+        encoding: "utf-8",
+        cwd: options.cwd,
+        input: options.input,
+        maxBuffer: MAX_BUFFER,
+    });
+    if (returns.stdout != "") {
+        lib_core.info(`\u001b[1mstdout:\u001b[0m`);
+        lib_core.info(returns.stdout);
+    }
+    if (returns.stderr != "") {
+        lib_core.info(`\u001b[1mstderr:\u001b[0m`);
+        lib_core.info(returns.stderr);
+    }
+    lib_core.endGroup();
+    if (options.check && returns.status != 0) {
+        throw new Error(`\`${cmd}\` failed with status code ${returns.status}:\n${returns.stderr}`);
+    }
+    return returns.stdout;
+}
+function exec(program, args, options) {
+    options = options != null ? options : {};
+    options.env = options.env != null ? options.env : {};
+    options.cwd = options.cwd != null ? options.cwd : ".";
+    options.check = options.check != null ? options.check : true;
+    options.input = options.input != null ? options.input : "";
+    core.startGroup(`\u001b[1m\u001b[35m${program}(${args.join(", ")})\u001b[0m`);
+    const returns = spawnSync(program, args, {
         // NOTE: Environment variables defined in `options.env` take precedence over
         // the parent process's environment, thus the destructuring is order is
         // important
@@ -24775,7 +24811,7 @@ function sh(cmd, options) {
     }
     core.endGroup();
     if (options.check && returns.status != 0) {
-        throw new Error(`\`${cmd}\` failed with status code ${returns.status}:\n${returns.stderr}`);
+        throw new Error(`\`${program}(${args.join(", ")})\` failed with status code ${returns.status}:\n${returns.stderr}`);
     }
     return returns.stdout;
 }
@@ -24786,11 +24822,11 @@ function sh(cmd, options) {
 
 const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
 function setup() {
-    const version = core.getInput("version");
-    const liveRun = core.getBooleanInput("live-run", { required: true });
-    const repo = core.getInput("repo", { required: true });
-    const githubToken = core.getInput("github-token", { required: true });
-    const dryRunHistorySize = core.getInput("dry-run-history-size");
+    const version = lib_core.getInput("version");
+    const liveRun = lib_core.getBooleanInput("live-run", { required: true });
+    const repo = lib_core.getInput("repo", { required: true });
+    const githubToken = lib_core.getInput("github-token", { required: true });
+    const dryRunHistorySize = lib_core.getInput("dry-run-history-size");
     return {
         version: version === "" ? undefined : version,
         liveRun,
@@ -24805,15 +24841,15 @@ async function main(input) {
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         sh(`git clone --recursive ${remote}`);
         const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
-        core.setOutput("version", version);
+        lib_core.setOutput("version", version);
         let branch;
         if (input.liveRun) {
             branch = `release/${version}`;
-            core.setOutput("branch", branch);
+            lib_core.setOutput("branch", branch);
         }
         else {
             branch = `release/dry-run/${version}`;
-            core.setOutput("branch", branch);
+            lib_core.setOutput("branch", branch);
             const refsPattern = "refs/remotes/origin/release/dry-run";
             const refsRaw = sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
             const refs = refsRaw.split("\n");
@@ -24828,12 +24864,12 @@ async function main(input) {
     catch (error) {
         await cleanup(input);
         if (error instanceof Error)
-            core.setFailed(error.message);
+            lib_core.setFailed(error.message);
     }
 }
 async function cleanup(input) {
     const repo = input.repo.split("/")[1];
-    core.info(`Deleting repository ${repo}`);
+    lib_core.info(`Deleting repository ${repo}`);
     await (0,promises_namespaceObject.rm)(repo, { recursive: true, force: true });
 }
 

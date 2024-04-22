@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 
-import { sh } from "./command";
+import { exec } from "./command";
 import * as cargo from "./cargo";
 
 export class TOML {
@@ -11,16 +11,16 @@ export class TOML {
 
   get(path: string, key?: string[]): Record<string, unknown> {
     const query = key == undefined ? "." : key.join(".");
-    return JSON.parse(sh(`toml get ${path} ${query}`)) as Record<string, unknown>;
+    return JSON.parse(exec("toml", ["get", path, query])) as Record<string, unknown>;
   }
 
   async set(path: string, key: string[], value: string) {
     const query = key.join(".");
-    await fs.writeFile(path, sh(`toml set ${path} ${query} ${value}`));
+    await fs.writeFile(path, exec("toml", ["set", path, query, value]));
   }
 
   async unset(path: string, key: string[]) {
     const query = key.join(".");
-    await fs.writeFile(path, sh(`toml unset ${path} ${query}`));
+    await fs.writeFile(path, exec("toml", ["unset", path, query]));
   }
 }
