@@ -80854,21 +80854,19 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered)
 /* harmony export */ });
 /* unused harmony exports packages, bump, bumpDependencies, packagesDebian, build, hostTarget, buildDebian */
-/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(3292);
-/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2037);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1017);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(7799);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(9839);
-/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(8121);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(98);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_5__]);
-_toml__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(7799);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(9839);
+/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8121);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_4__]);
+_toml__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
 
 
@@ -80876,15 +80874,14 @@ _toml__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (awa
 
 
 
-
-const toml = await _toml__WEBPACK_IMPORTED_MODULE_5__/* .TOML.init */ .f.init();
+const toml = await _toml__WEBPACK_IMPORTED_MODULE_4__/* .TOML.init */ .f.init();
 /**
  * Uses the cargo-metadata command to list all packages in a Cargo workspace or crate.
  * @param path Path to the Cargo workspace or crate.
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 function packages(path) {
-    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
+    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
     const metadata = JSON.parse(metadataContents);
     const result = [];
     for (const elem of metadata.packages) {
@@ -81008,7 +81005,7 @@ async function bumpDependencies(path, pattern, version, branch) {
  * @param registry The name of the Cargo alternative registry.
  */
 async function setRegistry(path, pattern, registry) {
-    _actions_core__WEBPACK_IMPORTED_MODULE_3__.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
+    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     let manifest;
@@ -81029,7 +81026,7 @@ async function setRegistry(path, pattern, registry) {
             await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
         }
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_3__.endGroup();
+    _actions_core__WEBPACK_IMPORTED_MODULE_2__.endGroup();
 }
 /**
  * Stores Cargo registry configuration in `.cargo/config.toml`.
@@ -81039,7 +81036,7 @@ async function setRegistry(path, pattern, registry) {
  */
 async function configRegistry(path, name, index) {
     const configPath = `${path}/.cargo/config.toml`;
-    await toml.set(configPath, ["registries", name], index);
+    await toml.set(configPath, ["registries", "index", name], index);
 }
 /**
  * Returns a list of all workspace packages which contain Debian package metadata.
@@ -81063,26 +81060,25 @@ function packagesDebian(path) {
  */
 async function installBinaryCached(name) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
-        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_2__.join)((0,os__WEBPACK_IMPORTED_MODULE_1__.homedir)(), ".cargo", "bin")];
-        const version = _config__WEBPACK_IMPORTED_MODULE_7__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${(0,os__WEBPACK_IMPORTED_MODULE_1__.platform)()}-${(0,os__WEBPACK_IMPORTED_MODULE_1__.arch)()}-${name}-${version}`;
+        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
+        const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
+        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
         // failure
-        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.restoreCache(paths, key);
+        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
         if (hit == undefined) {
-            (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name} --force`);
-            await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.saveCache(paths, key);
+            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
+            await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
         }
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name}`);
+        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
     }
 }
-async function build(path, target) {
-    const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
-    const crossManifest = toml.get(crossContents);
+function build(path, target) {
+    const crossManifest = toml.get(join(path, "Cross.toml"));
     sh(`rustup target add ${target}`, { cwd: path });
     const command = target in crossManifest.target ? ["cross"] : ["cargo"];
     command.push("build", "--release", "--bins", "--lib", "--target", target);
