@@ -81433,9 +81433,6 @@ _cargo__WEBPACK_IMPORTED_MODULE_2__ = (__webpack_async_dependencies__.then ? (aw
 
 
 class TOML {
-    constructor() {
-        throw new Error("Use the `init` static method to construct this class");
-    }
     static async init() {
         await _cargo__WEBPACK_IMPORTED_MODULE_2__/* .installBinaryCached */ .Mj("toml-cli2");
         return new TOML();

@@ -4,10 +4,6 @@ import { sh } from "./command";
 import * as cargo from "./cargo";
 
 export class TOML {
-  constructor() {
-    throw new Error("Use the `init` static method to construct this class");
-  }
-
   static async init(): Promise<TOML> {
     await cargo.installBinaryCached("toml-cli2");
     return new TOML();
