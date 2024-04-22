@@ -1,5 +1,4 @@
-import * as fs from "fs/promises";
-import { platform, arch, homedir } from "os";
+import * as os from "os";
 import { join } from "path";
 
 import * as core from "@actions/core";
@@ -252,7 +251,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
  */
 export async function configRegistry(path: string, name: string, index: string) {
   const configPath = `${path}/.cargo/config.toml`;
-  await toml.set(configPath, ["registries", name], index);
+  await toml.set(configPath, ["registries", "index", name], index);
 }
 
 /**
@@ -281,9 +280,9 @@ export function packagesDebian(path: string): Package[] {
  */
 export async function installBinaryCached(name: string) {
   if (process.env["GITHUB_ACTIONS"] != undefined) {
-    const paths = [join(homedir(), ".cargo", "bin")];
+    const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
-    const key = `${platform()}-${arch()}-${name}-${version}`;
+    const key = `${os.platform()}-${os.release()}-${os.arch()}-${name}-${version}`;
 
     // NOTE: We specify the Stable toolchain to override the current Rust
     // toolchain file in the current directory, as the caller can use this
@@ -304,9 +303,8 @@ type CrossManifest = {
   target: { [target: string]: { image: string } };
 };
 
-export async function build(path: string, target: string) {
-  const crossContents = await fs.readFile(join(path, "Cross.toml"), "utf-8");
-  const crossManifest = toml.get(crossContents) as CrossManifest;
+export function build(path: string, target: string) {
+  const crossManifest = toml.get(join(path, "Cross.toml")) as CrossManifest;
 
   sh(`rustup target add ${target}`, { cwd: path });
 
