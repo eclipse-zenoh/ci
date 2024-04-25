@@ -31,14 +31,14 @@ export function setup(): Input {
     repo,
     githubToken,
     unpublishedDepsRegExp:
-      unpublishedDepsPatterns == "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
-    unpublishedDepsRepos: unpublishedDepsRepos == "" ? [] : unpublishedDepsRepos.split("\n"),
+      unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
+    unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
   };
 }
 
 export async function main(input: Input) {
-  let registry: estuary.Estuary;
+  let registry: estuary.Estuary = undefined;
   try {
     registry = await estuary.spawn();
 
@@ -65,8 +65,8 @@ export async function main(input: Input) {
   }
 }
 
-export async function cleanup(input: Input, registry: estuary.Estuary) {
-  if (!input.liveRun) {
+export async function cleanup(input: Input, registry?: estuary.Estuary) {
+  if (registry !== undefined) {
     core.info(`Killing estuary process (${registry.proc.pid})`);
     try {
       process.kill(registry.proc.pid);
@@ -83,7 +83,7 @@ export async function cleanup(input: Input, registry: estuary.Estuary) {
 function clone(input: Input, repo: string, branch?: string): void {
   const remote = `https://${input.githubToken}@github.com/${repo}.git`;
 
-  if (branch == undefined) {
+  if (branch === undefined) {
     sh(`git clone --recursive ${remote}`);
   } else {
     sh(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
@@ -144,7 +144,7 @@ function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = fal
   };
 
   for (const package_ of cargo.packagesOrdered(path)) {
-    if (package_.publish == undefined || package_.publish) {
+    if (package_.publish === undefined || package_.publish) {
       const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
       if (allowDirty) {
         command.push("--allow-dirty");
