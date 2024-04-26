@@ -81344,13 +81344,13 @@ function setup() {
         branch,
         repo,
         githubToken,
-        unpublishedDepsRegExp: unpublishedDepsPatterns == "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
-        unpublishedDepsRepos: unpublishedDepsRepos == "" ? [] : unpublishedDepsRepos.split("\n"),
+        unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
+        unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
         cratesIoToken,
     };
 }
 async function main(input) {
-    let registry;
+    let registry = undefined;
     try {
         registry = await _estuary__WEBPACK_IMPORTED_MODULE_2__/* .spawn */ .C();
         for (const repo of input.unpublishedDepsRepos) {
@@ -81373,7 +81373,7 @@ async function main(input) {
     }
 }
 async function cleanup(input, registry) {
-    if (!input.liveRun) {
+    if (registry !== undefined) {
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Killing estuary process (${registry.proc.pid})`);
         try {
             process.kill(registry.proc.pid);
@@ -81388,7 +81388,7 @@ async function cleanup(input, registry) {
 }
 function clone(input, repo, branch) {
     const remote = `https://${input.githubToken}@github.com/${repo}.git`;
-    if (branch == undefined) {
+    if (branch === undefined) {
         (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git clone --recursive ${remote}`);
     }
     else {
@@ -81432,7 +81432,7 @@ function publish(path, env, allowDirty = false) {
         check: true,
     };
     for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
-        if (package_.publish == undefined || package_.publish) {
+        if (package_.publish === undefined || package_.publish) {
             const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");
