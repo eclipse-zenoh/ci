@@ -80977,7 +80977,7 @@ async function bumpDependencies(path, pattern, version, branch) {
         if (pattern.test(dep)) {
             await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
             if (branch != undefined) {
-                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), version);
+                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
             }
         }
     }
