@@ -80959,7 +80959,8 @@ async function bump(path, version) {
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
-async function bumpDependencies(path, pattern, version, branch) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function bumpDependencies(path, pattern, version, _branch) {
     core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
@@ -80976,9 +80977,15 @@ async function bumpDependencies(path, pattern, version, branch) {
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
             await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
-            if (branch != undefined) {
-                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
-            }
+            // FIXME(fuzzypixelz): Previously, we set the branch of the git source in dependencies,
+            // but as all dependencies are assumed to be on crates.io anyway, this is not necessary.
+            // Still, the API of all related actions/workflows should be updated to reflect this.
+            //
+            // if (branch != undefined) {
+            //   await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
+            // }
+            await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
+            await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
         }
     }
     for (const package_ of packages(path)) {
