@@ -74,6 +74,8 @@ runs:
         platforms: ${{ inputs.platforms }}
         push: ${{ inputs.live-run }}
         tags: ${{ inputs.tags }}
+        build-args: |
+          BINARY=${{ inputs.binary }}
         labels: |
           org.opencontainers.image.source=https://github.com/${{ inputs.repo }}
           org.opencontainers.image.licenses=${{ inputs.licenses }}
