@@ -183,7 +183,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
     if (pattern.test(dep)) {
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
       if (branch != undefined) {
-        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), version);
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
       }
     }
   }
