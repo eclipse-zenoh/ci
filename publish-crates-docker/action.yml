@@ -72,7 +72,7 @@ runs:
         context: ${{ steps.prepare.outputs.context }}
         file: ${{ github.action_path }}/Dockerfile
         platforms: ${{ inputs.platforms }}
-        push: ${{ inputs.live-run }}
+        push: true
         tags: |
           ${{ inputs.image }}:${{ version }}
           ${{ inputs.image }}:${{ inputs.live-run == 'true' && 'latest' || 'nightly' }}
