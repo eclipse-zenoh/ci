@@ -7,11 +7,7 @@ function setupAgent(): NodeJS.ProcessEnv {
   return Object.fromEntries([...commands.matchAll(/([A-Z_]+)=([^;]+);/g)].map(m => [m[1], m[2]]));
 }
 
-export async function withIdentity(
-  privateKey: string,
-  passphrase: string,
-  fn: (env: NodeJS.ProcessEnv) => void,
-) {
+export async function withIdentity(privateKey: string, passphrase: string, fn: (env: NodeJS.ProcessEnv) => void) {
   const env = setupAgent();
   const passphrasePath = "./.ssh_askpass";
   await fs.writeFile(passphrasePath, `echo '${passphrase}'`, { mode: fs.constants.S_IRWXU });

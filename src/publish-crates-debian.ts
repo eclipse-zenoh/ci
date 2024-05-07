@@ -34,7 +34,7 @@ export function setup(): Input {
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const installationTest = core.getBooleanInput("installation-test", { required: true });
-  const repo = core.getInput("repo", {required: true});
+  const repo = core.getInput("repo", { required: true });
 
   return {
     liveRun,
