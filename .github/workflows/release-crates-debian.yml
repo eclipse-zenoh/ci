@@ -70,3 +70,4 @@ jobs:
           ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          repo: ${{ inputs.repo }}

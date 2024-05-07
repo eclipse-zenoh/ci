@@ -23,6 +23,7 @@ export type Input = {
   sshPrivateKey: string;
   sshPassphrase: string;
   installationTest: boolean;
+  repo: string;
 };
 
 export function setup(): Input {
@@ -33,6 +34,7 @@ export function setup(): Input {
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const installationTest = core.getBooleanInput("installation-test", { required: true });
+  const repo = core.getInput("repo", {required: true});
 
   return {
     liveRun,
@@ -42,6 +44,7 @@ export function setup(): Input {
     sshPrivateKey,
     sshPassphrase,
     installationTest,
+    repo,
   };
 }
 
@@ -69,7 +72,7 @@ export async function main(input: Input) {
     }
 
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
-    const packagesPath = `.Packages-${input.version}`;
+    const packagesPath = `.Packages-${input.repo}-${input.version}`;
     const allPackagesPath = "Packages";
     const allPackagesGzippedPath = "Packages.gz";
 
