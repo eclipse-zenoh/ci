@@ -128,6 +128,7 @@ export async function main(input: Input) {
     }
 
     if (input.liveRun) {
+      sh(`git pull ${tapUrl} --rebase`, { cwd: tapPath });
       sh(`git push ${tapUrl}`, { cwd: tapPath });
     }
 
