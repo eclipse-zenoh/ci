@@ -74,7 +74,7 @@ runs:
         platforms: ${{ inputs.platforms }}
         push: true
         tags: |
-          ${{ inputs.image }}:${{ version }}
+          ${{ inputs.image }}:${{ inputs.version }}
           ${{ inputs.image }}:${{ inputs.live-run == 'true' && 'latest' || 'nightly' }}
         build-args: |
           BINARY=${{ inputs.binary }}
