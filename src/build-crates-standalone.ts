@@ -56,7 +56,7 @@ export async function main(input: Input) {
     input.version ??= git.describe(repoPath);
     input.target ??= cargo.hostTarget();
 
-    await cargo.build(repoPath, input.target);
+    cargo.build(repoPath, input.target);
 
     const output = artifactName(repoName, input.version, input.target);
     await zip.fromDirectory(
