@@ -24,7 +24,7 @@ on:
       platforms:
         type: string
         required: true
-      tags:
+      image:
         type: string
         required: true
       licenses:
@@ -57,7 +57,7 @@ on:
       platforms:
         type: string
         required: true
-      tags:
+      image:
         type: string
         required: true
       licenses:
@@ -99,7 +99,7 @@ jobs:
           files: ${{ inputs.files }}
           binary: ${{ inputs.binary }}
           platforms: ${{ inputs.platforms }}
-          tags: ${{ inputs.tags }}
+          image: ${{ inputs.image }}
           licenses: ${{ inputs.licenses }}
           username: ${{ secrets.DOCKER_COM_USERNAME }}
           password: ${{ secrets.DOCKER_COM_PASSWORD }}

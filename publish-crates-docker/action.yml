@@ -18,8 +18,8 @@ inputs:
   files:
     description: Files to be copied into the image
     required: true
-  tags:
-    description: List of Docker tags
+  image:
+    description: Name of Docker image
     required: true
   licenses:
     description: List of licenses
@@ -72,8 +72,10 @@ runs:
         context: ${{ steps.prepare.outputs.context }}
         file: ${{ github.action_path }}/Dockerfile
         platforms: ${{ inputs.platforms }}
-        push: ${{ inputs.live-run }}
-        tags: ${{ inputs.tags }}
+        push: true
+        tags: |
+          ${{ inputs.image }}:${{ version }}
+          ${{ inputs.image }}:${{ inputs.live-run == 'true' && 'latest' || 'nightly' }}
         build-args: |
           BINARY=${{ inputs.binary }}
         labels: |
