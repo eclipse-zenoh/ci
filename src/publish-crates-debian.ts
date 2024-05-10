@@ -71,8 +71,10 @@ export async function main(input: Input) {
       }
     }
 
+    // repo is actually owner/repo so we have to split it here to get only the git repo name
+    const gitRepo = input.repo.split("/")[1];
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
-    const packagesPath = `.Packages-${input.repo}-${input.version}`;
+    const packagesPath = `.Packages-${gitRepo}-${input.version}`;
     const allPackagesPath = "Packages";
     const allPackagesGzippedPath = "Packages.gz";
 
