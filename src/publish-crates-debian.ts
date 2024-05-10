@@ -34,7 +34,7 @@ export function setup(): Input {
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
   const installationTest = core.getBooleanInput("installation-test", { required: true });
-  const repo = core.getInput("repo", {required: true});
+  const repo = core.getInput("repo", { required: true });
 
   return {
     liveRun,
@@ -72,7 +72,7 @@ export async function main(input: Input) {
     }
 
     // repo is actually owner/repo so we have to split it here to get only the git repo name
-    const gitRepo = input.repo.split("/")[1]
+    const gitRepo = input.repo.split("/")[1];
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     const packagesPath = `.Packages-${gitRepo}-${input.version}`;
     const allPackagesPath = "Packages";
