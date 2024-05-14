@@ -9,4 +9,4 @@ jobs:
     steps:
       - run: gh pr view ${{ github.event.pull_request.number }} --json labels --repo ${{ github.repository }} | jq -e '.labels != []'
         env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          GH_TOKEN: ${{ github.token}}
