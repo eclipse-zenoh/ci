@@ -1,0 +1,13 @@
+name: Internal
+description: |
+  Pull request proposing an internal change that shouldn't show up in the changelog.
+labels: ["internal"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Describe the pull request"
+      description: |
+        A clear and concise description of the changes.
+    validations:
+      required: true

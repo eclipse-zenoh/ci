@@ -1,0 +1,13 @@
+name: Enhancement
+description: |
+  Pull request proposing an enhancement.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Describe the pull request"
+      description: |
+        A clear and concise description of the changes.
+    validations:
+      required: true

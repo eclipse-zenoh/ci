@@ -1,0 +1,13 @@
+name: Bug
+description: |
+  Pull request proposing a fix to a bug.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Describe the pull request"
+      description: |
+        A clear and concise description of the changes.
+    validations:
+      required: true
