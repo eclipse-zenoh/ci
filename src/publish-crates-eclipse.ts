@@ -51,21 +51,31 @@ export async function main(input: Input) {
       }
     };
 
+    const checksumFile = "sha256sums.txt";
+    const archiveDir = `${input.sshHostPath}/${input.version}`;
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
       if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
-        const archiveDir = `${input.sshHostPath}/${input.version}`;
 
-        core.info(`Uploading ${archive} to download.eclipse.org`);
+        // Write the sha256 checksum of the archive
+        sh(`sha256 ${archive} >> ${checksumFile}`);
         if (input.liveRun) {
+          core.info(`Uploading ${archive} to download.eclipse.org`);
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
             sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${archiveDir}`, { env });
             sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${input.sshHost}:${archiveDir}`, { env });
           });
         }
       }
+    }
+
+    if (input.liveRun) {
+      core.info(`Uploading ${checksumFile} to download.eclipse.org`);
+      await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
+        sh(`scp -v -o StrictHostKeyChecking=no -r ${checksumFile} ${input.sshHost}:${archiveDir}`, { env });
+      });
     }
 
     cleanup();
