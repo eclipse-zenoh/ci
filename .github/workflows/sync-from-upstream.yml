@@ -1,0 +1,43 @@
+name: Sync from upstream
+
+on:
+  schedule:
+    - cron: "0 */2 * * *" # Run every 2 hours
+
+  workflow_dispatch:
+
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync:
+    name: Sync ${{matrix.dependant}} from upstream
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - zenoh
+          - zenoh-backend-filesystem
+          - zenoh-backend-influxdb
+          - zenoh-backend-rocksdb
+          - zenoh-backend-s3
+          - zenoh-c
+          - zenoh-cpp
+          - zenoh-java
+          - zenoh-kotlin
+          - zenoh-pico
+          - zenoh-plugin-dds
+          - zenoh-plugin-mqtt
+          - zenoh-plugin-ros1
+          - zenoh-plugin-ros2dds
+          - zenoh-plugin-webserver
+          - zenoh-python
+
+    steps:
+      - run: >
+          gh repo sync ${{github.repository_owner}}/${{matrix.dependant}} --force --source eclipse-zenoh/${{matrix.dependant}}
+        env:
+          GH_TOKEN: ${{ github.token }}
