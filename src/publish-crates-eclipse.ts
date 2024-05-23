@@ -6,8 +6,8 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import * as ssh from "./ssh";
 import { sh } from "./command";
 
-import { artifactRegExp as artfifactRegExpDebain } from "./build-crates-debian";
-import { artifactRegExp as artfifactRegExpStandalone } from "./build-crates-standalone";
+import { artifactRegExp as artifactRegExpDebian } from "./build-crates-debian";
+import { artifactRegExp as artifactRegExpStandalone } from "./build-crates-standalone";
 
 const artifact = new DefaultArtifactClient();
 
@@ -45,7 +45,7 @@ export async function main(input: Input) {
   try {
     const shouldPublishArtifact = (name: string): boolean => {
       if (input.archiveRegExp == undefined) {
-        return artfifactRegExpStandalone.test(name) || artfifactRegExpDebain.test(name);
+        return artifactRegExpStandalone.test(name) || artifactRegExpDebian.test(name);
       } else {
         return input.archiveRegExp.test(name);
       }
