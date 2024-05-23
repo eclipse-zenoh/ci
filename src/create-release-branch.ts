@@ -4,7 +4,7 @@ import * as core from "@actions/core";
 
 import { sh } from "./command";
 
-const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
+const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 
 export type Input = {
   version?: string;
@@ -53,7 +53,8 @@ export async function main(input: Input) {
       const refs = refsRaw.split("\n");
 
       if (refs.length >= input.dryRunHistorySize) {
-        sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
+        const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
+        toDelete.forEach(ref => sh(`git push origin --delete ${ref}`, { cwd: repo }));
       }
     }
 

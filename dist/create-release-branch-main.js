@@ -24820,7 +24820,7 @@ function exec(program, args, options) {
 
 
 
-const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
+const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 function setup() {
     const version = lib_core.getInput("version");
     const liveRun = lib_core.getBooleanInput("live-run", { required: true });
@@ -24854,7 +24854,8 @@ async function main(input) {
             const refsRaw = sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
             const refs = refsRaw.split("\n");
             if (refs.length >= input.dryRunHistorySize) {
-                sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
+                const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
+                toDelete.forEach(ref => sh(`git push origin --delete ${ref}`, { cwd: repo }));
             }
         }
         sh(`git switch --force-create ${branch}`, { cwd: repo });
