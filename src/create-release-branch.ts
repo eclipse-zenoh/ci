@@ -53,7 +53,8 @@ export async function main(input: Input) {
       const refs = refsRaw.split("\n");
 
       if (refs.length >= input.dryRunHistorySize) {
-        sh(`git push origin --delete ${refs.at(0)}`, { cwd: repo });
+        const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
+        toDelete.forEach(ref => sh(`git push origin --delete ${ref}`, { cwd: repo }));
       }
     }
 
