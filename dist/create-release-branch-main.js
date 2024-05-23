@@ -24820,7 +24820,7 @@ function exec(program, args, options) {
 
 
 
-const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
+const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 function setup() {
     const version = lib_core.getInput("version");
     const liveRun = lib_core.getBooleanInput("live-run", { required: true });

@@ -4,7 +4,7 @@ import * as core from "@actions/core";
 
 import { sh } from "./command";
 
-const DEFAULT_DRY_RUN_HISTORY_SIZE = 30;
+const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 
 export type Input = {
   version?: string;
