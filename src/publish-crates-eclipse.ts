@@ -8,6 +8,8 @@ import { sh } from "./command";
 
 import { artifactRegExp as artifactRegExpDebian } from "./build-crates-debian";
 import { artifactRegExp as artifactRegExpStandalone } from "./build-crates-standalone";
+import { sha256 } from "./checksum";
+import * as fs from "fs/promises";
 
 const artifact = new DefaultArtifactClient();
 
@@ -59,8 +61,9 @@ export async function main(input: Input) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
 
+        const checksum = sha256(archive);
         // Write the sha256 checksum of the archive
-        sh(`sha256 ${archive} >> ${checksumFile}`);
+        await fs.appendFile(checksumFile, `${checksum} ${archive}\n`);
         if (input.liveRun) {
           core.info(`Uploading ${archive} to download.eclipse.org`);
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
