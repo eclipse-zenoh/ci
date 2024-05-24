@@ -49,7 +49,11 @@ export async function main(input: Input) {
       core.setOutput("branch", branch);
 
       const refsPattern = "refs/remotes/origin/release/dry-run";
-      const refsRaw = sh(`git for-each-ref --format='%(refname)' --sort=authordate ${refsPattern}`, { cwd: repo });
+      // for some reason using the full refname won't work to delete the remote branch, so
+      // refname:strip=3 removes 'refs/remotes/origin' from the pattern to have the branch name only.
+      const refsRaw = sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${refsPattern}`, {
+        cwd: repo,
+      });
       const refs = refsRaw.split("\n");
 
       if (refs.length >= input.dryRunHistorySize) {
