@@ -61,7 +61,7 @@ export async function main(input: Input) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
 
-        const checksum = sha256(archive);
+        const checksum = await sha256(archive);
         // Write the sha256 checksum of the archive
         await fs.appendFile(checksumFile, `${checksum} ${archive}\n`);
         if (input.liveRun) {
