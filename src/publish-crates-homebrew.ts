@@ -1,10 +1,10 @@
 import * as fs from "fs/promises";
-import * as crypto from "crypto";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
 
 import { sh } from "./command";
+import { sha256 } from "./checksum";
 import * as ssh from "./ssh";
 
 import { artifactName } from "./build-crates-standalone";
@@ -97,11 +97,6 @@ export async function main(input: Input) {
     const releaseFile = await fs.readFile(releasePath, "utf-8");
     const release = JSON.parse(releaseFile) as Release;
 
-    const sha256 = async (target: string): Promise<string> => {
-      const contents = await fs.readFile(artifactName(repo, input.version, target));
-      return crypto.createHash("sha256").update(contents).digest("hex");
-    };
-
     const url = (target: string): string => {
       const baseUrl = input.liveRun ? input.sshHostUrl : `file://${process.cwd()}`;
       return `${baseUrl}/${artifactName(repo, input.version, target)}`;
@@ -110,9 +105,9 @@ export async function main(input: Input) {
     for (const formula of input.formulae) {
       release[formula] = {
         [X86_64_URL]: url(X86_64_APPLE_DARWIN),
-        [X86_64_SHA256]: await sha256(X86_64_APPLE_DARWIN),
+        [X86_64_SHA256]: await sha256(artifactName(repo, input.version, X86_64_APPLE_DARWIN)),
         [AARCH64_URL]: url(AARCH64_APPLE_DARWIN),
-        [AARCH64_SHA256]: await sha256(AARCH64_APPLE_DARWIN),
+        [AARCH64_SHA256]: await sha256(artifactName(repo, input.version, AARCH64_APPLE_DARWIN)),
       };
     }
 

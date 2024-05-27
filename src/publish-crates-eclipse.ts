@@ -6,8 +6,10 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import * as ssh from "./ssh";
 import { sh } from "./command";
 
-import { artifactRegExp as artfifactRegExpDebain } from "./build-crates-debian";
-import { artifactRegExp as artfifactRegExpStandalone } from "./build-crates-standalone";
+import { artifactRegExp as artifactRegExpDebian } from "./build-crates-debian";
+import { artifactRegExp as artifactRegExpStandalone } from "./build-crates-standalone";
+import { sha256 } from "./checksum";
+import * as fs from "fs/promises";
 
 const artifact = new DefaultArtifactClient();
 
@@ -45,27 +47,38 @@ export async function main(input: Input) {
   try {
     const shouldPublishArtifact = (name: string): boolean => {
       if (input.archiveRegExp == undefined) {
-        return artfifactRegExpStandalone.test(name) || artfifactRegExpDebain.test(name);
+        return artifactRegExpStandalone.test(name) || artifactRegExpDebian.test(name);
       } else {
         return input.archiveRegExp.test(name);
       }
     };
 
+    const checksumFile = "sha256sums.txt";
+    const archiveDir = `${input.sshHostPath}/${input.version}`;
     const results = await artifact.listArtifacts({ latest: true });
     for (const result of results.artifacts) {
       if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
-        const archiveDir = `${input.sshHostPath}/${input.version}`;
 
-        core.info(`Uploading ${archive} to download.eclipse.org`);
+        const checksum = await sha256(archive);
+        // Write the sha256 checksum of the archive
+        await fs.appendFile(checksumFile, `${checksum} ${archive}\n`);
         if (input.liveRun) {
+          core.info(`Uploading ${archive} to download.eclipse.org`);
           await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
             sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${archiveDir}`, { env });
             sh(`scp -v -o StrictHostKeyChecking=no -r ${archive} ${input.sshHost}:${archiveDir}`, { env });
           });
         }
       }
+    }
+
+    if (input.liveRun) {
+      core.info(`Uploading ${checksumFile} to download.eclipse.org`);
+      await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
+        sh(`scp -v -o StrictHostKeyChecking=no -r ${checksumFile} ${input.sshHost}:${archiveDir}`, { env });
+      });
     }
 
     cleanup();
