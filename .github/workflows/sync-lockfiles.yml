@@ -36,7 +36,7 @@ jobs:
           echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
 
       - name: Upload lockfile
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Cargo.lock
           path: Cargo.lock
@@ -89,7 +89,7 @@ jobs:
           fi
 
       - name: Override ${{ matrix.dependant }} lockfile with Zenoh's
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: Cargo.lock
           path: ${{ steps.crate-path.outputs.value }}
