@@ -81102,7 +81102,6 @@ function buildDebian(path, target, version) {
                 sh(`cargo deb --no-build --no-strip \
           --target ${target} \
           --package ${package_.name} \
-          --deb-version ${version} \
           --variant ${variant}`, {
                     cwd: path,
                 });
@@ -81111,8 +81110,7 @@ function buildDebian(path, target, version) {
         else {
             sh(`cargo deb --no-build --no-strip \
         --target ${target} \
-        --package ${package_.name} \
-        --deb-version ${version}`, {
+        --package ${package_.name}`, {
                 cwd: path,
             });
         }
