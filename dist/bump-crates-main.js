@@ -81206,7 +81206,7 @@ function build(path, target) {
 function hostTarget() {
     return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
-function buildDebian(path, target, version) {
+function buildDebian(path, target) {
     for (const package_ of packagesDebian(path)) {
         const manifest = toml.get(package_.manifestPath);
         if ("variants" in manifest.package.metadata.deb) {

@@ -325,7 +325,7 @@ export function hostTarget(): string {
   return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
 }
 
-export function buildDebian(path: string, target: string, version: string) {
+export function buildDebian(path: string, target: string) {
   for (const package_ of packagesDebian(path)) {
     const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
