@@ -4,7 +4,7 @@ import * as os from "os";
 import { sh } from "./command";
 
 /**
- * Create a ZIP archive archive from a directory.
+ * Create a ZIP archive from a directory.
  *
  * @param output Absolute path to the output ZIP archive name.
  * @param dir Directory containing files to add to the archive.
