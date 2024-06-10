@@ -1,0 +1,107 @@
+name: Bump and tag dev branch 
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: The new development version (e.g. 0.11.1-dev)
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  bump-and-tag-crates:
+    name: Bump and tag ${{matrix.dependant}} dev branch (cargo)
+    runs-on: [self-hosted, ubuntu-22.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - zenoh
+          #- zenoh-backend-filesystem
+          #- zenoh-backend-influxdb
+          #- zenoh-backend-rocksdb
+          #- zenoh-backend-s3
+          #- zenoh-plugin-dds
+          #- zenoh-plugin-mqtt
+          #- zenoh-plugin-ros1
+          #- zenoh-plugin-ros2dds
+          #- zenoh-plugin-webserver
+    steps:
+      - uses: eclipse-zenoh/ci/.github/workflows/branch-bump-tag-crates.yml@main
+        with:
+          repo: ${{ matrix.dependant }}
+          live-run: false 
+          version: ${{ inputs.version }}
+          bump-deps-version: ${{ inputs.version }}
+          bump-deps-pattern: 'zenoh.*'
+
+      - name: Create pull request version change
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Bump dev version to ${{ inputs.version }}`
+          body: |
+            This pull request updates ${{ matrix.dependant }}'s to the new development line.
+
+            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
+          commit-message: "build: Bump dev version"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          branch: eclipse-zenoh-bot/bump-dev-version-${{ matrix.dependant }}
+          delete-branch: true
+          labels: internal
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+  bump-and-tag-bash:
+    name: Bump and tag ${{matrix.dependant}} dev branch (non-cargo)
+    runs-on: [self-hosted, ubuntu-22.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - zenoh-c
+          #- zenoh-cpp
+          #- zenoh-java
+          #- zenoh-kotlin
+          #- zenoh-pico
+          #- zenoh-python
+    steps:
+      - name: Checkout ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/${{ matrix.dependant }}
+          ref: main
+          submodules: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Bump and tag project
+        run: bash ci/scripts/bump-and-tag.bash
+        env:
+          VERSION: ${{ inputs.version }}
+          BUMP_DEPS_VERSION: ${{ inputs.version }}
+          BUMP_DEPS_PATTERN: 'zenoh.*'
+          GIT_USER_NAME: eclipse-zenoh-bot
+          GIT_USER_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
+
+      - name: Create pull request version change
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Bump dev version to ${{ inputs.version }}`
+          body: |
+            This pull request updates ${{ matrix.dependant }}'s to the new development line.
+
+            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
+          commit-message: "build: Bump dev version"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          branch: eclipse-zenoh-bot/bump-dev-version-${{ matrix.dependant }}
+          delete-branch: true
+          labels: internal
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
