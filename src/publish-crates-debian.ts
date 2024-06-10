@@ -86,10 +86,10 @@ export async function main(input: Input) {
     sh("sudo apt-get install -y dpkg-dev");
 
     await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
-    const packages = sh("cat .Packages-*");
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
-    // local repository created below
-    await fs.writeFile(allPackagesPath, packages);
+    // local repository created below. By redirecting the output we also avoid breaking the Github webUI displaying too much data.
+    sh(`cat .Packages-* > ${allPackagesPath}`);
+    const packages = await fs.readFile(allPackagesPath, 'utf8');
     await fs.writeFile(allPackagesGzippedPath, await gzip(packages));
 
     sh("ls -R");
