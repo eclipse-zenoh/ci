@@ -24711,7 +24711,7 @@ module.exports = {
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _create_release_branch__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(1712);
+/* harmony import */ var _create_release_branch__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(6210);
 
 await (0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_create_release_branch__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
 
@@ -24720,7 +24720,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 1712:
+/***/ 6210:
 /***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -24743,7 +24743,7 @@ const external_child_process_namespaceObject = require("child_process");
 
 
 const MAX_BUFFER = 10 * 1024 * 1024;
-function sh(cmd, options) {
+function command_sh(cmd, options) {
     options = options != null ? options : {};
     options.env = options.env != null ? options.env : {};
     options.cwd = options.cwd != null ? options.cwd : ".";
@@ -24816,7 +24816,26 @@ function exec(program, args, options) {
     return returns.stdout;
 }
 
+;// CONCATENATED MODULE: ./src/git.ts
+
+function cloneFromGitHub(repo, options) {
+    const remote = options.token == undefined ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
+    const command = ["git", "clone", "--recursive", "--single-branch"];
+    if (options.branch != undefined) {
+        command.push("--branch", options.branch);
+    }
+    command.push(remote);
+    if (options.path != undefined) {
+        command.push(options.path);
+    }
+    command_sh(command.join(" "));
+}
+function describe(path = process.cwd()) {
+    return sh("git describe", { cwd: path }).trim();
+}
+
 ;// CONCATENATED MODULE: ./src/create-release-branch.ts
+
 
 
 
@@ -24824,13 +24843,15 @@ const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 function setup() {
     const version = lib_core.getInput("version");
     const liveRun = lib_core.getBooleanInput("live-run", { required: true });
+    const dryRunHistorySize = lib_core.getInput("dry-run-history-size", { required: false });
     const repo = lib_core.getInput("repo", { required: true });
+    const branch = lib_core.getInput("branch", { required: false });
     const githubToken = lib_core.getInput("github-token", { required: true });
-    const dryRunHistorySize = lib_core.getInput("dry-run-history-size");
     return {
         version: version === "" ? undefined : version,
         liveRun,
         repo,
+        branch,
         githubToken,
         dryRunHistorySize: dryRunHistorySize == "" ? DEFAULT_DRY_RUN_HISTORY_SIZE : Number(dryRunHistorySize),
     };
@@ -24839,8 +24860,8 @@ async function main(input) {
     try {
         const repo = input.repo.split("/")[1];
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
-        sh(`git clone --recursive ${remote}`);
-        const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
+        cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
+        const version = input.version ?? command_sh("git describe", { cwd: repo }).trimEnd();
         lib_core.setOutput("version", version);
         let branch;
         if (input.liveRun) {
@@ -24853,17 +24874,17 @@ async function main(input) {
             const refsPattern = "refs/remotes/origin/release/dry-run";
             // for some reason using the full refname won't work to delete the remote branch, so
             // refname:strip=3 removes 'refs/remotes/origin' from the pattern to have the branch name only.
-            const refsRaw = sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${refsPattern}`, {
+            const refsRaw = command_sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${refsPattern}`, {
                 cwd: repo,
             });
             const refs = refsRaw.split("\n");
             if (refs.length >= input.dryRunHistorySize) {
                 const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
-                toDelete.forEach(ref => sh(`git push origin --delete ${ref}`, { cwd: repo }));
+                toDelete.forEach(ref => command_sh(`git push origin --delete ${ref}`, { cwd: repo }));
             }
         }
-        sh(`git switch --force-create ${branch}`, { cwd: repo });
-        sh(`git push --force ${remote} ${branch}`, { cwd: repo });
+        command_sh(`git switch --force-create ${branch}`, { cwd: repo });
+        command_sh(`git push --force ${remote} ${branch}`, { cwd: repo });
         await cleanup(input);
     }
     catch (error) {
