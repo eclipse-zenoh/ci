@@ -1,4 +1,4 @@
-name: Bump and tag dev branch 
+name: Bump and tag branch
 
 on:
   workflow_dispatch:
@@ -55,6 +55,7 @@ jobs:
           branch: eclipse-zenoh-bot/bump-dev-version-${{ matrix.dependant }}
           delete-branch: true
           labels: internal
+          draft: true
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
   bump-and-tag-bash:
@@ -104,4 +105,5 @@ jobs:
           branch: eclipse-zenoh-bot/bump-dev-version-${{ matrix.dependant }}
           delete-branch: true
           labels: internal
+          draft: true
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
