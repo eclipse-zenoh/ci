@@ -31,10 +31,11 @@ jobs:
           #- zenoh-plugin-ros2dds
           #- zenoh-plugin-webserver
     steps:
-      - uses: eclipse-zenoh/ci/.github/workflows/branch-bump-tag-crates.yml@main
+      - name: "Checkout and tag branch"
+        uses: eclipse-zenoh/ci/.github/workflows/branch-bump-tag-crates.yml@main
         with:
           repo: ${{ matrix.dependant }}
-          live-run: false 
+          live-run: false
           version: ${{ inputs.version }}
           bump-deps-version: ${{ inputs.version }}
           bump-deps-pattern: 'zenoh.*'
