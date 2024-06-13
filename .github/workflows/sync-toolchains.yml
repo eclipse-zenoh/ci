@@ -1,0 +1,77 @@
+name: Sync Rust toolchains
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # At the end of every day
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Rust toolchain version (e.g. "1.76")
+        type: string
+        required: true
+      branch:
+        description: Target branch (e.g. "main")
+        type: string
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  sync:
+    name: Update Rust toolchain
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dependant:
+          - zenoh
+          - zenoh-c
+          - zenoh-python
+          - zenoh-java
+          - zenoh-kotlin
+          - zenoh-plugin-dds
+          - zenoh-plugin-mqtt
+          - zenoh-plugin-ros1
+          - zenoh-plugin-ros2dds
+          - zenoh-plugin-webserver
+          - zenoh-backend-filesystem
+          - zenoh-backend-influxdb
+          - zenoh-backend-rocksdb
+          - zenoh-backend-s3
+    steps:
+      - name: Clone ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/${{ matrix.dependant }}
+          ref: ${{ inputs.branch }}
+
+      - name: Update ${{ matrix.dependant }}'s Rust toolchain to ${{ inputs.version }}
+        run: sed "s;^channel = .*\$;channel = \"${{ inputs.version }}\";" --in-place rust-toolchain.toml
+        shell: bash
+
+      - name: Create/Update a pull request if the toolchain changed
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: Sync Rust toolchain
+          body: >
+            Automated update of the Rust toolchain defined in `rust-toolchain.tml`. The Rust
+            toolchain should be pinned in all eclipse-zenoh crates to ensure ABI compatibility for
+            plugins and backends.
+          commit-message: "chore: Sync Rust toolchain"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          branch: eclipse-zenoh-bot/sync-toolchain
+          base: ${{ inputs.branch }}
+          delete-branch: true
+          labels: dependencies
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Enable auto merge for the pull request
+        if: steps.cpr.outputs.pull-request-operation == 'created'
+        run:
+          gh pr merge -R "eclipse-zenoh/${{ matrix.dependant }}" --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
