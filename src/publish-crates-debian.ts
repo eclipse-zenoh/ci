@@ -67,7 +67,7 @@ export async function main(input: Input) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
-        sh(`unzip ${archive} -d ${input.version}`);
+        sh(`unzip ${archive} -d ${input.version}-stable`);
       }
     }
 
