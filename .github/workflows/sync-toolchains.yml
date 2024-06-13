@@ -25,6 +25,7 @@ jobs:
     strategy:
       matrix:
         dependant:
+          - zenoh
           - zenoh-c
           - zenoh-python
           - zenoh-java
