@@ -67,7 +67,7 @@ export async function main(input: Input) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
         const archive = path.join(downloadPath, result.name);
-        sh(`unzip ${archive} -d ${input.version}-stable`);
+        sh(`unzip ${archive} -d ${input.version}`);
       }
     }
 
@@ -85,7 +85,7 @@ export async function main(input: Input) {
     sh("sudo apt-get update");
     sh("sudo apt-get install -y dpkg-dev");
 
-    await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}-stable`));
+    await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
     // local repository created below
     const packages = sh(`cat .Packages-*`, { quiet: true });
