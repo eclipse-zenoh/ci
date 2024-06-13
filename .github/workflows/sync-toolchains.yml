@@ -1,8 +1,6 @@
 name: Sync Rust toolchains
 
 on:
-  schedule:
-    - cron: "0 0 * * *" # At the end of every day
   workflow_dispatch:
     inputs:
       version:
