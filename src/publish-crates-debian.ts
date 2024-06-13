@@ -87,9 +87,9 @@ export async function main(input: Input) {
 
     await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
-    // local repository created below. By redirecting the output we also avoid breaking the Github webUI displaying too much data.
-    sh(`cat .Packages-* > ${allPackagesPath}`);
-    const packages = await fs.readFile(allPackagesPath, "utf8");
+    // local repository created below
+    const packages = sh(`cat .Packages-*`, { quiet: true });
+    await fs.writeFile(allPackagesPath, packages);
     await fs.writeFile(allPackagesGzippedPath, await gzip(packages));
 
     sh("ls -R");
