@@ -335,7 +335,7 @@ export function buildDebian(path: string, target: string, version: string) {
           `cargo deb --no-build --no-strip \
           --target ${target} \
           --package ${package_.name} \
-          --deb-version ${version} \
+          --deb-version ${version}-stable \
           --variant ${variant}`,
           {
             cwd: path,
@@ -347,7 +347,7 @@ export function buildDebian(path: string, target: string, version: string) {
         `cargo deb --no-build --no-strip \
         --target ${target} \
         --package ${package_.name} \
-        --deb-version ${version}`,
+        --deb-version ${version}-stable`,
         {
           cwd: path,
         },
