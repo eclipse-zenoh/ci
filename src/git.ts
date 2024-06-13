@@ -11,11 +11,11 @@ export function cloneFromGitHub(repo: string, options: CloneFromGitHubOptions) {
     options.token == undefined ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
 
   const command = ["git", "clone", "--recursive", "--single-branch"];
-  if (options.branch != "" && options.branch != undefined) {
+  if (options.branch) {
     command.push("--branch", options.branch);
   }
   command.push(remote);
-  if (options.path != "" && options.path != undefined) {
+  if (options.path) {
     command.push(options.path);
   }
 

@@ -67,7 +67,7 @@ jobs:
       branch: ${{ steps.create-release-branch.outputs.branch }}
     steps:
       - id: create-release-branch
-        uses: eclipse-zenoh/ci/create-release-branch@main
+        uses: eclipse-zenoh/ci/create-release-branch@hotfix-0.11.0
         with:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}
@@ -75,7 +75,7 @@ jobs:
           branch: ${{ inputs.branch }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      - uses: eclipse-zenoh/ci/bump-crates@main
+      - uses: eclipse-zenoh/ci/bump-crates@hotfix-0.11.0
         with:
           repo: ${{ inputs.repo }}
           path: ${{ inputs.path }}
