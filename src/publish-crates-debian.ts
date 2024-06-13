@@ -89,7 +89,7 @@ export async function main(input: Input) {
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
     // local repository created below. By redirecting the output we also avoid breaking the Github webUI displaying too much data.
     sh(`cat .Packages-* > ${allPackagesPath}`);
-    const packages = await fs.readFile(allPackagesPath, 'utf8');
+    const packages = await fs.readFile(allPackagesPath, "utf8");
     await fs.writeFile(allPackagesGzippedPath, await gzip(packages));
 
     sh("ls -R");
