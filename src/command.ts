@@ -8,6 +8,7 @@ export type CommandOptions = {
   cwd?: string;
   check?: boolean;
   input?: string;
+  quiet?: boolean;
 };
 
 export function sh(cmd: string, options?: CommandOptions): string {
@@ -16,13 +17,13 @@ export function sh(cmd: string, options?: CommandOptions): string {
   options.cwd = options.cwd != null ? options.cwd : ".";
   options.check = options.check != null ? options.check : true;
   options.input = options.input != null ? options.input : "";
+  options.quiet = options.quiet != null ? options.quiet : false;
 
   core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
 
   const returns = spawnSync(cmd, {
     // NOTE: Environment variables defined in `options.env` take precedence over
-    // the parent process's environment, thus the destructuring is order is
-    // important
+    // the parent process's environment, thus the destructuring order is important
     env: {
       ...process.env,
       ...options.env,
@@ -35,12 +36,12 @@ export function sh(cmd: string, options?: CommandOptions): string {
     maxBuffer: MAX_BUFFER,
   });
 
-  if (returns.stdout != "") {
+  if (returns.stdout != "" && !options.quiet) {
     core.info(`\u001b[1mstdout:\u001b[0m`);
     core.info(returns.stdout);
   }
 
-  if (returns.stderr != "") {
+  if (returns.stderr != "" && !options.quiet) {
     core.info(`\u001b[1mstderr:\u001b[0m`);
     core.info(returns.stderr);
   }

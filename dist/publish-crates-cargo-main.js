@@ -81145,11 +81145,11 @@ function sh(cmd, options) {
     options.cwd = options.cwd != null ? options.cwd : ".";
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
+    options.quiet = options.quiet != null ? options.quiet : false;
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync)(cmd, {
         // NOTE: Environment variables defined in `options.env` take precedence over
-        // the parent process's environment, thus the destructuring is order is
-        // important
+        // the parent process's environment, thus the destructuring order is important
         env: {
             ...process.env,
             ...options.env,
@@ -81161,11 +81161,11 @@ function sh(cmd, options) {
         input: options.input,
         maxBuffer: MAX_BUFFER,
     });
-    if (returns.stdout != "") {
+    if (returns.stdout != "" && !options.quiet) {
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstdout:\u001b[0m`);
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stdout);
     }
-    if (returns.stderr != "") {
+    if (returns.stderr != "" && !options.quiet) {
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstderr:\u001b[0m`);
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stderr);
     }
