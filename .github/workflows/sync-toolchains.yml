@@ -9,6 +9,10 @@ on:
         description: Rust toolchain version (e.g. "1.76")
         type: string
         required: true
+      branch:
+        description: Target branch (e.g. "main")
+        type: string
+        required: false
 
 defaults:
   run:
@@ -35,6 +39,12 @@ jobs:
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
     steps:
+      - name: Clone ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/${{ matrix.dependant }}
+          ref: ${{ inputs.branch }}
+
       - name: Update ${{ matrix.dependant }}'s Rust toolchain to ${{ inputs.version }}
         run: sed "s;^channel = .*\$;channel = \"${{ inputs.version }}\";" --in-place rust-toolchain.toml
         shell: bash
@@ -52,7 +62,8 @@ jobs:
           commit-message: "chore: Sync Rust toolchain"
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
           author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
-          branch: eclipse-zenoh-bot/sync-toolchains
+          branch: eclipse-zenoh-bot/sync-toolchain
+          base: ${{ inputs.branch }}
           delete-branch: true
           labels: dependencies
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
