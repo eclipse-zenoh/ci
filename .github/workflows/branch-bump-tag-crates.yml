@@ -15,6 +15,9 @@ on:
       version:
         type: string
         required: false
+      branch:
+        type: string
+        required: false
       bump-deps-pattern:
         type: string
         required: true
@@ -43,6 +46,9 @@ on:
       version:
         type: string
         required: false
+      branch:
+        type: string
+        required: false
       bump-deps-pattern:
         type: string
         required: true
@@ -66,6 +72,7 @@ jobs:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
+          branch: ${{ inputs.branch }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - uses: eclipse-zenoh/ci/bump-crates@main
