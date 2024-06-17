@@ -80961,6 +80961,7 @@ __webpack_async_result__();
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "$l": () => (/* binding */ toDebianVersion),
 /* harmony export */   "HU": () => (/* binding */ bump),
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
@@ -80977,8 +80978,10 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(9839);
 /* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8121);
 /* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_4__]);
-_toml__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(8683);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__]);
+([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -81108,7 +81111,7 @@ async function bumpDependencies(path, pattern, version, _branch) {
             manifest.package.metadata.deb.depends != "$auto" &&
             pattern.test(manifest.package.metadata.deb.name)) {
             const deb = manifest.package.metadata.deb;
-            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${_cargo__WEBPACK_IMPORTED_MODULE_7__/* .toDebianVersion */ .$l(version)})`);
             _actions_core__WEBPACK_IMPORTED_MODULE_2__.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
             await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
         }
@@ -81214,7 +81217,7 @@ function buildDebian(path, target, version) {
                 sh(`cargo deb --no-build --no-strip \
           --target ${target} \
           --package ${package_.name} \
-          --deb-version ${version} \
+          --deb-version ${cargo.toDebianVersion(version)} \
           --variant ${variant}`, {
                     cwd: path,
                 });
@@ -81224,10 +81227,33 @@ function buildDebian(path, target, version) {
             sh(`cargo deb --no-build --no-strip \
         --target ${target} \
         --package ${package_.name} \
-        --deb-version ${version}`, {
+        --deb-version ${cargo.toDebianVersion(version)}`, {
                 cwd: path,
             });
         }
+    }
+}
+/**
+ * Transforms a version number to a version number that conforms to the Debian Policy.
+ * @param version Version number.
+ * @param revision Package revision number.
+ * @returns Modified version.
+ */
+function toDebianVersion(version, revision) {
+    revision = revision ?? 1;
+    const re = /^(\d+\.\d+\.\d+)(?:-((?:alpha|beta|rc)\.\d+))?$/g;
+    const matches = Array.from(version.matchAll(re));
+    if (matches.length === 0) {
+        throw Error(`Unsupported version format: ${version}`);
+    }
+    const [base, suffix] = matches[0].slice(1);
+    if (suffix === undefined) {
+        // In this case the version is of the form X.Y.Z
+        return `${base}-${revision}`;
+    }
+    else {
+        // In this case the version is of the form X.Y.Z-(alpha|beta|rc).N
+        return `${base}~${suffix}-${revision}`;
     }
 }
 

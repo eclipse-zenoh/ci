@@ -7,6 +7,7 @@ import * as cache from "@actions/cache";
 import { TOML } from "./toml";
 import { sh } from "./command";
 import { config } from "./config";
+import * as cargo from "./cargo";
 
 const toml = await TOML.init();
 
@@ -207,7 +208,7 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
       pattern.test(manifest.package.metadata.deb.name)
     ) {
       const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${version})`);
+      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`);
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
       await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
@@ -335,7 +336,7 @@ export function buildDebian(path: string, target: string, version: string) {
           `cargo deb --no-build --no-strip \
           --target ${target} \
           --package ${package_.name} \
-          --deb-version ${version} \
+          --deb-version ${cargo.toDebianVersion(version)} \
           --variant ${variant}`,
           {
             cwd: path,
@@ -347,11 +348,37 @@ export function buildDebian(path: string, target: string, version: string) {
         `cargo deb --no-build --no-strip \
         --target ${target} \
         --package ${package_.name} \
-        --deb-version ${version}`,
+        --deb-version ${cargo.toDebianVersion(version)}`,
         {
           cwd: path,
         },
       );
     }
+  }
+}
+
+/**
+ * Transforms a version number to a version number that conforms to the Debian Policy.
+ * @param version Version number.
+ * @param revision Package revision number.
+ * @returns Modified version.
+ */
+export function toDebianVersion(version: string, revision?: number): string {
+  revision = revision ?? 1;
+
+  const re = /^(\d+\.\d+\.\d+)(?:-((?:alpha|beta|rc)\.\d+))?$/g;
+  const matches = Array.from(version.matchAll(re));
+
+  if (matches.length === 0) {
+    throw Error(`Unsupported version format: ${version}`);
+  }
+  const [base, suffix] = matches[0].slice(1);
+
+  if (suffix === undefined) {
+    // In this case the version is of the form X.Y.Z
+    return `${base}-${revision}`;
+  } else {
+    // In this case the version is of the form X.Y.Z-(alpha|beta|rc).N
+    return `${base}~${suffix}-${revision}`;
   }
 }
