@@ -28,7 +28,7 @@ export function setup(): Input {
     version: version === "" ? undefined : version,
     liveRun,
     repo,
-    branch,
+    branch: branch === "" ? undefined : branch,
     githubToken,
     dryRunHistorySize: dryRunHistorySize == "" ? DEFAULT_DRY_RUN_HISTORY_SIZE : Number(dryRunHistorySize),
   };
