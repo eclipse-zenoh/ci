@@ -8,10 +8,7 @@ async function main() {
   for await (const dirent of dir) {
     if (["-pre.ts", "-main.ts", "-post.ts"].some(x => dirent.name.endsWith(x))) {
       console.log(`> Transpiling ${dirent.name}`);
-      child_process.execSync(`ncc build src/${dirent.name} --out dist`, { stdio: "inherit" });
-      const name = dirent.name.replace(".ts", ".js");
-      fs.rename("dist/index.js", `dist/${name}`);
-      console.log(`> Generated dist/${name}`);
+      child_process.exec(`tsup src/${dirent.name} --out-dir dist --format esm`, { stdio: "inherit" });
     }
   }
 }
