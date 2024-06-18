@@ -40,6 +40,7 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
 
     git.cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
+    sh("git fetch --tags");
 
     const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
     core.setOutput("version", version);

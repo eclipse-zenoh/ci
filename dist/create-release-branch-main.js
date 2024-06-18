@@ -24861,6 +24861,7 @@ async function main(input) {
         const repo = input.repo.split("/")[1];
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
+        command_sh("git fetch --tags");
         const version = input.version ?? command_sh("git describe", { cwd: repo }).trimEnd();
         lib_core.setOutput("version", version);
         let branch;
