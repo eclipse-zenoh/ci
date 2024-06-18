@@ -52,17 +52,21 @@ export async function main(input: Input) {
       branch = `release/dry-run/${version}`;
       core.setOutput("branch", branch);
 
-      const refsPattern = "refs/remotes/origin/release/dry-run";
+      const branchPattern = "refs/remotes/origin/release/dry-run";
       // for some reason using the full refname won't work to delete the remote branch, so
       // refname:strip=3 removes 'refs/remotes/origin' from the pattern to have the branch name only.
-      const refsRaw = sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${refsPattern}`, {
+      const branchesRaw = sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${branchPattern}`, {
         cwd: repo,
       });
-      const refs = refsRaw.split("\n");
+      const branches = branchesRaw.split("\n");
 
-      if (refs.length >= input.dryRunHistorySize) {
-        const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
-        toDelete.forEach(ref => sh(`git push origin --delete ${ref}`, { cwd: repo }));
+      if (branches.length >= input.dryRunHistorySize) {
+        const toDelete = branches.slice(0, branches.length - input.dryRunHistorySize);
+        toDelete.forEach(branch => {
+          const tag = branch.replace("release/dry-run/", "");
+          sh(`git push origin --delete ${branch}`, { cwd: repo });
+          sh(`git push origin --delete ${tag}`, { cwd: repo });
+        });
       }
     }
 
