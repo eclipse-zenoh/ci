@@ -18,4 +18,4 @@ inputs:
 
 runs:
   using: node20
-  main: ../dist/publish-crates-eclipse-main.js
+  main: ../dist/publish-crates-eclipse-main.mjs
