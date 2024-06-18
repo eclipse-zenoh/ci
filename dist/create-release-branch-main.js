@@ -24820,8 +24820,9 @@ function exec(program, args, options) {
 
 function cloneFromGitHub(repo, options) {
     const remote = options.token == undefined ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
-    const command = ["git", "clone", "--recursive", "--single-branch"];
+    const command = ["git", "clone", "--recursive"];
     if (options.branch != undefined) {
+        command.push("--single-branch");
         command.push("--branch", options.branch);
     }
     command.push(remote);
@@ -24861,7 +24862,6 @@ async function main(input) {
         const repo = input.repo.split("/")[1];
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
-        command_sh("git fetch --tags");
         const version = input.version ?? command_sh("git describe", { cwd: repo }).trimEnd();
         lib_core.setOutput("version", version);
         let branch;
