@@ -24822,7 +24822,6 @@ function cloneFromGitHub(repo, options) {
     const remote = options.token == undefined ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
     const command = ["git", "clone", "--recursive"];
     if (options.branch != undefined) {
-        command.push("--single-branch");
         command.push("--branch", options.branch);
     }
     command.push(remote);

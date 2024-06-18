@@ -12,7 +12,6 @@ export function cloneFromGitHub(repo: string, options: CloneFromGitHubOptions) {
 
   const command = ["git", "clone", "--recursive"];
   if (options.branch != undefined) {
-    command.push("--single-branch");
     command.push("--branch", options.branch);
   }
   command.push(remote);
