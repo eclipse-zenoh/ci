@@ -24820,8 +24820,9 @@ function exec(program, args, options) {
 
 function cloneFromGitHub(repo, options) {
     const remote = options.token == undefined ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
-    const command = ["git", "clone", "--recursive", "--single-branch"];
+    const command = ["git", "clone", "--recursive"];
     if (options.branch != undefined) {
+        command.push("--single-branch");
         command.push("--branch", options.branch);
     }
     command.push(remote);
@@ -24871,16 +24872,20 @@ async function main(input) {
         else {
             branch = `release/dry-run/${version}`;
             lib_core.setOutput("branch", branch);
-            const refsPattern = "refs/remotes/origin/release/dry-run";
+            const branchPattern = "refs/remotes/origin/release/dry-run";
             // for some reason using the full refname won't work to delete the remote branch, so
             // refname:strip=3 removes 'refs/remotes/origin' from the pattern to have the branch name only.
-            const refsRaw = command_sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${refsPattern}`, {
+            const branchesRaw = command_sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${branchPattern}`, {
                 cwd: repo,
             });
-            const refs = refsRaw.split("\n");
-            if (refs.length >= input.dryRunHistorySize) {
-                const toDelete = refs.slice(0, refs.length - input.dryRunHistorySize);
-                toDelete.forEach(ref => command_sh(`git push origin --delete ${ref}`, { cwd: repo }));
+            const branches = branchesRaw.split("\n");
+            if (branches.length >= input.dryRunHistorySize) {
+                const toDelete = branches.slice(0, branches.length - input.dryRunHistorySize);
+                toDelete.forEach(branch => {
+                    const tag = branch.replace("release/dry-run/", "");
+                    command_sh(`git push origin --delete ${branch}`, { cwd: repo });
+                    command_sh(`git push origin --delete ${tag}`, { cwd: repo });
+                });
             }
         }
         command_sh(`git switch --force-create ${branch}`, { cwd: repo });
