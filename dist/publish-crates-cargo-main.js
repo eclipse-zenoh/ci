@@ -81127,21 +81127,8 @@ function buildDebian(path, target, version) {
  * @returns Modified version.
  */
 function toDebianVersion(version, revision) {
-    revision = revision ?? 1;
-    const re = /^(\d+\.\d+\.\d+)(?:-((?:alpha|beta|rc)\.\d+))?$/g;
-    const matches = Array.from(version.matchAll(re));
-    if (matches.length === 0) {
-        throw Error(`Unsupported version format: ${version}`);
-    }
-    const [base, suffix] = matches[0].slice(1);
-    if (suffix === undefined) {
-        // In this case the version is of the form X.Y.Z
-        return `${base}-${revision}`;
-    }
-    else {
-        // In this case the version is of the form X.Y.Z-(alpha|beta|rc).N
-        return `${base}~${suffix}-${revision}`;
-    }
+    // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
+    return `${version.replace("-", "~")}-${revision ?? 1}`;
 }
 
 __webpack_async_result__();
