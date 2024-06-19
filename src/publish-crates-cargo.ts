@@ -14,6 +14,7 @@ export type Input = {
   unpublishedDepsRegExp: RegExp;
   unpublishedDepsRepos: string[];
   cratesIoToken?: string;
+  publicationTest: boolean;
 };
 
 export function setup(): Input {
@@ -24,6 +25,7 @@ export function setup(): Input {
   const cratesIoToken = core.getInput("crates-io-token", { required: true });
   const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns");
   const unpublishedDepsRepos = core.getInput("unpublished-deps-repos");
+  const publicationTest = core.getBooleanInput("publication-test", { required: true });
 
   return {
     liveRun,
@@ -34,6 +36,7 @@ export function setup(): Input {
       unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
     unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
+    publicationTest,
   };
 }
 
@@ -42,13 +45,15 @@ export async function main(input: Input) {
   try {
     registry = await estuary.spawn();
 
-    for (const repo of input.unpublishedDepsRepos) {
-      await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
+    if (input.publicationTest) {
+      for (const repo of input.unpublishedDepsRepos) {
+        await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
+      }
+
+      await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
+
+      await deleteRepos(input);
     }
-
-    await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
-
-    await deleteRepos(input);
 
     if (input.liveRun) {
       for (const repo of input.unpublishedDepsRepos) {
