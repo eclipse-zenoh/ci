@@ -81358,7 +81358,7 @@ function setup() {
     const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token", { required: true });
     const unpublishedDepsPatterns = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-patterns");
     const unpublishedDepsRepos = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-repos");
-    const installationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("installation-test", { required: true });
+    const publicationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("publication-test", { required: true });
     return {
         liveRun,
         branch,
@@ -81367,14 +81367,14 @@ function setup() {
         unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
         unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
         cratesIoToken,
-        installationTest,
+        publicationTest,
     };
 }
 async function main(input) {
     let registry = undefined;
     try {
         registry = await _estuary__WEBPACK_IMPORTED_MODULE_2__/* .spawn */ .C();
-        if (input.installationTest) {
+        if (input.publicationTest) {
             for (const repo of input.unpublishedDepsRepos) {
                 await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
             }
