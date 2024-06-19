@@ -25,7 +25,7 @@ export function setup(): Input {
   const cratesIoToken = core.getInput("crates-io-token", { required: true });
   const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns");
   const unpublishedDepsRepos = core.getInput("unpublished-deps-repos");
-  const publicationTest = core.getBooleanInput("publication-test", { required: true });
+  const publicationTest = core.getBooleanInput("publication-test");
 
   return {
     liveRun,

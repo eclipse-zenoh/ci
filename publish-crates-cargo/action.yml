@@ -16,7 +16,7 @@ inputs:
   unpublished-deps-repos:
     required: false
   publication-test:
-    required: true
+    required: false
 
 runs:
   using: node20
