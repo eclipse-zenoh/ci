@@ -18,6 +18,10 @@ on:
       unpublished-deps-repos:
         type: string
         required: false
+      installation-test:
+        type: boolean
+        required: true
+        default: true
   workflow_dispatch:
     inputs:
       repo:
@@ -35,6 +39,10 @@ on:
       unpublished-deps-repos:
         type: string
         required: false
+      installation-test:
+        type: boolean
+        required: true
+        default: true
 
 jobs:
   publish:
@@ -49,3 +57,4 @@ jobs:
           unpublished-deps-repos: ${{ inputs.unpublished-deps-repos }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
           crates-io-token: ${{ secrets.CRATES_IO_TOKEN }}
+          installation-test: ${{ inputs.installation-test }}
