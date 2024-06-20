@@ -80893,7 +80893,7 @@ function packages(path) {
             manifestPath: elem.manifest_path,
             publish: elem.publish == null ? undefined : false,
             workspaceDependencies: elem.dependencies
-                .filter(dep => "path" in dep && dep.kind !== "dev")
+                .filter(dep => "path" in dep)
                 .map(dep => ({
                 name: dep.name,
                 req: dep.req,
