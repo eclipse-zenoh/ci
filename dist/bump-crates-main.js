@@ -80966,7 +80966,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
-/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, build, hostTarget, buildDebian */
+/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, build, hostTarget, buildDebian, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81242,6 +81242,15 @@ function buildDebian(path, target, version) {
 function toDebianVersion(version, revision) {
     // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
     return `${version.replace("-", "~")}-${revision ?? 1}`;
+}
+/**
+ * Check if Package is already published in crates.io
+ * @param pkg Package to check.
+ */
+function isPublished(pkg) {
+    // Hackish but crates.io doesn't have a stable api anyway.
+    const published_version = sh(`cargo search ${pkg.name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+    return published_version === pkg.version;
 }
 
 __webpack_async_result__();
