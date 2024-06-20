@@ -81358,7 +81358,7 @@ function setup() {
     const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token", { required: true });
     const unpublishedDepsPatterns = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-patterns");
     const unpublishedDepsRepos = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-repos");
-    const publicationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("publication-test", { required: true });
+    const publicationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("publication-test");
     return {
         liveRun,
         branch,
