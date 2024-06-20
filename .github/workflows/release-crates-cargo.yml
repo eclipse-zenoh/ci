@@ -21,7 +21,7 @@ on:
       publication-test:
         type: boolean
         required: false
-        default: false
+        default: true
   workflow_dispatch:
     inputs:
       repo:
@@ -42,7 +42,7 @@ on:
       publication-test:
         type: boolean
         required: false
-        default: false
+        default: true
 
 jobs:
   publish:
