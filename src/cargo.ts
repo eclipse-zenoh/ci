@@ -29,6 +29,7 @@ type CargoMetadataDependency = {
   name: string;
   req: string;
   path?: string;
+  kind: string;
   [key: string]: unknown;
 };
 
@@ -62,7 +63,7 @@ export function packages(path: string): Package[] {
       manifestPath: elem.manifest_path,
       publish: elem.publish == null ? undefined : false,
       workspaceDependencies: elem.dependencies
-        .filter(dep => "path" in dep)
+        .filter(dep => "path" in dep && dep.kind !== "dev")
         .map(dep => ({
           name: dep.name,
           req: dep.req,
