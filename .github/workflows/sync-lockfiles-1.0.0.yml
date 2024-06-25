@@ -52,8 +52,6 @@ jobs:
         dependant:
           - zenoh-c
           - zenoh-python
-          - zenoh-java
-          - zenoh-kotlin
           - zenoh-plugin-dds
           - zenoh-plugin-mqtt
           - zenoh-plugin-ros1
@@ -63,6 +61,9 @@ jobs:
           - zenoh-backend-influxdb
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
+          # zenoh-[java,kotlin] are not ready yet for 1.0.0
+          #- zenoh-java
+          #- zenoh-kotlin
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
