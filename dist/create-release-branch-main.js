@@ -24883,7 +24883,8 @@ async function main(input) {
                 toDelete.forEach(branch => {
                     const tag = branch.replace("release/dry-run/", "");
                     command_sh(`git push origin --delete ${branch}`, { cwd: repo });
-                    command_sh(`git push origin --delete ${tag}`, { cwd: repo });
+                    // Don't fail the entire workflow if the tag delete fails
+                    command_sh(`git push origin --delete ${tag}`, { cwd: repo, check: false });
                 });
             }
         }
