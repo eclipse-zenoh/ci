@@ -367,3 +367,13 @@ export function toDebianVersion(version: string, revision?: number): string {
   // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
   return `${version.replace("-", "~")}-${revision ?? 1}`;
 }
+
+/**
+ * Check if Package is already published in crates.io
+ * @param pkg Package to check.
+ */
+export function isPublished(pkg: Package): boolean {
+  // Hackish but crates.io doesn't have a stable api anyway.
+  const publishedVersion = sh(`cargo search ${pkg.name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+  return publishedVersion === pkg.version;
+}
