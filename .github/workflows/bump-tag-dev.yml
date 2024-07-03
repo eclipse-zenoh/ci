@@ -31,14 +31,22 @@ jobs:
           #- zenoh-plugin-ros2dds
           #- zenoh-plugin-webserver
     steps:
-      - name: "Checkout and tag branch"
-        uses: eclipse-zenoh/ci/.github/workflows/branch-bump-tag-crates.yml@main
+      - id: create-branch
+        uses: eclipse-zenoh/ci/create-release-branch@main
         with:
-          repo: ${{ matrix.dependant }}
+          repo: ${{ matrix.dependant}}
           live-run: false
           version: ${{ inputs.version }}
-          bump-deps-version: ${{ inputs.version }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - uses: eclipse-zenoh/ci/bump-crates@main
+        with:
+          repo: eclipse-zenoh/${{ matrix.dependant }}
+          version: ${{ steps.create-branch.outputs.version }}
+          branch: ${{ steps.create-branch.outputs.branch }}
           bump-deps-pattern: 'zenoh.*'
+          bump-deps-version: ${{ inputs.version }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Create pull request version change
         id: cpr
