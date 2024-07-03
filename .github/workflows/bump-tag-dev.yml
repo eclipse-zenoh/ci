@@ -15,21 +15,21 @@ defaults:
 jobs:
   bump-and-tag-crates:
     name: Bump and tag ${{matrix.dependant}} dev branch (cargo)
-    runs-on: [self-hosted, ubuntu-22.04]
+    runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
       matrix:
         dependant:
           - zenoh
-          #- zenoh-backend-filesystem
-          #- zenoh-backend-influxdb
-          #- zenoh-backend-rocksdb
-          #- zenoh-backend-s3
-          #- zenoh-plugin-dds
-          #- zenoh-plugin-mqtt
-          #- zenoh-plugin-ros1
-          #- zenoh-plugin-ros2dds
-          #- zenoh-plugin-webserver
+          - zenoh-backend-filesystem
+          - zenoh-backend-influxdb
+          - zenoh-backend-rocksdb
+          - zenoh-backend-s3
+          - zenoh-plugin-dds
+          - zenoh-plugin-mqtt
+          - zenoh-plugin-ros1
+          - zenoh-plugin-ros2dds
+          - zenoh-plugin-webserver
     steps:
       - id: create-branch
         uses: eclipse-zenoh/ci/create-release-branch@main
@@ -69,17 +69,17 @@ jobs:
 
   bump-and-tag-bash:
     name: Bump and tag ${{matrix.dependant}} dev branch (non-cargo)
-    runs-on: [self-hosted, ubuntu-22.04]
+    runs-on: [ubuntu-latest]
     strategy:
       fail-fast: false
       matrix:
         dependant:
           - zenoh-c
-          #- zenoh-cpp
-          #- zenoh-java
-          #- zenoh-kotlin
-          #- zenoh-pico
-          #- zenoh-python
+          - zenoh-cpp
+          - zenoh-java
+          - zenoh-kotlin
+          - zenoh-pico
+          - zenoh-python
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
