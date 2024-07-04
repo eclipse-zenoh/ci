@@ -1,0 +1,15 @@
+name: Bump crates
+
+inputs:
+  version:
+    required: true
+  bump-deps-pattern:
+    required: false
+  bump-deps-version:
+    required: false
+  bump-deps-branch:
+    required: false
+
+runs:
+  using: node20
+  main: ../dist/bump-only-main.js
