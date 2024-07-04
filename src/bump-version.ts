@@ -101,7 +101,7 @@ export async function main(input: Input) {
           await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
           // FIXME: Need to call for both Cargo.toml and Cargo.toml.in
           // await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-          sh("git add .", { cwd: workspace });
+          sh("git add Cargo.toml", { cwd: workspace });
           sh(
             `git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`,
             gitOptions,

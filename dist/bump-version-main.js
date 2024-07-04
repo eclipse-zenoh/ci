@@ -80948,7 +80948,7 @@ async function main(input) {
                     await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
                     // FIXME: Need to call for both Cargo.toml and Cargo.toml.in
                     // await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add Cargo.toml", { cwd: workspace });
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
                     // Update lockfile
                     // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
