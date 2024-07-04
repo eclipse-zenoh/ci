@@ -99,8 +99,12 @@ export async function main(input: Input) {
         // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
         if (input.bumpDepsRegExp != undefined) {
           await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-          // FIXME: Need to call for both Cargo.toml and Cargo.toml.in. Still need to fix bumpDeps() function
-          await cargo.bumpDependencies(`${workspace}/Cargo.toml.in`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+          await cargo.bumpDependencies(
+            `${workspace}/Cargo.toml.in`,
+            input.bumpDepsRegExp,
+            input.bumpDepsVersion,
+            input.bumpDepsBranch,
+          );
           sh("git add Cargo.toml Cargo.toml.in", { cwd: workspace });
           sh(
             `git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`,
@@ -126,19 +130,27 @@ export async function main(input: Input) {
       await toml.set("zenoh-jni/Cargo.toml", ["package", "version"], `${input.cargoVersion}`);
 
       // git commit version.txt zenoh-jni/Cargo.toml -m "chore: Bump version to \`$version\`"
-      sh(`git commit Cargo.toml pyproject.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`);
+      sh(
+        `git commit version.txt zenoh-jni/Cargo.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`,
+        gitOptions,
+      );
 
       // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
       if (input.bumpDepsRegExp != undefined) {
-        // FIXME: select only zenoh-jni/Cargo.toml
-        await cargo.bumpDependencies(`${workspace}/zenoh-jni/Cargo.toml`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+        await cargo.bumpDependencies(
+          `${workspace}/zenoh-jni/Cargo.toml`,
+          input.bumpDepsRegExp,
+          input.bumpDepsVersion,
+          input.bumpDepsBranch,
+        );
         sh("git add .", { cwd: workspace });
         sh(
           `git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`,
           gitOptions,
         );
 
-        sh("cargo check --manifest-path zenoh-jni/Cargo.toml", { cwd: workspace });
+        // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
+        sh("cargo check --manifest-path zenoh-jni/Cargo.toml", { cwd: workspace, check: false });
         sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
       }
     } else if (existsSync("pyproject.toml")) {
@@ -161,7 +173,8 @@ export async function main(input: Input) {
           gitOptions,
         );
 
-        sh("cargo check", { cwd: workspace });
+        // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
+        sh("cargo check", { cwd: workspace, check: false });
         sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
       }
     } else {

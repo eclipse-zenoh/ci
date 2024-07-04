@@ -1,3 +1,4 @@
+import fs from "fs";
 import * as os from "os";
 import { join } from "path";
 
@@ -168,7 +169,17 @@ export async function bump(path: string, version: string) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function bumpDependencies(path: string, pattern: RegExp, version: string, _branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
-  const manifestPath = `${path}/Cargo.toml`;
+  // HACK to not break current API
+  let manifestPath: string;
+  if (fs.lstatSync(path).isDirectory()) {
+    manifestPath = `${path}/Cargo.toml`;
+  } else {
+    manifestPath = `${path}`;
+    let elements = `${path}`.split("/");
+    elements.pop();
+    path = elements.join("/");
+  }
+
   const manifestRaw = toml.get(manifestPath);
 
   let manifest: CargoManifest;

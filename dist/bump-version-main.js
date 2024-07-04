@@ -80946,7 +80946,6 @@ async function main(input) {
                 // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
                 if (input.bumpDepsRegExp != undefined) {
                     await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-                    // FIXME: Need to call for both Cargo.toml and Cargo.toml.in. Still need to fix bumpDeps() function
                     await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(`${workspace}/Cargo.toml.in`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add Cargo.toml Cargo.toml.in", { cwd: workspace });
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
@@ -80966,14 +80965,14 @@ async function main(input) {
             //toml_set_in_place zenoh-jni/Cargo.toml "package.version" "$version"
             await toml.set("zenoh-jni/Cargo.toml", ["package", "version"], `${input.cargoVersion}`);
             // git commit version.txt zenoh-jni/Cargo.toml -m "chore: Bump version to \`$version\`"
-            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml pyproject.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`);
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit version.txt zenoh-jni/Cargo.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`, gitOptions);
             // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
             if (input.bumpDepsRegExp != undefined) {
-                // FIXME: select only zenoh-jni/Cargo.toml
                 await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(`${workspace}/zenoh-jni/Cargo.toml`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
-                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check --manifest-path zenoh-jni/Cargo.toml", { cwd: workspace });
+                // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check --manifest-path zenoh-jni/Cargo.toml", { cwd: workspace, check: false });
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
             }
         }
@@ -80991,7 +80990,8 @@ async function main(input) {
                 await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
-                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace });
+                // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace, check: false });
                 (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
             }
         }
@@ -81031,20 +81031,22 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
 /* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, build, hostTarget, buildDebian */
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(7799);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(9839);
-/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8121);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
-/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(8683);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__]);
-([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7147);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2037);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1017);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(7799);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(9839);
+/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(8121);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(98);
+/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_8__ = __nccwpck_require__(8683);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_5__, _cargo__WEBPACK_IMPORTED_MODULE_8__]);
+([_toml__WEBPACK_IMPORTED_MODULE_5__, _cargo__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -81053,14 +81055,15 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_tom
 
 
 
-const toml = await _toml__WEBPACK_IMPORTED_MODULE_4__/* .TOML.init */ .f.init();
+
+const toml = await _toml__WEBPACK_IMPORTED_MODULE_5__/* .TOML.init */ .f.init();
 /**
  * Uses the cargo-metadata command to list all packages in a Cargo workspace or crate.
  * @param path Path to the Cargo workspace or crate.
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 function packages(path) {
-    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
+    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
     const metadata = JSON.parse(metadataContents);
     const result = [];
     for (const elem of metadata.packages) {
@@ -81111,7 +81114,7 @@ function* packagesOrdered(path) {
  * @param version New version.
  */
 async function bump(path, version) {
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Bumping package versions in ${path} to ${version}`);
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.startGroup(`Bumping package versions in ${path} to ${version}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     if ("workspace" in manifestRaw) {
@@ -81120,7 +81123,7 @@ async function bump(path, version) {
     else {
         await toml.set(manifestPath, ["package", "version"], version);
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.endGroup();
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.endGroup();
 }
 /**
  * Bumps select workspace dependencies to @param version.
@@ -81140,8 +81143,18 @@ async function bump(path, version) {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function bumpDependencies(path, pattern, version, _branch) {
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
-    const manifestPath = `${path}/Cargo.toml`;
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
+    // HACK to not break current API
+    let manifestPath;
+    if (fs__WEBPACK_IMPORTED_MODULE_0___default().lstatSync(path).isDirectory()) {
+        manifestPath = `${path}/Cargo.toml`;
+    }
+    else {
+        manifestPath = `${path}`;
+        let elements = `${path}`.split("/");
+        elements.pop();
+        path = elements.join("/");
+    }
     const manifestRaw = toml.get(manifestPath);
     let manifest;
     let prefix;
@@ -81175,12 +81188,12 @@ async function bumpDependencies(path, pattern, version, _branch) {
             manifest.package.metadata.deb.depends != "$auto" &&
             pattern.test(manifest.package.metadata.deb.name)) {
             const deb = manifest.package.metadata.deb;
-            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${_cargo__WEBPACK_IMPORTED_MODULE_7__/* .toDebianVersion */ .$l(version)})`);
-            _actions_core__WEBPACK_IMPORTED_MODULE_2__.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
+            const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${_cargo__WEBPACK_IMPORTED_MODULE_8__/* .toDebianVersion */ .$l(version)})`);
+            _actions_core__WEBPACK_IMPORTED_MODULE_3__.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
             await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
         }
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.endGroup();
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.endGroup();
 }
 /**
  * Sets the Cargo registry of select dependencies.
@@ -81246,21 +81259,21 @@ function packagesDebian(path) {
  */
 async function installBinaryCached(name) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
-        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
-        const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
+        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_2__.join)(os__WEBPACK_IMPORTED_MODULE_1__.homedir(), ".cargo", "bin")];
+        const version = _config__WEBPACK_IMPORTED_MODULE_7__/* .config.lock.cratesio */ .v.lock.cratesio[name];
+        const key = `${os__WEBPACK_IMPORTED_MODULE_1__.platform()}-${os__WEBPACK_IMPORTED_MODULE_1__.release()}-${os__WEBPACK_IMPORTED_MODULE_1__.arch()}-${name}-${version}`;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
         // failure
-        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
+        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.restoreCache(paths, key);
         if (hit == undefined) {
-            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
-            await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
+            (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name} --force`);
+            await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.saveCache(paths, key);
         }
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
+        (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name}`);
     }
 }
 function build(path, target) {

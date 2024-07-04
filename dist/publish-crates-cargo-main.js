@@ -80854,20 +80854,22 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered)
 /* harmony export */ });
 /* unused harmony exports packages, bump, bumpDependencies, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(7799);
-/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(9839);
-/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8121);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
-/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(8683);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__]);
-([_toml__WEBPACK_IMPORTED_MODULE_4__, _cargo__WEBPACK_IMPORTED_MODULE_7__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7147);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2037);
+/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(1017);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(7799);
+/* harmony import */ var _actions_cache__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_cache__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(9839);
+/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(8121);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(98);
+/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_8__ = __nccwpck_require__(8683);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_toml__WEBPACK_IMPORTED_MODULE_5__, _cargo__WEBPACK_IMPORTED_MODULE_8__]);
+([_toml__WEBPACK_IMPORTED_MODULE_5__, _cargo__WEBPACK_IMPORTED_MODULE_8__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
@@ -80876,14 +80878,15 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_tom
 
 
 
-const toml = await _toml__WEBPACK_IMPORTED_MODULE_4__/* .TOML.init */ .f.init();
+
+const toml = await _toml__WEBPACK_IMPORTED_MODULE_5__/* .TOML.init */ .f.init();
 /**
  * Uses the cargo-metadata command to list all packages in a Cargo workspace or crate.
  * @param path Path to the Cargo workspace or crate.
  * @returns The list of Cargo packages present in the workspace or crate.
  */
 function packages(path) {
-    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
+    const metadataContents = (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)("cargo metadata --no-deps --format-version=1", { cwd: path });
     const metadata = JSON.parse(metadataContents);
     const result = [];
     for (const elem of metadata.packages) {
@@ -80964,7 +80967,17 @@ async function bump(path, version) {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function bumpDependencies(path, pattern, version, _branch) {
     core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
-    const manifestPath = `${path}/Cargo.toml`;
+    // HACK to not break current API
+    let manifestPath;
+    if (fs.lstatSync(path).isDirectory()) {
+        manifestPath = `${path}/Cargo.toml`;
+    }
+    else {
+        manifestPath = `${path}`;
+        let elements = `${path}`.split("/");
+        elements.pop();
+        path = elements.join("/");
+    }
     const manifestRaw = toml.get(manifestPath);
     let manifest;
     let prefix;
@@ -81014,7 +81027,7 @@ async function bumpDependencies(path, pattern, version, _branch) {
  * @param registry The name of the Cargo alternative registry.
  */
 async function setRegistry(path, pattern, registry) {
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     let manifest;
@@ -81035,7 +81048,7 @@ async function setRegistry(path, pattern, registry) {
             await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
         }
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.endGroup();
+    _actions_core__WEBPACK_IMPORTED_MODULE_3__.endGroup();
 }
 /**
  * Stores Cargo registry configuration in `.cargo/config.toml`.
@@ -81069,21 +81082,21 @@ function packagesDebian(path) {
  */
 async function installBinaryCached(name) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
-        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
-        const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
+        const paths = [(0,path__WEBPACK_IMPORTED_MODULE_2__.join)(os__WEBPACK_IMPORTED_MODULE_1__.homedir(), ".cargo", "bin")];
+        const version = _config__WEBPACK_IMPORTED_MODULE_7__/* .config.lock.cratesio */ .v.lock.cratesio[name];
+        const key = `${os__WEBPACK_IMPORTED_MODULE_1__.platform()}-${os__WEBPACK_IMPORTED_MODULE_1__.release()}-${os__WEBPACK_IMPORTED_MODULE_1__.arch()}-${name}-${version}`;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
         // failure
-        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
+        const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.restoreCache(paths, key);
         if (hit == undefined) {
-            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
-            await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
+            (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name} --force`);
+            await _actions_cache__WEBPACK_IMPORTED_MODULE_4__.saveCache(paths, key);
         }
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
+        (0,_command__WEBPACK_IMPORTED_MODULE_6__.sh)(`cargo +stable install ${name}`);
     }
 }
 function build(path, target) {
