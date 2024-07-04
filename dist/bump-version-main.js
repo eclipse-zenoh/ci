@@ -80842,24 +80842,24 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
-/***/ 8454:
+/***/ 498:
 /***/ ((module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _bump_only__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(9564);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_bump_only__WEBPACK_IMPORTED_MODULE_0__]);
-_bump_only__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+/* harmony import */ var _bump_version__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(4402);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_bump_version__WEBPACK_IMPORTED_MODULE_0__]);
+_bump_version__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
-await (0,_bump_only__WEBPACK_IMPORTED_MODULE_0__/* .main */ .D)((0,_bump_only__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .c)());
+await (0,_bump_version__WEBPACK_IMPORTED_MODULE_0__/* .main */ .D)((0,_bump_version__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .c)());
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
-/***/ 9564:
+/***/ 4402:
 /***/ ((module, __webpack_exports__, __nccwpck_require__) => {
 
 "use strict";
@@ -80868,24 +80868,41 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "D": () => (/* binding */ main),
 /* harmony export */   "c": () => (/* binding */ setup)
 /* harmony export */ });
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8121);
-/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(8683);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(98);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_2__]);
-_cargo__WEBPACK_IMPORTED_MODULE_2__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(7147);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3292);
+/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(8683);
+/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(8121);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(98);
+/* harmony import */ var _toml__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(9839);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_3__, _toml__WEBPACK_IMPORTED_MODULE_6__]);
+([_cargo__WEBPACK_IMPORTED_MODULE_3__, _toml__WEBPACK_IMPORTED_MODULE_6__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 
 
 
 
+
+
+
+const toml = await _toml__WEBPACK_IMPORTED_MODULE_6__/* .TOML.init */ .f.init();
 function setup() {
-    const version = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("version", { required: true });
-    const bumpDepsPattern = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("bump-deps-pattern");
-    const bumpDepsVersion = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("bump-deps-version");
-    const bumpDepsBranch = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput("bump-deps-branch");
+    const cargoVersion = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("cargo-version", { required: true });
+    const cmakeVersion = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("cmake-version");
+    const branch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("branch");
+    const zenohCBranch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("zenoh-c-branch");
+    const zenohPicoBranch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("zenoh-pico-branch");
+    const bumpDepsPattern = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("bump-deps-pattern");
+    const bumpDepsVersion = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("bump-deps-version");
+    const bumpDepsBranch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("bump-deps-branch");
     return {
-        version,
+        cargoVersion,
+        cmakeVersion: cmakeVersion === "" ? undefined : cmakeVersion,
+        branch: branch === "" ? undefined : branch,
+        zenohCBranch: zenohCBranch === "" ? undefined : zenohCBranch,
+        zenohPicoBranch: zenohPicoBranch === "" ? undefined : zenohPicoBranch,
         bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
         bumpDepsVersion: bumpDepsVersion === "" ? undefined : bumpDepsVersion,
         bumpDepsBranch: bumpDepsBranch === "" ? undefined : bumpDepsBranch,
@@ -80894,33 +80911,73 @@ function setup() {
 async function main(input) {
     try {
         const workspace = ".";
-        await _cargo__WEBPACK_IMPORTED_MODULE_2__/* .bump */ .HU(workspace, input.version);
-        (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)("git add .", { cwd: workspace });
-        (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: workspace, env: _config__WEBPACK_IMPORTED_MODULE_3__/* .gitEnv */ .B });
-        if (input.bumpDepsRegExp != undefined) {
-            await _cargo__WEBPACK_IMPORTED_MODULE_2__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-            (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)("git add .", { cwd: workspace });
-            (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
-                cwd: workspace,
-                env: _config__WEBPACK_IMPORTED_MODULE_3__/* .gitEnv */ .B,
-                check: false,
-            });
-            (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)("cargo check", { cwd: workspace });
-            (0,_command__WEBPACK_IMPORTED_MODULE_1__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-                cwd: workspace,
-                env: _config__WEBPACK_IMPORTED_MODULE_3__/* .gitEnv */ .B,
-                check: false,
-            });
+        const gitOptions = { cwd: workspace, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B, check: false };
+        if (input.cmakeVersion) {
+            // Common to all CMake based projects
+            await fs_promises__WEBPACK_IMPORTED_MODULE_1__.writeFile("version.txt", `${input.cmakeVersion}`);
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit version.txt --message 'chore: Bump version to \`${input.cmakeVersion}\`'`, gitOptions);
+            // zenoh-cpp specific
+            // FIXME: this is not quite the same as zenoh-cpp/ci/scripts/bump-and-tag.bash yet
+            // In the current version, the bash script doesn't commit the changes to the zenoh-*-branch.txt files.
+            // Check with Mahmoud if this is a bug in the script of intended behavior
+            if ((0,fs__WEBPACK_IMPORTED_MODULE_0__.existsSync)("zenoh-cpp-branch.txt")) {
+                if (input.branch != undefined) {
+                    await fs_promises__WEBPACK_IMPORTED_MODULE_1__.writeFile("zenoh-cpp-branch.txt", `${input.branch}`);
+                }
+                if (input.zenohCBranch != undefined) {
+                    await fs_promises__WEBPACK_IMPORTED_MODULE_1__.writeFile("zenoh-c-branch.txt", `${input.zenohCBranch}`);
+                }
+                if (input.zenohPicoBranch != undefined) {
+                    await fs_promises__WEBPACK_IMPORTED_MODULE_1__.writeFile("zenoh-pico-branch.txt", `${input.zenohPicoBranch}`);
+                }
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Update zenoh-cpp, zenoh-c and zenoh-pico branches.'`, gitOptions);
+            }
+            // zenoh-c specific
+            // Check if Cargo.toml.in exist at the root of the checkout and assume this is a zenoh-c checkout
+            if ((0,fs__WEBPACK_IMPORTED_MODULE_0__.existsSync)("Cargo.toml.in")) {
+                // Propagate version change to Cargo.toml and Cargo.toml.in
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cmake . -DZENOHC_BUILD_IN_SOURCE_TREE=TRUE -DCMAKE_BUILD_TYPE=Release", { cwd: workspace });
+                // Update Debian dependency of libzenohc-dev
+                const deb_version = _cargo__WEBPACK_IMPORTED_MODULE_3__/* .toDebianVersion */ .$l(input.cargoVersion);
+                await toml.set("Cargo.toml", ["package", "metadata", "deb", "variants", "libzenohc-dev", "depends"], `libzenohc (=${deb_version})`);
+                await toml.set("Cargo.toml.in", ["package", "metadata", "deb", "variants", "libzenohc-dev", "depends"], `libzenohc (=${deb_version})`);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml Cargo.toml.in Cargo.lock --message 'chore: Bump libzenohc-dev version to \`${deb_version}\`'`, gitOptions);
+                // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
+                if (input.bumpDepsRegExp != undefined) {
+                    await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                    // FIXME: Need to call for both Cargo.toml and Cargo.toml.in
+                    // await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
+                    // Update lockfile
+                    // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace, check: false });
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml Cargo.toml.in Cargo.lock --message 'chore: Bump \`${input.bumpDepsRegExp}\` version to \`${input.bumpDepsVersion}\`'`, gitOptions);
+                }
+            }
+        }
+        else {
+            await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bump */ .HU(workspace, input.cargoVersion);
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump version to \`${input.cargoVersion}\`'`, gitOptions);
+            if (input.bumpDepsRegExp != undefined) {
+                await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
+            }
         }
     }
     catch (error) {
         if (error instanceof Error)
-            _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);
+            _actions_core__WEBPACK_IMPORTED_MODULE_2__.setFailed(error.message);
     }
 }
 
 __webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
+} catch(e) { __webpack_async_result__(e); } }, 1);
 
 /***/ }),
 
@@ -83426,7 +83483,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module used 'module' so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(8454);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(498);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
