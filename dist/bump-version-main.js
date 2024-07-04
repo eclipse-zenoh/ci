@@ -80946,15 +80946,53 @@ async function main(input) {
                 // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
                 if (input.bumpDepsRegExp != undefined) {
                     await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-                    // FIXME: Need to call for both Cargo.toml and Cargo.toml.in
-                    // await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add Cargo.toml", { cwd: workspace });
+                    // FIXME: Need to call for both Cargo.toml and Cargo.toml.in. Still need to fix bumpDeps() function
+                    await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(`${workspace}/Cargo.toml.in`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add Cargo.toml Cargo.toml.in", { cwd: workspace });
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump \`${input.bumpDepsRegExp}\` dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
                     // Update lockfile
                     // FIXME: Bumping the version before zenoh is released causes cargo check to return an error. Ignore for now
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace, check: false });
                     (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml Cargo.toml.in Cargo.lock --message 'chore: Bump \`${input.bumpDepsRegExp}\` version to \`${input.bumpDepsVersion}\`'`, gitOptions);
                 }
+            }
+        }
+        else if ((0,fs__WEBPACK_IMPORTED_MODULE_0__.existsSync)("zenoh-jni/Cargo.toml")) {
+            // zenoh-[java,kotlin]
+            // Bump Gradle project version
+            //printf '%s' "$version" > version.txt
+            await fs_promises__WEBPACK_IMPORTED_MODULE_1__.writeFile("version.txt", `${input.cargoVersion}`);
+            // Propagate version change to zenoh-jni
+            //toml_set_in_place zenoh-jni/Cargo.toml "package.version" "$version"
+            await toml.set("zenoh-jni/Cargo.toml", ["package", "version"], `${input.cargoVersion}`);
+            // git commit version.txt zenoh-jni/Cargo.toml -m "chore: Bump version to \`$version\`"
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml pyproject.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`);
+            // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
+            if (input.bumpDepsRegExp != undefined) {
+                // FIXME: select only zenoh-jni/Cargo.toml
+                await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(`${workspace}/zenoh-jni/Cargo.toml`, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check --manifest-path zenoh-jni/Cargo.toml", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
+            }
+        }
+        else if ((0,fs__WEBPACK_IMPORTED_MODULE_0__.existsSync)("pyproject.toml")) {
+            // zenoh-python
+            // Bump Cargo version
+            // toml_set_in_place Cargo.toml "package.version" "$version"
+            await toml.set("Cargo.toml", ["package", "version"], `${input.cargoVersion}`);
+            // Propagate version change to pyproject.toml
+            // toml_set_in_place pyproject.toml "project.version" "$version"
+            await toml.set("pyproject.toml", ["package", "version"], `${input.cargoVersion}`);
+            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit Cargo.toml pyproject.toml -m "chore: Bump version to \`${input.cargoVersion}\`"`, gitOptions);
+            // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
+            if (input.bumpDepsRegExp != undefined) {
+                await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git add .", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, gitOptions);
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo check", { cwd: workspace });
+                (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", gitOptions);
             }
         }
         else {
