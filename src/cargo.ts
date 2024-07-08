@@ -160,14 +160,15 @@ export async function bump(path: string, version: string) {
  * eclipse-zenoh/zenoh-plugin-webserver). It also assumes that all matching
  * dependencies define a version, a git repository remote and a git branch.
  *
- * @param path Path to the Cargo workspace.
+ * @param path Path to the Cargo workspace or TOML file.
  * @param pattern A regular expression that matches the dependencies to be
  * @param version New version.
+ * @param release True if bumping deps for a release
  * @param git Git repository location.
  * @param branch Branch of git repository location. bumped to @param version.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function bumpDependencies(path: string, pattern: RegExp, version: string, _branch?: string) {
+export async function bumpDependencies(path: string, pattern: RegExp, version: string, release: boolean, git?: string, branch?: string) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   // HACK to not break current API
   let manifestPath: string;
@@ -196,15 +197,19 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
     if (pattern.test(dep)) {
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
 
-      // FIXME(fuzzypixelz): Previously, we set the branch of the git source in dependencies,
-      // but as all dependencies are assumed to be on crates.io anyway, this is not necessary.
-      // Still, the API of all related actions/workflows should be updated to reflect this.
-      //
-      // if (branch != undefined) {
-      //   await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
-      // }
-      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
-      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
+      if (release) {
+        await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
+        await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
+        continue;
+      }
+
+      if (git) {
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), git);
+      }
+
+      if (branch) {
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
+      }
     }
   }
 
