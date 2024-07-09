@@ -1,0 +1,26 @@
+name: Yank crates
+
+on:
+  workflow_dispatch:
+    inputs:
+      crate:
+        type: string
+        description: Crate to yank
+        required: true
+      version:
+        type: string
+        description: The version to yank
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  yank-crates:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Yank crates
+        env:
+            CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+        run: cargo yank ${{ inputs.crate }} --version ${{ inputs.version }}
