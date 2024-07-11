@@ -3,9 +3,9 @@ name: Yank crates
 on:
   workflow_dispatch:
     inputs:
-      crate:
+      crates:
         type: string
-        description: Crate to yank
+        description: Space separated list of crates to yank
         required: true
       version:
         type: string
@@ -23,4 +23,7 @@ jobs:
       - name: Yank crates
         env:
             CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo yank ${{ inputs.crate }} --version ${{ inputs.version }}
+        run: |
+          for crate in ${{ inputs.crates }};
+            do cargo yank $crate --version ${{ inputs.version }};
+          done;
