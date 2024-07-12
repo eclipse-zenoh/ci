@@ -1,0 +1,129 @@
+name: Bump dev version
+
+on:
+  workflow_dispatch:
+    inputs:
+      cargo_version:
+        type: string
+        description: The new development version (e.g. 0.11.1-dev)
+        required: true
+      cmake_version:
+        type: string
+        description: The new development version (e.g. 0.11.1.0)
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  bump-and-tag-crates:
+    name: Bump ${{ matrix.dependant }} dev branch (Cargo)
+    runs-on: [self-hosted, ubuntu-22.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - zenoh
+          #- zenoh-backend-filesystem
+          #- zenoh-backend-influxdb
+          #- zenoh-backend-rocksdb
+          #- zenoh-backend-s3
+          #- zenoh-plugin-dds
+          #- zenoh-plugin-mqtt
+          #- zenoh-plugin-ros1
+          #- zenoh-plugin-ros2dds
+          #- zenoh-plugin-webserver
+          - zenoh-java
+          - zenoh-python
+    steps:
+      - name: Checkout ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          #repository: eclipse-zenoh/${{ matrix.dependant }}
+          repository: ZettaScaleLabs/${{ matrix.dependant }}
+          submodules: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - uses: ZettaScaleLabs/ci/bump-version@bump-only
+        with:
+          cargo-version: ${{ inputs.cargo_version }}
+          bump-deps-pattern: 'zenoh.*'
+          bump-deps-version: ${{ inputs.cargo_version }}
+
+      - name: Create pull request version change
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Bump dev version to `${{ inputs.cargo_version }}`
+          body: |
+            This pull request updates `${{ matrix.dependant }}` to the new development line.
+
+            - **workflow**: [${{ github.run_id }}](https://github.com/${{ github.repository}}/actions/runs/${{ github.run_id }})
+          commit-message: "chore: Bump dev version to `${{ inputs.cargo_version }}`"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          branch: eclipse-zenoh-bot/bump-dev-version
+          delete-branch: true
+          labels: internal
+          draft: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Print pull request URL
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
+  bump-and-tag-cmake:
+    name: Bump ${{ matrix.dependant }} dev branch (CMake)
+    runs-on: [self-hosted, ubuntu-22.04]
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - zenoh-c
+          - zenoh-cpp
+          - zenoh-pico
+    steps:
+      - name: Checkout ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          #repository: eclipse-zenoh/${{ matrix.dependant }}
+          repository: ZettaScaleLabs/${{ matrix.dependant }}
+          submodules: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - uses: ZettaScaleLabs/ci/bump-version@bump-only
+        with:
+          cargo-version: ${{ inputs.cargo_version }}
+          cmake-version: ${{ inputs.cmake_version }}
+          bump-deps-pattern: 'zenoh.*'
+          bump-deps-version: ${{ inputs.cargo_version }}
+
+      # At this point we should have all the commits in the branch
+      - run: git clean -f
+
+      - name: Create pull request version change
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Bump dev version to ${{ inputs.cmake_version }}`
+          body: |
+            This pull request updates `${{ matrix.dependant }}` to the new development line.
+
+            - **workflow**: [${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          commit-message: "build: Bump dev version"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          branch: eclipse-zenoh-bot/bump-dev-version
+          delete-branch: true
+          labels: internal
+          draft: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Print pull request URL
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
