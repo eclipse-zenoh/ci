@@ -168,7 +168,14 @@ export async function bump(path: string, version: string) {
  * @param branch Branch of git repository location. bumped to @param version.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function bumpDependencies(path: string, pattern: RegExp, version: string, release: boolean, git?: string, branch?: string) {
+export async function bumpDependencies(
+  path: string,
+  pattern: RegExp,
+  version: string,
+  release: boolean,
+  git?: string,
+  branch?: string,
+) {
   core.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
   // HACK to not break current API
   let manifestPath: string;

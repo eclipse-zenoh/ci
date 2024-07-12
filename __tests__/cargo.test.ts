@@ -163,7 +163,7 @@ describe("cargo", () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
 
     const version = "1.2.3-beta.1";
-    const debVersion = cargo.toDebianVersion(version)
+    const debVersion = cargo.toDebianVersion(version);
     await cargo.bumpDependencies(tmp, /zenoh.*/, version);
 
     expect(toml.get(`${tmp}/Cargo.toml`, ["workspace", "dependencies", "zenoh", "version"])).toEqual(version);
