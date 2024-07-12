@@ -54,7 +54,7 @@ export async function main(input: Input) {
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
 
     if (input.bumpDepsRegExp != undefined) {
-      await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+      await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, true, input.bumpDepsBranch);
       sh("git add .", { cwd: repo });
       sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
         cwd: repo,

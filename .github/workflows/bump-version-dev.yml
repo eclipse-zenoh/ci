@@ -40,12 +40,11 @@ jobs:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
         with:
-          #repository: eclipse-zenoh/${{ matrix.dependant }}
-          repository: ZettaScaleLabs/${{ matrix.dependant }}
+          repository: eclipse-zenoh/${{ matrix.dependant }}
           submodules: true
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      - uses: ZettaScaleLabs/ci/bump-version@bump-only
+      - uses: eclipse-zenoh/ci/bump-version@main
         with:
           cargo-version: ${{ inputs.cargo_version }}
           bump-deps-pattern: 'zenoh.*'
@@ -89,12 +88,11 @@ jobs:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
         with:
-          #repository: eclipse-zenoh/${{ matrix.dependant }}
-          repository: ZettaScaleLabs/${{ matrix.dependant }}
+          repository: eclipse-zenoh/${{ matrix.dependant }}
           submodules: true
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      - uses: ZettaScaleLabs/ci/bump-version@bump-only
+      - uses: eclipse-zenoh/ci/bump-version@main
         with:
           cargo-version: ${{ inputs.cargo_version }}
           cmake-version: ${{ inputs.cmake_version }}

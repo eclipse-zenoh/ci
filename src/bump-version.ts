@@ -98,11 +98,12 @@ export async function main(input: Input) {
 
         // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
         if (input.bumpDepsRegExp != undefined) {
-          await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+          await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, false, input.bumpDepsBranch);
           await cargo.bumpDependencies(
             `${workspace}/Cargo.toml.in`,
             input.bumpDepsRegExp,
             input.bumpDepsVersion,
+            false,
             input.bumpDepsBranch,
           );
           sh("git add Cargo.toml Cargo.toml.in", { cwd: workspace });
@@ -141,6 +142,7 @@ export async function main(input: Input) {
           `${workspace}/zenoh-jni/Cargo.toml`,
           input.bumpDepsRegExp,
           input.bumpDepsVersion,
+          false,
           input.bumpDepsBranch,
         );
         sh("git add .", { cwd: workspace });
@@ -166,7 +168,7 @@ export async function main(input: Input) {
 
       // Select all package dependencies that match $bump_deps_pattern and bump them to $bump_deps_version
       if (input.bumpDepsRegExp != undefined) {
-        await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+        await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, false, input.bumpDepsBranch);
         sh("git add .", { cwd: workspace });
         sh(
           `git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`,
@@ -183,7 +185,7 @@ export async function main(input: Input) {
       sh(`git commit --message 'chore: Bump version to \`${input.cargoVersion}\`'`, gitOptions);
 
       if (input.bumpDepsRegExp != undefined) {
-        await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+        await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, false, input.bumpDepsBranch);
         sh("git add .", { cwd: workspace });
         sh(
           `git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`,
