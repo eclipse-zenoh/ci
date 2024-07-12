@@ -80975,7 +80975,7 @@ async function bumpDependencies(path, pattern, version, release, git, branch) {
     }
     else {
         manifestPath = `${path}`;
-        let elements = `${path}`.split("/");
+        const elements = `${path}`.split("/");
         elements.pop();
         path = elements.join("/");
     }

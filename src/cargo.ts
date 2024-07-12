@@ -183,7 +183,7 @@ export async function bumpDependencies(
     manifestPath = `${path}/Cargo.toml`;
   } else {
     manifestPath = `${path}`;
-    let elements = `${path}`.split("/");
+    const elements = `${path}`.split("/");
     elements.pop();
     path = elements.join("/");
   }
