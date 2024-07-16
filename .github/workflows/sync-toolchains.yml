@@ -48,6 +48,16 @@ jobs:
         run: sed "s;^channel = .*\$;channel = \"${{ inputs.version }}\";" --in-place rust-toolchain.toml
         shell: bash
 
+      - name: Update ${{ matrix.dependant }}' rust-version in Cargo.toml to ${{ inputs.version }}
+        if: ${{ matrix.dependent }} ==  "zenoh"
+        run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place Cargo.toml
+        shell: bash
+
+      - name: Update ${{ matrix.dependant }}' rust-version in zenoh-jni/Cargo.toml to ${{ inputs.version }}
+        if: contains(fromJSON('["zenoh-java", "zenoh-kotlin"]'), ${{ matrix.dependent }})
+        run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place zenoh-jni/Cargo.toml
+        shell: bash
+
       - name: Create/Update a pull request if the toolchain changed
         id: cpr
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
