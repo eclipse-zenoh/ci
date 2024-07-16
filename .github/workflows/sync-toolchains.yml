@@ -49,12 +49,12 @@ jobs:
         shell: bash
 
       - name: Update ${{ matrix.dependant }}' rust-version in Cargo.toml to ${{ inputs.version }}
-        if: ${{ matrix.dependent }} ==  "zenoh"
+        if: ${{ matrix.dependant == 'zenoh' }}
         run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place Cargo.toml
         shell: bash
 
       - name: Update ${{ matrix.dependant }}' rust-version in zenoh-jni/Cargo.toml to ${{ inputs.version }}
-        if: contains(fromJSON('["zenoh-java", "zenoh-kotlin"]'), ${{ matrix.dependent }})
+        if: ${{ contains(fromJSON('["zenoh-java", "zenoh-kotlin"]'), matrix.dependant ) }}
         run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place zenoh-jni/Cargo.toml
         shell: bash
 
