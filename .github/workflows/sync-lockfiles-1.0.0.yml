@@ -97,7 +97,7 @@ jobs:
 
       # Another ugly workaround, since zenoh-c has an additional Cargo.lock not in the root
       - name: Override ${{ matrix.dependant }} build-resources lockfile with Zenoh's
-        if: ${{ matrix.dependant }} == "zenoh-c"
+        if: ${{ matrix.dependant == 'zenoh-c' }}
         run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
       - name: Rectify lockfile
