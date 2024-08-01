@@ -105,6 +105,10 @@ jobs:
         # the dependency versions fetched from source.
         run: cargo check --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
 
+      - name: Rectify lockfile for zenoh-c build-resources
+        if: ${{ matrix.dependant == 'zenoh-c' }}
+        run: cargo check --manifest-path build-resources/opaque-types/Cargo.toml
+
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
