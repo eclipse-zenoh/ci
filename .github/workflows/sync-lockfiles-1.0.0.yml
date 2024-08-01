@@ -61,9 +61,8 @@ jobs:
           - zenoh-backend-influxdb
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
-          # zenoh-[java,kotlin] are not ready yet for 1.0.0
-          #- zenoh-java
-          #- zenoh-kotlin
+          - zenoh-java
+          - zenoh-kotlin
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
