@@ -61,9 +61,8 @@ jobs:
           - zenoh-backend-influxdb
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
-          # zenoh-[java,kotlin] are not ready yet for 1.0.0
-          #- zenoh-java
-          #- zenoh-kotlin
+          - zenoh-java
+          - zenoh-kotlin
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
@@ -99,10 +98,7 @@ jobs:
       # Another ugly workaround, since zenoh-c has an additional Cargo.lock not in the root
       - name: Override ${{ matrix.dependant }} build-resources lockfile with Zenoh's
         if: ${{ matrix.dependant }} == "zenoh-c"
-        uses: actions/download-artifact@v4
-        with:
-          name: Cargo.lock
-          path: build-resources/opaque-types/Cargo.lock
+        run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
