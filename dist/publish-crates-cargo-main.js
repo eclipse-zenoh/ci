@@ -80851,7 +80851,8 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "i8": () => (/* binding */ setRegistry),
 /* harmony export */   "p3": () => (/* binding */ configRegistry),
-/* harmony export */   "r4": () => (/* binding */ packagesOrdered)
+/* harmony export */   "r4": () => (/* binding */ packagesOrdered),
+/* harmony export */   "s9": () => (/* binding */ isPublished)
 /* harmony export */ });
 /* unused harmony exports packages, bump, bumpDependencies, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
@@ -81129,6 +81130,15 @@ function buildDebian(path, target, version) {
 function toDebianVersion(version, revision) {
     // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
     return `${version.replace("-", "~")}-${revision ?? 1}`;
+}
+/**
+ * Check if Package is already published in crates.io
+ * @param pkg Package to check.
+ */
+function isPublished(pkg) {
+    // Hackish but crates.io doesn't have a stable api anyway.
+    const publishedVersion = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+    return publishedVersion === pkg.version;
 }
 
 __webpack_async_result__();
@@ -81455,7 +81465,8 @@ function publish(path, env, allowDirty = false) {
         check: true,
     };
     for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
-        if (package_.publish === undefined || package_.publish) {
+        // Crates.io won't allow packages to be published with the same version
+        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_) && (package_.publish === undefined || package_.publish)) {
             const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");
