@@ -81249,7 +81249,11 @@ function toDebianVersion(version, revision) {
  */
 function isPublished(pkg) {
     // Hackish but crates.io doesn't have a stable api anyway.
-    const publishedVersion = sh(`cargo search ${pkg.name}`).split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+    const results = sh(`cargo search ${pkg.name}`);
+    if (!results) {
+        return false;
+    }
+    const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
     return publishedVersion === pkg.version;
 }
 
