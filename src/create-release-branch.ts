@@ -63,10 +63,7 @@ export async function main(input: Input) {
       if (branches.length >= input.dryRunHistorySize) {
         const toDelete = branches.slice(0, branches.length - input.dryRunHistorySize);
         toDelete.forEach(branch => {
-          const tag = branch.replace("release/dry-run/", "");
           sh(`git push origin --delete ${branch}`, { cwd: repo });
-          // Don't fail the entire workflow if the tag delete fails
-          sh(`git push origin --delete ${tag}`, { cwd: repo, check: false });
         });
       }
     }
