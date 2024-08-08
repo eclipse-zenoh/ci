@@ -7,6 +7,18 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - run: gh pr view ${{ github.event.pull_request.number }} --json labels --repo ${{ github.repository }} | jq -e '.labels != []'
+      - name: Check Labels
+        run: |
+          required_labels=("breaking-change" "bug" "dependencies" "documentation" "enhancement" "new feature" "internal")
+          pr_labels="$(gh pr view ${{ github.event.pull_request.number }} --json labels --repo ${{ github.repository }} | jq -r '.labels[].name')"
+          for label in $pr_labels; do
+              for req_label in "${required_labels[@]}"; do
+                  if [[ "${label}" == "${req_label}" ]] ; then
+                      exit 0
+                  fi
+              done
+          done
+          gh pr comment --repo ${{ github.repository}} ${{ github.event.pull_request.number }} -b "PR missing one of the required labels: **${required_labels[*]}**"
+          exit 1
         env:
-          GH_TOKEN: ${{ github.token}}
+          GH_TOKEN: ${{ github.token }}
