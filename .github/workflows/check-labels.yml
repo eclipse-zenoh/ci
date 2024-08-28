@@ -21,4 +21,4 @@ jobs:
           gh pr comment --repo ${{ github.repository}} ${{ github.event.pull_request.number }} -b "PR missing one of the required labels: **${required_labels[*]}**"
           exit 1
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
