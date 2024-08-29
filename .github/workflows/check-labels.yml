@@ -2,6 +2,9 @@ name: Check labels
 
 on:
   workflow_call:
+    secrets:
+      github-token:
+        required: true
 
 jobs:
   main:
@@ -21,4 +24,4 @@ jobs:
           gh pr comment --repo ${{ github.repository}} ${{ github.event.pull_request.number }} -b "PR missing one of the required labels: **${required_labels[*]}**"
           exit 1
         env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          GH_TOKEN: ${{ secrets.github-token }}
