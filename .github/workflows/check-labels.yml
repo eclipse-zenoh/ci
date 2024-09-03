@@ -16,7 +16,6 @@ jobs:
           import json
           import os
           import subprocess
-          import sys
 
           required_labels = set(["breaking-change", "bug", "dependencies", "documentation", "enhancement", "new feature", "internal"])
 
