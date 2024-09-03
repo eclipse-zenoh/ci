@@ -11,17 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check Labels
+        shell: python
         run: |
-          required_labels=("breaking-change" "bug" "dependencies" "documentation" "enhancement" "new feature" "internal")
-          pr_labels="$(gh pr view ${{ github.event.pull_request.number }} --json labels --repo ${{ github.repository }} | jq -r '.labels[].name')"
-          for label in $pr_labels; do
-              for req_label in "${required_labels[@]}"; do
-                  if [[ "${label}" == "${req_label}" ]] ; then
-                      exit 0
-                  fi
-              done
-          done
-          gh pr comment --repo ${{ github.repository}} ${{ github.event.pull_request.number }} -b "PR missing one of the required labels: **${required_labels[*]}**"
-          exit 1
+          import json
+          import os
+          import subprocess
+          import sys
+
+          required_labels = set(["breaking-change", "bug", "dependencies", "documentation", "enhancement", "new feature", "internal"])
+
+          out = subprocess.check_output(["gh", "pr", "view", "${{ github.event.pull_request.number }}", "--json", "labels", "--repo", "${{ github.repository }}"])
+          pr_labels = set([label["name"] for label in json.loads(out).get("labels")])
+
+          if pr_labels.intersection(required_labels):
+              exit(0)
+          subprocess.run(["gh", "pr", "comment", "--repo", "${{ github.repository }}", "${{ github.event.pull_request.number }}", "-b", f"PR missing one of the required labels: **{required_labels}**"])
+          exit(1)
         env:
           GH_TOKEN: ${{ secrets.github-token }}
