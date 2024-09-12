@@ -99,6 +99,11 @@ jobs:
         if: ${{ matrix.dependant == 'zenoh-c' }}
         run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
+      # zenoh-c also requires a run of cargo update -p zenoh
+      - name: cargo update ${{ matrix.dependant }}
+        if: ${{ matrix.dependant == 'zenoh-c' }}
+        run: cargo update -p zenoh
+
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
