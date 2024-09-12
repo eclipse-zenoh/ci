@@ -94,10 +94,19 @@ jobs:
           name: Cargo.lock
           path: ${{ steps.crate-path.outputs.value }}
 
+      # Another ugly workaround, since zenoh-c has an additional Cargo.lock not in the root
+      - name: Override ${{ matrix.dependant }} build-resources lockfile with Zenoh's
+        if: ${{ matrix.dependant == 'zenoh-c' }}
+        run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
+
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
         run: cargo check --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
+
+      - name: Rectify lockfile for zenoh-c build-resources
+        if: ${{ matrix.dependant == 'zenoh-c' }}
+        run: cargo check --manifest-path build-resources/opaque-types/Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
