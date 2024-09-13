@@ -77,7 +77,7 @@ export async function main(input: Input) {
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
     // local repository created below
     sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
-    sh(`gzip -k ${allPackagesPath}`, { quiet: true });
+    sh(`gzip -k -9 ${allPackagesPath}`, { quiet: true });
 
     sh("ls -R");
     core.info(`Adding a local Debian repository at ${process.cwd()}`);
