@@ -48,18 +48,6 @@ export function setup(): Input {
   };
 }
 
-function gzip(input: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    zlib.gzip(input, { level: 9 }, (error, buffer) => {
-      if (!error) {
-        resolve(buffer);
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
-
 export async function main(input: Input) {
   try {
     const results = await artifact.listArtifacts({ latest: true });
