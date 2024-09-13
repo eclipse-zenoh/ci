@@ -1,5 +1,4 @@
 import * as fs from "fs/promises";
-import * as zlib from "zlib";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
@@ -48,18 +47,6 @@ export function setup(): Input {
   };
 }
 
-function gzip(input: string): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    zlib.gzip(input, { level: 9 }, (error, buffer) => {
-      if (!error) {
-        resolve(buffer);
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
-
 export async function main(input: Input) {
   try {
     const results = await artifact.listArtifacts({ latest: true });
@@ -88,9 +75,8 @@ export async function main(input: Input) {
     await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
     // local repository created below
-    const packages = sh(`cat .Packages-*`, { quiet: true });
-    await fs.writeFile(allPackagesPath, packages);
-    await fs.writeFile(allPackagesGzippedPath, await gzip(packages));
+    sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
+    sh(`gzip -k -9 ${allPackagesPath}`, { quiet: true });
 
     sh("ls -R");
     core.info(`Adding a local Debian repository at ${process.cwd()}`);
