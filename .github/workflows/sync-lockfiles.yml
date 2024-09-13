@@ -100,7 +100,7 @@ jobs:
         run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
       - name: cargo update ${{ matrix.dependant }}
-        run: cargo update -p zenoh
+        run: cargo update zenoh
 
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
