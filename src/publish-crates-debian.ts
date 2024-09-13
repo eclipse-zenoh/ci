@@ -1,5 +1,4 @@
 import * as fs from "fs/promises";
-import * as zlib from "zlib";
 
 import * as core from "@actions/core";
 import { DefaultArtifactClient } from "@actions/artifact";
