@@ -88,9 +88,8 @@ export async function main(input: Input) {
     await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     // NOTE: An unzipped package index is necessary for apt-get to recognize the
     // local repository created below
-    const packages = sh(`cat .Packages-*`, { quiet: true });
-    await fs.writeFile(allPackagesPath, packages);
-    await fs.writeFile(allPackagesGzippedPath, await gzip(packages));
+    sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
+    sh(`gzip -k ${allPackagesPath}`, { quiet: true });
 
     sh("ls -R");
     core.info(`Adding a local Debian repository at ${process.cwd()}`);
