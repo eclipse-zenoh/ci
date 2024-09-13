@@ -99,9 +99,6 @@ jobs:
         if: ${{ matrix.dependant == 'zenoh-c' }}
         run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
-      - name: cargo update ${{ matrix.dependant }}
-        run: cargo update zenoh
-
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
@@ -110,6 +107,13 @@ jobs:
       - name: Rectify lockfile for zenoh-c build-resources
         if: ${{ matrix.dependant == 'zenoh-c' }}
         run: cargo check --manifest-path build-resources/opaque-types/Cargo.toml
+
+      - name: cargo update ${{ matrix.dependant }}
+        run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
+
+      - name: cargo update for zenoh-c build-resources
+        if: ${{ matrix.dependant == 'zenoh-c' }}
+        run: cargo update zenoh --manifest-path build-resources/opaque-types/Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
