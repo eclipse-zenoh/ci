@@ -46,8 +46,8 @@ type CargoMetadata = {
 };
 
 type CargoInstallOptions = {
-  gitUrl: string
-  gitBranch: string
+  gitUrl: string;
+  gitBranch: string;
 };
 
 /**
@@ -294,20 +294,19 @@ export function packagesDebian(path: string): Package[] {
  * @param options Options to pass to cargo install command
  */
 export async function installBinaryCached(name: string, options?: CargoInstallOptions) {
-  const command = ["cargo", "+stable", "install"]
+  const command = ["cargo", "+stable", "install"];
   if (options.gitUrl != undefined) {
     command.push("--git", options.gitUrl);
   }
 
   if (options.gitBranch != undefined) {
-    command.push("--branch", options.gitBranch)
+    command.push("--branch", options.gitBranch);
   }
 
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
-    const key = `${os.platform()
-      } -${os.release()} -${os.arch()} -${name} -${version} `;
+    const key = `${os.platform()} -${os.release()} -${os.arch()} -${name} -${version} `;
 
     // NOTE: We specify the Stable toolchain to override the current Rust
     // toolchain file in the current directory, as the caller can use this
@@ -316,12 +315,12 @@ export async function installBinaryCached(name: string, options?: CargoInstallOp
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      command.push(name, "--force")
+      command.push(name, "--force");
       sh(command.join(" "));
       await cache.saveCache(paths, key);
     }
   } else {
-    command.push(name)
+    command.push(name);
     sh(command.join(" "));
   }
 }
