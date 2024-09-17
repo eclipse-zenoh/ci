@@ -81192,7 +81192,7 @@ async function installBinaryCached(name, options) {
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()} -${os__WEBPACK_IMPORTED_MODULE_0__.release()} -${os__WEBPACK_IMPORTED_MODULE_0__.arch()} -${name} -${version} `;
+        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
