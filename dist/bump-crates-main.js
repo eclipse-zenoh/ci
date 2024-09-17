@@ -81179,24 +81179,34 @@ function packagesDebian(path) {
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
+ * @param options Options to pass to cargo install command
  */
-async function installBinaryCached(name) {
+async function installBinaryCached(name, options) {
+    const command = ["cargo", "+stable", "install"];
+    if (options.gitUrl != undefined) {
+        command.push("--git", options.gitUrl);
+    }
+    if (options.gitBranch != undefined) {
+        command.push("--branch", options.gitBranch);
+    }
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
+        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()} -${os__WEBPACK_IMPORTED_MODULE_0__.release()} -${os__WEBPACK_IMPORTED_MODULE_0__.arch()} -${name} -${version} `;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
         // failure
         const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
         if (hit == undefined) {
-            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
+            command.push(name, "--force");
+            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
             await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
         }
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
+        command.push(name);
+        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
     }
 }
 function build(path, target) {

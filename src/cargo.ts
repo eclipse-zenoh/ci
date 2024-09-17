@@ -45,6 +45,11 @@ type CargoMetadata = {
   packages: CargoMetadataPackage[];
 };
 
+type CargoInstallOptions = {
+  gitUrl: string
+  gitBranch: string
+};
+
 /**
  * Uses the cargo-metadata command to list all packages in a Cargo workspace or crate.
  * @param path Path to the Cargo workspace or crate.
@@ -286,12 +291,23 @@ export function packagesDebian(path: string): Package[] {
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
+ * @param options Options to pass to cargo install command
  */
-export async function installBinaryCached(name: string) {
+export async function installBinaryCached(name: string, options?: CargoInstallOptions) {
+  const command = ["cargo", "+stable", "install"]
+  if (options.gitUrl != undefined) {
+    command.push("--git", options.gitUrl);
+  }
+
+  if (options.gitBranch != undefined) {
+    command.push("--branch", options.gitBranch)
+  }
+
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
-    const key = `${os.platform()}-${os.release()}-${os.arch()}-${name}-${version}`;
+    const key = `${os.platform()
+      } -${os.release()} -${os.arch()} -${name} -${version} `;
 
     // NOTE: We specify the Stable toolchain to override the current Rust
     // toolchain file in the current directory, as the caller can use this
@@ -300,11 +316,13 @@ export async function installBinaryCached(name: string) {
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      sh(`cargo +stable install ${name} --force`);
+      command.push(name, "--force")
+      sh(command.join(" "));
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`);
+    command.push(name)
+    sh(command.join(" "));
   }
 }
 

@@ -13,6 +13,8 @@ const index = `${baseUrl}/git/index`;
 const token = "0000";
 const indexPath = "index";
 const cratePath = "crate";
+const gitUrl = "https://github.com/fuzzypixelz/estuary.git";
+const gitBranch = "main"
 
 export type Estuary = {
   name: string;
@@ -36,7 +38,7 @@ export async function spawn(): Promise<Estuary> {
     stdio: "inherit",
   } as child_process.SpawnOptions;
 
-  await cargo.installBinaryCached(name);
+  await cargo.installBinaryCached(name, { gitUrl: gitUrl, gitBranch: gitBranch });
 
   const proc = child_process.spawn(
     "estuary",

@@ -81067,24 +81067,34 @@ function packagesDebian(path) {
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
+ * @param options Options to pass to cargo install command
  */
-async function installBinaryCached(name) {
+async function installBinaryCached(name, options) {
+    const command = ["cargo", "+stable", "install"];
+    if (options.gitUrl != undefined) {
+        command.push("--git", options.gitUrl);
+    }
+    if (options.gitBranch != undefined) {
+        command.push("--branch", options.gitBranch);
+    }
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
-        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
+        const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()} -${os__WEBPACK_IMPORTED_MODULE_0__.release()} -${os__WEBPACK_IMPORTED_MODULE_0__.arch()} -${name} -${version} `;
         // NOTE: We specify the Stable toolchain to override the current Rust
         // toolchain file in the current directory, as the caller can use this
         // function with an arbitrary Rust toolchain, often resulting in build
         // failure
         const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
         if (hit == undefined) {
-            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
+            command.push(name, "--force");
+            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
             await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
         }
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
+        command.push(name);
+        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
     }
 }
 function build(path, target) {
@@ -81301,6 +81311,8 @@ const index = `${baseUrl}/git/index`;
 const token = "0000";
 const indexPath = "index";
 const cratePath = "crate";
+const gitUrl = "https://github.com/fuzzypixelz/estuary.git";
+const gitBranch = "main";
 async function spawn() {
     const tmp = await (0,fs_promises__WEBPACK_IMPORTED_MODULE_1__.mkdtemp)((0,path__WEBPACK_IMPORTED_MODULE_3__.join)((0,os__WEBPACK_IMPORTED_MODULE_2__.tmpdir)(), name));
     const indexDir = (0,path__WEBPACK_IMPORTED_MODULE_3__.join)(tmp, indexPath);
@@ -81312,7 +81324,7 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name);
+    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, { gitUrl: gitUrl, gitBranch: gitBranch });
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };
