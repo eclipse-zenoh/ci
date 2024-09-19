@@ -76,6 +76,9 @@ jobs:
         # will have the side effect of installing it; if it's not installed already.
         run: rustup show
 
+      - name: Install build dependencies
+        run: apt install llvm-dev libclang-dev clang
+
       # NOTE: Not all Zenoh dependants have their Cargo manifest and lockfile
       # at the repository's toplevel. The only exception being zenoh-kotlin and
       # zenoh-java. Thus the need for this ugly workaround.
