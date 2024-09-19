@@ -102,11 +102,11 @@ jobs:
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
-        run: cargo check --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
+        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets --all-features -- --deny warnings
 
       - name: Rectify lockfile for zenoh-c build-resources
         if: ${{ matrix.dependant == 'zenoh-c' }}
-        run: cargo check --manifest-path build-resources/opaque-types/Cargo.toml
+        run: cargo clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --all-features -- --deny warnings
 
       - name: cargo update ${{ matrix.dependant }}
         run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
