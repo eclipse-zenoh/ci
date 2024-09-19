@@ -77,7 +77,7 @@ jobs:
         run: rustup show
 
       - name: Install build dependencies
-        run: sudo apt-get install -y llvm-dev libclang-dev clang
+        run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
 
       # NOTE: Not all Zenoh dependants have their Cargo manifest and lockfile
       # at the repository's toplevel. The only exception being zenoh-kotlin and
