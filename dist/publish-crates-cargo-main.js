@@ -81324,7 +81324,10 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, { gitUrl: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.url */ .v.lock.git.estuary.url, gitBranch: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.branch */ .v.lock.git.estuary.branch });
+    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, {
+        gitUrl: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.url */ .v.lock.git.estuary.url,
+        gitBranch: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.branch */ .v.lock.git.estuary.branch,
+    });
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };

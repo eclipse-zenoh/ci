@@ -6,7 +6,7 @@ import { join } from "path";
 import * as core from "@actions/core";
 
 import * as cargo from "./cargo";
-import { config } from "./config"
+import { config } from "./config";
 
 const name = "estuary";
 const baseUrl = "http://localhost:7878";
@@ -37,7 +37,10 @@ export async function spawn(): Promise<Estuary> {
     stdio: "inherit",
   } as child_process.SpawnOptions;
 
-  await cargo.installBinaryCached(name, { gitUrl: config.lock.git.estuary.url, gitBranch: config.lock.git.estuary.branch });
+  await cargo.installBinaryCached(name, {
+    gitUrl: config.lock.git.estuary.url,
+    gitBranch: config.lock.git.estuary.branch,
+  });
 
   const proc = child_process.spawn(
     "estuary",
