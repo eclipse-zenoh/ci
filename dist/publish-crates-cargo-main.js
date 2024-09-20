@@ -81264,7 +81264,7 @@ __nccwpck_require__.d(__webpack_exports__, {
 // UNUSED EXPORTS: gitEnv
 
 ;// CONCATENATED MODULE: ./ci.config.json
-const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"}}}');
+const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"},"git":{"estuary":{"url":"https://github.com/fuzzypixelz/estuary.git","branch":"main"}}}}');
 ;// CONCATENATED MODULE: ./src/config.ts
 
 const config = ci_config_namespaceObject;
@@ -81297,8 +81297,10 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(2186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8683);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_5__]);
 _cargo__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+
 
 
 
@@ -81311,8 +81313,6 @@ const index = `${baseUrl}/git/index`;
 const token = "0000";
 const indexPath = "index";
 const cratePath = "crate";
-const gitUrl = "https://github.com/fuzzypixelz/estuary.git";
-const gitBranch = "main";
 async function spawn() {
     const tmp = await (0,fs_promises__WEBPACK_IMPORTED_MODULE_1__.mkdtemp)((0,path__WEBPACK_IMPORTED_MODULE_3__.join)((0,os__WEBPACK_IMPORTED_MODULE_2__.tmpdir)(), name));
     const indexDir = (0,path__WEBPACK_IMPORTED_MODULE_3__.join)(tmp, indexPath);
@@ -81324,7 +81324,7 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, { gitUrl: gitUrl, gitBranch: gitBranch });
+    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, { gitUrl: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.url */ .v.lock.git.estuary.url, gitBranch: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.branch */ .v.lock.git.estuary.branch });
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };
