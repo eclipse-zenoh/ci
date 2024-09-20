@@ -107,9 +107,12 @@ jobs:
         # the dependency versions fetched from source.
         run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets --all-features -- --deny warnings
 
-      - name: Rectify lockfile for zenoh-c build-resources
+      - name: Rectify lockfile for zenoh-c opaque-types
         if: ${{ matrix.dependant == 'zenoh-c' }}
-        run: cargo clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --all-features -- --deny warnings
+        # Disable panic feature for zenoh-c opaque-types
+        run: |
+          features=$(cargo tree --manifest-path build-resources/opaque-types/Cargo.toml -f "{p} {f}" --all-features| grep opaque-types | cut -d" " -f4 | sed s/panic,//)
+          cargo clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --features $features -- --deny warnings
 
       - name: cargo update ${{ matrix.dependant }}
         run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
