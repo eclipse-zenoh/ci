@@ -81184,7 +81184,6 @@ function installBinaryFromGit(name, gitUrl, gitBranch) {
  * @param name Name of the cargo binary on crates.io
  */
 async function installBinaryCached(name) {
-    const command = ["cargo", "+stable", "install"];
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
@@ -81195,14 +81194,12 @@ async function installBinaryCached(name) {
         // failure
         const hit = await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.restoreCache(paths, key);
         if (hit == undefined) {
-            command.push(name, "--force");
-            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
+            (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name} --force`);
             await _actions_cache__WEBPACK_IMPORTED_MODULE_3__.saveCache(paths, key);
         }
     }
     else {
-        command.push(name);
-        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(command.join(" "));
+        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install ${name}`);
     }
 }
 function build(path, target) {

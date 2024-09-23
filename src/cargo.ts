@@ -292,7 +292,6 @@ export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: st
  * @param name Name of the cargo binary on crates.io
  */
 export async function installBinaryCached(name: string) {
-  const command = ["cargo", "+stable", "install"];
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
@@ -305,13 +304,11 @@ export async function installBinaryCached(name: string) {
 
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      command.push(name, "--force");
-      sh(command.join(" "));
+      sh(`cargo +stable install ${name} --force`);
       await cache.saveCache(paths, key);
     }
   } else {
-    command.push(name);
-    sh(command.join(" "));
+    sh(`cargo +stable install ${name}`);
   }
 }
 
