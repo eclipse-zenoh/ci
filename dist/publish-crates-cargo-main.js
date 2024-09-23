@@ -80852,7 +80852,8 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "i8": () => (/* binding */ setRegistry),
 /* harmony export */   "p3": () => (/* binding */ configRegistry),
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered),
-/* harmony export */   "s9": () => (/* binding */ isPublished)
+/* harmony export */   "s9": () => (/* binding */ isPublished),
+/* harmony export */   "wS": () => (/* binding */ installBinaryFromGit)
 /* harmony export */ });
 /* unused harmony exports packages, bump, bumpDependencies, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
@@ -81063,20 +81064,16 @@ function packagesDebian(path) {
     }
     return result;
 }
+async function installBinaryFromGit(name, gitUrl, gitBranch) {
+    (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
- * @param options Options to pass to cargo install command
  */
-async function installBinaryCached(name, options) {
+async function installBinaryCached(name) {
     const command = ["cargo", "+stable", "install"];
-    if (options.gitUrl != undefined) {
-        command.push("--git", options.gitUrl);
-    }
-    if (options.gitBranch != undefined) {
-        command.push("--branch", options.gitBranch);
-    }
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
@@ -81324,10 +81321,7 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name, {
-        gitUrl: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.url */ .v.lock.git.estuary.url,
-        gitBranch: _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git.estuary.branch */ .v.lock.git.estuary.branch,
-    });
+    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryFromGit */ .wS(name, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].url, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].branch);
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };

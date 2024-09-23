@@ -12,9 +12,8 @@ type Config = {
       [key: string]: string;
     };
     git: {
-      estuary: {
-        url: string;
-        branch: string;
+      [key: string]: {
+        [key: string]: string;
       };
     };
   };

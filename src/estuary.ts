@@ -37,10 +37,7 @@ export async function spawn(): Promise<Estuary> {
     stdio: "inherit",
   } as child_process.SpawnOptions;
 
-  await cargo.installBinaryCached(name, {
-    gitUrl: config.lock.git.estuary.url,
-    gitBranch: config.lock.git.estuary.branch,
-  });
+  await cargo.installBinaryFromGit(name, config.lock.git[name].url, config.lock.git[name].branch);
 
   const proc = child_process.spawn(
     "estuary",

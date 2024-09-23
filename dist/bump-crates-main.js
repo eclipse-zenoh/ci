@@ -80966,7 +80966,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
-/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, build, hostTarget, buildDebian, isPublished */
+/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81175,20 +81175,16 @@ function packagesDebian(path) {
     }
     return result;
 }
+async function installBinaryFromGit(name, gitUrl, gitBranch) {
+    sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
- * @param options Options to pass to cargo install command
  */
-async function installBinaryCached(name, options) {
+async function installBinaryCached(name) {
     const command = ["cargo", "+stable", "install"];
-    if (options.gitUrl != undefined) {
-        command.push("--git", options.gitUrl);
-    }
-    if (options.gitBranch != undefined) {
-        command.push("--branch", options.gitBranch);
-    }
     if (process.env["GITHUB_ACTIONS"] != undefined) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];

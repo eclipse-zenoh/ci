@@ -287,22 +287,17 @@ export function packagesDebian(path: string): Package[] {
   return result;
 }
 
+export async function installBinaryFromGit(name: string, gitUrl: string, gitBranch: string) {
+  sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
+
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
- * @param options Options to pass to cargo install command
  */
-export async function installBinaryCached(name: string, options?: CargoInstallOptions) {
+export async function installBinaryCached(name: string) {
   const command = ["cargo", "+stable", "install"];
-  if (options.gitUrl != undefined) {
-    command.push("--git", options.gitUrl);
-  }
-
-  if (options.gitBranch != undefined) {
-    command.push("--branch", options.gitBranch);
-  }
-
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
