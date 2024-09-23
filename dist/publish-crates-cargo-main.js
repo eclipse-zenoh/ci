@@ -81065,7 +81065,7 @@ function packagesDebian(path) {
     return result;
 }
 function installBinaryFromGit(name, gitUrl, gitBranch) {
-    (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name}`);
+    (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name} --locked`);
 }
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
