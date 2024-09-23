@@ -81176,7 +81176,7 @@ function packagesDebian(path) {
     return result;
 }
 function installBinaryFromGit(name, gitUrl, gitBranch) {
-    sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name}`);
+    sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name} --locked`);
 }
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
