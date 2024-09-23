@@ -81064,7 +81064,7 @@ function packagesDebian(path) {
     }
     return result;
 }
-async function installBinaryFromGit(name, gitUrl, gitBranch) {
+function installBinaryFromGit(name, gitUrl, gitBranch) {
     (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
 }
 /**
@@ -81321,7 +81321,7 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryFromGit */ .wS(name, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].url, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].branch);
+    _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryFromGit */ .wS(name, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].url, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].branch);
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };

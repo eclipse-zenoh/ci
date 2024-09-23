@@ -81175,7 +81175,7 @@ function packagesDebian(path) {
     }
     return result;
 }
-async function installBinaryFromGit(name, gitUrl, gitBranch) {
+function installBinaryFromGit(name, gitUrl, gitBranch) {
     sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
 }
 /**

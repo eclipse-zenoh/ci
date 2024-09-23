@@ -282,7 +282,7 @@ export function packagesDebian(path: string): Package[] {
   return result;
 }
 
-export async function installBinaryFromGit(name: string, gitUrl: string, gitBranch: string) {
+export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: string) {
   sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
 }
 
