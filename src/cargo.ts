@@ -45,11 +45,6 @@ type CargoMetadata = {
   packages: CargoMetadataPackage[];
 };
 
-type CargoInstallOptions = {
-  gitUrl: string;
-  gitBranch: string;
-};
-
 /**
  * Uses the cargo-metadata command to list all packages in a Cargo workspace or crate.
  * @param path Path to the Cargo workspace or crate.
