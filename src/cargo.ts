@@ -282,6 +282,10 @@ export function packagesDebian(path: string): Package[] {
   return result;
 }
 
+export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: string) {
+  sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
+
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.

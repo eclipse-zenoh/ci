@@ -80966,7 +80966,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
-/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, build, hostTarget, buildDebian, isPublished */
+/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81175,6 +81175,9 @@ function packagesDebian(path) {
     }
     return result;
 }
+function installBinaryFromGit(name, gitUrl, gitBranch) {
+    sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
@@ -81365,7 +81368,7 @@ __nccwpck_require__.d(__webpack_exports__, {
 });
 
 ;// CONCATENATED MODULE: ./ci.config.json
-const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"}}}');
+const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"},"git":{"estuary":{"url":"https://github.com/ZettaScaleLabs/estuary.git","branch":"main"}}}}');
 ;// CONCATENATED MODULE: ./src/config.ts
 
 const config = ci_config_namespaceObject;

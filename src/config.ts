@@ -11,6 +11,12 @@ type Config = {
     cratesio: {
       [key: string]: string;
     };
+    git: {
+      [key: string]: {
+        url: string;
+        branch: string;
+      };
+    };
   };
 };
 

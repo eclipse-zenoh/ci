@@ -80852,7 +80852,8 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "i8": () => (/* binding */ setRegistry),
 /* harmony export */   "p3": () => (/* binding */ configRegistry),
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered),
-/* harmony export */   "s9": () => (/* binding */ isPublished)
+/* harmony export */   "s9": () => (/* binding */ isPublished),
+/* harmony export */   "wS": () => (/* binding */ installBinaryFromGit)
 /* harmony export */ });
 /* unused harmony exports packages, bump, bumpDependencies, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
@@ -81063,6 +81064,9 @@ function packagesDebian(path) {
     }
     return result;
 }
+function installBinaryFromGit(name, gitUrl, gitBranch) {
+    (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} name`);
+}
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
  * The executable is cached using GitHub's `@actions/cache`.
@@ -81254,7 +81258,7 @@ __nccwpck_require__.d(__webpack_exports__, {
 // UNUSED EXPORTS: gitEnv
 
 ;// CONCATENATED MODULE: ./ci.config.json
-const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"}}}');
+const ci_config_namespaceObject = JSON.parse('{"git":{"user":{"name":"eclipse-zenoh-bot","email":"eclipse-zenoh-bot@users.noreply.github.com"}},"lock":{"cratesio":{"cargo-deb":"2.1.0","estuary":"0.1.1","cross":"0.2.5","toml-cli2":"0.3.2"},"git":{"estuary":{"url":"https://github.com/ZettaScaleLabs/estuary.git","branch":"main"}}}}');
 ;// CONCATENATED MODULE: ./src/config.ts
 
 const config = ci_config_namespaceObject;
@@ -81287,8 +81291,10 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(2186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_4__);
 /* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8683);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_5__]);
 _cargo__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+
 
 
 
@@ -81312,7 +81318,7 @@ async function spawn() {
         },
         stdio: "inherit",
     };
-    await _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryCached */ .Mj(name);
+    _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryFromGit */ .wS(name, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].url, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].branch);
     const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
     _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
     return { name, index, token, crateDir, indexDir, proc };
