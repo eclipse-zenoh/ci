@@ -13,7 +13,8 @@ type Config = {
     };
     git: {
       [key: string]: {
-        [key: string]: string;
+        url: string;
+        branch: string;
       };
     };
   };
