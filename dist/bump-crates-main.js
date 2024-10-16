@@ -81243,8 +81243,26 @@ function buildDebian(path, target, version) {
  * @returns Modified version.
  */
 function toDebianVersion(version, revision) {
-    // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
-    return `${version.replace("-", "~")}-${revision ?? 1}`;
+    var deb_version = version;
+    // Check if version is semver or cmake version
+    if (version.includes("-")) {
+        // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
+        deb_version = `${version.replace("-", "~")}-${revision ?? 1}`;
+    }
+    else {
+        // check cmake version has tweak component
+        if (version.split(".").length == 4) {
+            if (version.endsWith(".0")) {
+                var pos = version.lastIndexOf(".0");
+                deb_version = `${version.substring(0, pos)}~dev-${revision ?? 1}`;
+            }
+            else if (parseInt(version.substring(version.lastIndexOf(".") + 1)) > 0) {
+                var pos = version.lastIndexOf(".");
+                deb_version = `${version.substring(0, pos)}~${version.substring(pos + 1)}-${revision ?? 1}`;
+            }
+        }
+    }
+    return `${deb_version}`;
 }
 /**
  * Check if Package is already published in crates.io
