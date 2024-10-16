@@ -81132,7 +81132,7 @@ function buildDebian(path, target, version) {
  * @returns Modified version.
  */
 function toDebianVersion(version, revision) {
-    var deb_version = version;
+    let deb_version = version;
     // Check if version is semver or cmake version
     if (version.includes("-")) {
         // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
@@ -81142,11 +81142,11 @@ function toDebianVersion(version, revision) {
         // check cmake version has tweak component
         if (version.split(".").length == 4) {
             if (version.endsWith(".0")) {
-                var pos = version.lastIndexOf(".0");
+                const pos = version.lastIndexOf(".0");
                 deb_version = `${version.substring(0, pos)}~dev-${revision ?? 1}`;
             }
             else if (parseInt(version.substring(version.lastIndexOf(".") + 1)) > 0) {
-                var pos = version.lastIndexOf(".");
+                const pos = version.lastIndexOf(".");
                 deb_version = `${version.substring(0, pos)}~${version.substring(pos + 1)}-${revision ?? 1}`;
             }
         }
