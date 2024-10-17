@@ -81322,6 +81322,7 @@ function exec(program, args, options) {
     options.cwd = options.cwd != null ? options.cwd : ".";
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
+    options.quiet = options.quiet != null ? options.quiet : false;
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup(`\u001b[1m\u001b[35m${program}(${args.join(", ")})\u001b[0m`);
     const returns = (0,child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync)(program, args, {
         // NOTE: Environment variables defined in `options.env` take precedence over
@@ -81338,11 +81339,11 @@ function exec(program, args, options) {
         input: options.input,
         maxBuffer: MAX_BUFFER,
     });
-    if (returns.stdout != "") {
+    if (returns.stdout != "" && !options.quiet) {
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstdout:\u001b[0m`);
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stdout);
     }
-    if (returns.stderr != "") {
+    if (returns.stderr != "" && !options.quiet) {
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`\u001b[1mstderr:\u001b[0m`);
         _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(returns.stderr);
     }
@@ -81406,7 +81407,7 @@ class TOML {
     }
     get(path, key) {
         const query = key == undefined ? "." : key.join(".");
-        return JSON.parse((0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["get", path, query]));
+        return JSON.parse((0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["get", path, query], { quiet: true }));
     }
     async set(path, key, value) {
         const query = key.join(".");

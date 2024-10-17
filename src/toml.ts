@@ -11,7 +11,7 @@ export class TOML {
 
   get(path: string, key?: string[]): Record<string, unknown> {
     const query = key == undefined ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path, query])) as Record<string, unknown>;
+    return JSON.parse(exec("toml", ["get", path, query], { quiet: true })) as Record<string, unknown>;
   }
 
   async set(path: string, key: string[], value: string) {

@@ -24785,6 +24785,7 @@ function exec(program, args, options) {
     options.cwd = options.cwd != null ? options.cwd : ".";
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
+    options.quiet = options.quiet != null ? options.quiet : false;
     core.startGroup(`\u001b[1m\u001b[35m${program}(${args.join(", ")})\u001b[0m`);
     const returns = spawnSync(program, args, {
         // NOTE: Environment variables defined in `options.env` take precedence over
@@ -24801,11 +24802,11 @@ function exec(program, args, options) {
         input: options.input,
         maxBuffer: MAX_BUFFER,
     });
-    if (returns.stdout != "") {
+    if (returns.stdout != "" && !options.quiet) {
         core.info(`\u001b[1mstdout:\u001b[0m`);
         core.info(returns.stdout);
     }
-    if (returns.stderr != "") {
+    if (returns.stderr != "" && !options.quiet) {
         core.info(`\u001b[1mstderr:\u001b[0m`);
         core.info(returns.stderr);
     }
