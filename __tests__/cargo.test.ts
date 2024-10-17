@@ -174,10 +174,10 @@ describe("cargo", () => {
 
   test("toDebianVersion()", async () => {
     expect(cargo.toDebianVersion("1.0.0.0")).toEqual("1.0.0~dev-1");
-    expect(cargo.toDebianVersion("1.0.0.11")).toEqual("1.0.0~11-1");
+    expect(cargo.toDebianVersion("1.0.0.11")).toEqual("1.0.0~pre.11-1");
     expect(cargo.toDebianVersion("1.0.0-rc.1")).toEqual("1.0.0~rc.1-1");
     expect(cargo.toDebianVersion("1.0.0")).toEqual("1.0.0");
-    expect(cargo.toDebianVersion("1.0.0.1")).toEqual("1.0.0~1-1");
-    expect(cargo.toDebianVersion("1.0.0.1", 2)).toEqual("1.0.0~1-2");
+    expect(cargo.toDebianVersion("1.0.0.1")).toEqual("1.0.0~pre.1-1");
+    expect(cargo.toDebianVersion("1.0.0.1", 2)).toEqual("1.0.0~pre.1-2");
   });
 });
