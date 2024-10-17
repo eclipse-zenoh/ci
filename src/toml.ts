@@ -5,7 +5,7 @@ import * as cargo from "./cargo";
 
 export class TOML {
   static async init(): Promise<TOML> {
-    await cargo.installBinaryCached("toml-cli2");
+    await cargo.installBinaryCached("toml-cli2", false);
     return new TOML();
   }
 

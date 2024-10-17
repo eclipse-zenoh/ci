@@ -81441,8 +81441,8 @@ function installBinaryFromGit(name, gitUrl, gitBranch) {
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
  */
-async function installBinaryCached(name) {
-    if (process.env["GITHUB_ACTIONS"] != undefined) {
+async function installBinaryCached(name, useCache) {
+    if (process.env["GITHUB_ACTIONS"] != undefined && useCache == true) {
         const paths = [(0,path__WEBPACK_IMPORTED_MODULE_1__.join)(os__WEBPACK_IMPORTED_MODULE_0__.homedir(), ".cargo", "bin")];
         const version = _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.cratesio */ .v.lock.cratesio[name];
         const key = `${os__WEBPACK_IMPORTED_MODULE_0__.platform()}-${os__WEBPACK_IMPORTED_MODULE_0__.release()}-${os__WEBPACK_IMPORTED_MODULE_0__.arch()}-${name}-${version}`;
@@ -81679,7 +81679,7 @@ _cargo__WEBPACK_IMPORTED_MODULE_2__ = (__webpack_async_dependencies__.then ? (aw
 
 class TOML {
     static async init() {
-        await _cargo__WEBPACK_IMPORTED_MODULE_2__/* .installBinaryCached */ .Mj("toml-cli2");
+        await _cargo__WEBPACK_IMPORTED_MODULE_2__/* .installBinaryCached */ .Mj("toml-cli2", false);
         return new TOML();
     }
     get(path, key) {
