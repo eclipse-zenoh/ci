@@ -163,11 +163,21 @@ describe("cargo", () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
 
     const version = "1.2.3-beta.1";
+    const debian_version = "1.2.3~beta.1-1";
     await cargo.bumpDependencies(tmp, /zenoh.*/, version);
 
     expect(toml.get(`${tmp}/Cargo.toml`, ["workspace", "dependencies", "zenoh", "version"])).toEqual(version);
     expect(toml.get(`${tmp}/zenoh/Cargo.toml`, ["package", "metadata", "deb", "depends"])).toEqual(
-      `zenohd (=${version}), zenoh-plugin-rest (=${version}), zenoh-plugin-storage-manager (=${version})`,
+      `zenohd (=${debian_version}), zenoh-plugin-rest (=${debian_version}), zenoh-plugin-storage-manager (=${debian_version})`,
     );
+  });
+
+  test("toDebianVersion()", async () => {
+    expect(cargo.toDebianVersion("1.0.0.0")).toEqual("1.0.0~dev-1");
+    expect(cargo.toDebianVersion("1.0.0.11")).toEqual("1.0.0~pre.11-1");
+    expect(cargo.toDebianVersion("1.0.0-rc.1")).toEqual("1.0.0~rc.1-1");
+    expect(cargo.toDebianVersion("1.0.0")).toEqual("1.0.0");
+    expect(cargo.toDebianVersion("1.0.0.1")).toEqual("1.0.0~pre.1-1");
+    expect(cargo.toDebianVersion("1.0.0.1", 2)).toEqual("1.0.0~pre.1-2");
   });
 });
