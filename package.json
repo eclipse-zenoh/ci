@@ -11,7 +11,7 @@
     "lint": "npx eslint . -c .eslintrc.json",
     "build": "./build.js",
     "build:watch": "npm run package -- --watch",
-    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --debug",
     "all": "npm run format:write && npm run lint && npm run test && npm run build",
     "clean": "rm dist/*"
   },
