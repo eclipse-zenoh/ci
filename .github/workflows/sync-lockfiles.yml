@@ -49,24 +49,25 @@ jobs:
       fail-fast: false
       matrix:
         dependant:
-          - zenoh-c
-          - zenoh-python
-          - zenoh-java
-          - zenoh-kotlin
-          - zenoh-plugin-dds
-          - zenoh-plugin-mqtt
-          - zenoh-plugin-ros1
-          - zenoh-plugin-ros2dds
-          - zenoh-plugin-webserver
-          - zenoh-backend-filesystem
-          - zenoh-backend-influxdb
-          - zenoh-backend-rocksdb
-          - zenoh-backend-s3
+          - eclipse-zenoh/zenoh-c
+          - eclipse-zenoh/zenoh-python
+          - eclipse-zenoh/zenoh-java
+          - eclipse-zenoh/zenoh-kotlin
+          - eclipse-zenoh/zenoh-plugin-dds
+          - eclipse-zenoh/zenoh-plugin-mqtt
+          - eclipse-zenoh/zenoh-plugin-ros1
+          - eclipse-zenoh/zenoh-plugin-ros2dds
+          - eclipse-zenoh/zenoh-plugin-webserver
+          - eclipse-zenoh/zenoh-backend-filesystem
+          - eclipse-zenoh/zenoh-backend-influxdb
+          - eclipse-zenoh/zenoh-backend-rocksdb
+          - eclipse-zenoh/zenoh-backend-s3
+          - ZettaScaleLabs/zenoh-dissector
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
         with:
-          repository: eclipse-zenoh/${{ matrix.dependant }}
+          repository: ${{ matrix.dependant }}
           ref: ${{ inputs.branch }}
           submodules: true
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
@@ -85,7 +86,7 @@ jobs:
       - name: Compute crate path of ${{ matrix.dependant }}
         id: crate-path
         run: |
-          if [[ "${{ matrix.dependant }}" =~ zenoh-(java|kotlin) ]]; then
+          if [[ "${{ matrix.dependant }}" =~ eclipse-zenoh/zenoh-(java|kotlin) ]]; then
             echo "value=zenoh-jni" >> $GITHUB_OUTPUT
           else
             echo "value=." >> $GITHUB_OUTPUT
@@ -99,7 +100,7 @@ jobs:
 
       # Another ugly workaround, since zenoh-c has an additional Cargo.lock not in the root
       - name: Override ${{ matrix.dependant }} build-resources lockfile with Zenoh's
-        if: ${{ matrix.dependant == 'zenoh-c' }}
+        if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
         run: cp Cargo.lock build-resources/opaque-types/Cargo.lock
 
       - name: Rectify lockfile
@@ -108,7 +109,7 @@ jobs:
         run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets --all-features -- --deny warnings
 
       - name: Rectify lockfile for zenoh-c opaque-types
-        if: ${{ matrix.dependant == 'zenoh-c' }}
+        if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
         # Disable panic feature for zenoh-c opaque-types
         run: |
           features=$(cargo tree --manifest-path build-resources/opaque-types/Cargo.toml -f "{p} {f}" --all-features| grep opaque-types | cut -d" " -f4 | sed s/panic,//)
@@ -118,7 +119,7 @@ jobs:
         run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
 
       - name: cargo update for zenoh-c build-resources
-        if: ${{ matrix.dependant == 'zenoh-c' }}
+        if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
         run: cargo update zenoh --manifest-path build-resources/opaque-types/Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
@@ -147,7 +148,7 @@ jobs:
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
           --subject "build: Sync `Cargo.lock` with eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }} from ${{ needs.fetch.outputs.zenoh-head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
-          --repo "eclipse-zenoh/${{ matrix.dependant }}"
+          --repo "${{ matrix.dependant }}"
           --squash
           --auto
         env:
