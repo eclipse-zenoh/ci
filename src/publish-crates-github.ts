@@ -58,6 +58,9 @@ export async function main(input: Input) {
       if (releaseLatest != undefined) {
         command.push("--notes-start-tag", releaseLatest.tagName);
       }
+      if (isPreRelease(input.version)) {
+        command.push("--prerelease");
+      }
       sh(command.join(" "), { env });
     }
 
@@ -84,6 +87,13 @@ export async function main(input: Input) {
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
   }
+}
+
+export function isPreRelease(version: string): boolean {
+  if (version.indexOf("-") > 0 || version.split(".").length == 4) {
+    return true;
+  }
+  return false;
 }
 
 type GitHubRelease = {
