@@ -3,6 +3,8 @@ name: Bump crates
 inputs:
   version:
     required: true
+  live-run:
+    required: false
   branch:
     required: true
   repo:

@@ -81103,6 +81103,7 @@ _cargo__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? (aw
 
 function setup() {
     const version = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("version", { required: true });
+    const liveRun = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getBooleanInput("live-run", { required: true });
     const branch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("branch", { required: true });
     const repo = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("repo", { required: true });
     const path = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("path");
@@ -81112,6 +81113,7 @@ function setup() {
     const bumpDepsBranch = _actions_core__WEBPACK_IMPORTED_MODULE_2__.getInput("bump-deps-branch");
     return {
         version,
+        liveRun,
         branch,
         repo,
         path: path === "" ? undefined : path,
@@ -81147,8 +81149,10 @@ async function main(input) {
             });
         }
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} ${input.branch}`, { cwd: repo });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} ${input.version}`, { cwd: repo });
+        if (input.liveRun) {
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} ${input.version}`, { cwd: repo });
+        }
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git log -10", { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git show-ref --tags", { cwd: repo });
         await cleanup(input);
