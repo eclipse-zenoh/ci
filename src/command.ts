@@ -1,7 +1,7 @@
 import { spawnSync } from "child_process";
 import * as core from "@actions/core";
 
-const MAX_BUFFER = 10 * 1024 * 1024;
+const MAX_BUFFER = 100 * 1024 * 1024;
 
 export type CommandOptions = {
   env?: NodeJS.ProcessEnv;

@@ -81516,7 +81516,7 @@ __webpack_async_result__();
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
 
 
-const MAX_BUFFER = 10 * 1024 * 1024;
+const MAX_BUFFER = 100 * 1024 * 1024;
 function sh(cmd, options) {
     options = options != null ? options : {};
     options.env = options.env != null ? options.env : {};

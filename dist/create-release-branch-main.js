@@ -24957,7 +24957,7 @@ const external_child_process_namespaceObject = require("child_process");
 ;// CONCATENATED MODULE: ./src/command.ts
 
 
-const MAX_BUFFER = 10 * 1024 * 1024;
+const MAX_BUFFER = 100 * 1024 * 1024;
 function command_sh(cmd, options) {
     options = options != null ? options : {};
     options.env = options.env != null ? options.env : {};
