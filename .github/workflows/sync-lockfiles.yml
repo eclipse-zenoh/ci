@@ -63,6 +63,7 @@ jobs:
           - eclipse-zenoh/zenoh-backend-rocksdb
           - eclipse-zenoh/zenoh-backend-s3
           - ZettaScaleLabs/zenoh-dissector
+          - eclipse-zenoh/zenoh-ts
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
