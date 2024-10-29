@@ -62,8 +62,8 @@ jobs:
           - eclipse-zenoh/zenoh-backend-influxdb
           - eclipse-zenoh/zenoh-backend-rocksdb
           - eclipse-zenoh/zenoh-backend-s3
-          - ZettaScaleLabs/zenoh-dissector
           - eclipse-zenoh/zenoh-ts
+          - eclipse-zenoh/zenoh-dissector
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
@@ -117,6 +117,7 @@ jobs:
           cargo clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --features $features -- --deny warnings
 
       - name: cargo update ${{ matrix.dependant }}
+        if: ${{ matrix.dependant != 'eclipse-zenoh/zenoh-dissector' }}
         run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
 
       - name: cargo update for zenoh-c build-resources
