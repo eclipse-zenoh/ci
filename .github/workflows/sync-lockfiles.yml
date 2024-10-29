@@ -81,6 +81,14 @@ jobs:
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
 
+      - name: Install build dependencies (zenoh-dissector)
+        if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-dissector' }}
+        run: |
+          sudo apt install -y software-properties-common
+          sudo add-apt-repository -y ppa:wireshark-dev/stable
+          sudo apt install -y wireshark-dev
+          sudo apt install -y --allow-change-held-packages wireshark
+
       # NOTE: Not all Zenoh dependants have their Cargo manifest and lockfile
       # at the repository's toplevel. The only exception being zenoh-kotlin and
       # zenoh-java. Thus the need for this ugly workaround.
