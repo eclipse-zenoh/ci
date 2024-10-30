@@ -37,6 +37,7 @@ jobs:
           - zenoh-backend-influxdb
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
+          - zenoh-ts
     steps:
       - name: Clone ${{ matrix.dependant }}
         uses: actions/checkout@v4
