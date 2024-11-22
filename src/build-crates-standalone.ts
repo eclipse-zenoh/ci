@@ -74,6 +74,9 @@ export async function main(input: Input) {
 }
 
 export function artifactName(repo: string, version: string, target: string): string {
+  if (target == "multiarch") {
+    return `${repo}-${version}-standalone.zip`;
+  }
   return `${repo}-${version}-${target}-standalone.zip`;
 }
 

@@ -77,7 +77,7 @@ export async function main(input: Input) {
     const tapPath = `${sh("brew --repository").trim()}/Library/Taps/${input.tap}`;
     const tapUrl = `https://${input.githubToken}@github.com/${input.tap}.git`;
 
-    for (const target of [X86_64_APPLE_DARWIN, AARCH64_APPLE_DARWIN]) {
+    for (const target of [X86_64_APPLE_DARWIN, AARCH64_APPLE_DARWIN, "multiarch"]) {
       const name = artifactName(repo, input.version, target);
       const result = await artifact.getArtifact(name);
       await artifact.downloadArtifact(result.artifact.id);
