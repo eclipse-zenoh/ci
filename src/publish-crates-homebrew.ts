@@ -56,6 +56,7 @@ export function setup(): Input {
 
 const X86_64_APPLE_DARWIN = "x86_64-apple-darwin";
 const AARCH64_APPLE_DARWIN = "aarch64-apple-darwin";
+const MULTI_ARCH = "multiarch";
 
 const AARCH64_URL = "aarch64-url";
 const AARCH64_SHA256 = "aarch64-sha256";
@@ -77,7 +78,7 @@ export async function main(input: Input) {
     const tapPath = `${sh("brew --repository").trim()}/Library/Taps/${input.tap}`;
     const tapUrl = `https://${input.githubToken}@github.com/${input.tap}.git`;
 
-    for (const target of [X86_64_APPLE_DARWIN, AARCH64_APPLE_DARWIN, "multiarch"]) {
+    for (const target of [MULTI_ARCH, X86_64_APPLE_DARWIN, AARCH64_APPLE_DARWIN]) {
       const name = artifactName(repo, input.version, target);
       const result = await artifact.getArtifact(name);
       await artifact.downloadArtifact(result.artifact.id);
