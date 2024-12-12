@@ -5,13 +5,13 @@ import * as cargo from "./cargo";
 
 export class TOML {
   static async init(): Promise<TOML> {
-    await cargo.installBinaryCached("toml-cli2");
+    await cargo.installBinaryCached("toml-cli2", false);
     return new TOML();
   }
 
   get(path: string, key?: string[]): Record<string, unknown> {
     const query = key == undefined ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path, query])) as Record<string, unknown>;
+    return JSON.parse(exec("toml", ["get", path, query], { quiet: true })) as Record<string, unknown>;
   }
 
   async set(path: string, key: string[], value: string) {
