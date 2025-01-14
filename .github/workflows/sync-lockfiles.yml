@@ -125,7 +125,7 @@ jobs:
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
-        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets ${{ steps.clippy-options.outputs.value }} --all-features -- --deny warnings
+        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets ${{ steps.clippy-options.outputs.value }} -- --deny warnings
 
       - name: Rectify lockfile for zenoh-c opaque-types
         if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
