@@ -101,6 +101,16 @@ jobs:
             echo "value=." >> $GITHUB_OUTPUT
           fi
 
+      - name: Compute clippy options
+        id: clippy-options
+        run: |
+          if [[ "${{ matrix.dependant }}" =~ eclipse-zenoh/zenoh-plugin-(ros2dds|dds) ]]; then
+            echo "value=--features stats,dynamic_plugin,dds_shm" >> $GITHUB_OUTPUT
+          else
+            echo "value=--all-features" >> $GITHUB_OUTPUT
+          fi
+
+
       - name: Override ${{ matrix.dependant }} lockfile with Zenoh's
         uses: actions/download-artifact@v4
         with:
@@ -115,7 +125,7 @@ jobs:
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
-        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets --all-features -- --deny warnings
+        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets ${{ steps.clippy-options.outputs.value }} --all-features -- --deny warnings
 
       - name: Rectify lockfile for zenoh-c opaque-types
         if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
