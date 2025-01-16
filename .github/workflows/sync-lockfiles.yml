@@ -172,3 +172,8 @@ jobs:
           --auto
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Add the PR as annotation to workflow run
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        run: >
+          echo "::notice:: Created PR: https://github.com/${{ matrix.depedant }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
