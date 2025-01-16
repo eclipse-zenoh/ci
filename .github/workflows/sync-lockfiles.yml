@@ -55,7 +55,6 @@ jobs:
           - eclipse-zenoh/zenoh-kotlin
           - eclipse-zenoh/zenoh-plugin-dds
           - eclipse-zenoh/zenoh-plugin-mqtt
-          - eclipse-zenoh/zenoh-plugin-ros1
           - eclipse-zenoh/zenoh-plugin-ros2dds
           - eclipse-zenoh/zenoh-plugin-webserver
           - eclipse-zenoh/zenoh-backend-filesystem
