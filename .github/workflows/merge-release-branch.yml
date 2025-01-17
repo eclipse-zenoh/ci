@@ -37,12 +37,12 @@ jobs:
         id: cpr
         run: >
           gh pr create
-            --title "chore: Merge release/${{ inputs.version }} into main"
-            --body "- Merge release/${{ inputs.version }} into main\n- Open new development line"
-            --head release/${{ inputs.version }}
-            --base main
-            --label internal
-            -R ${{ inputs.repo }}
+          --title "chore: Merge release/${{ inputs.version }} into main"
+          "- Merge release/${{ inputs.version }} into main\n- Open new development line"
+          --head release/${{ inputs.version }}
+          --base main
+          --label internal
+          -R ${{ inputs.repo }}
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
