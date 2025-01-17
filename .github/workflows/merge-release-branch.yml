@@ -33,30 +33,18 @@ jobs:
     name: Submit PR to merge release branch into main
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout ${{ inputs.repo }}
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ inputs.repo }}
-          ref: release/${{ inputs.version }}
-          submodules: true
-          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-
       - name: Create PR
         id: cpr
-        uses: peter-evans/create-pull-request@v7
-        with:
-          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-          commit-message: "chore: merge release/${{ inputs.version }} into main"
-          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
-          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
-          base: main
-          branch: release/${{ inputs.version }} 
-          delete-branch: false
-          title: 'chore: Merge release/${{ inputs.version }} into main'
-          body: |
-              - Merge release/${{ inputs.version }} into main
-              - Open new development line
-          labels: internal
+        run: >
+          gh pr create
+            --title "chore: Merge release/${{ inputs.version }} into main"
+            --body "- Merge release/${{ inputs.version }} into main\n- Open new development line"
+            --head release/${{ inputs.version }}
+            --base main
+            --label internal
+            -R ${{ inputs.repo }}
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request
         if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
