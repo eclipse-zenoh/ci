@@ -50,9 +50,12 @@ jobs:
       matrix:
         dependant:
           - eclipse-zenoh/zenoh-c
+          - eclipse-zenoh/zenoh-pico
+          - eclipse-zenoh/zenoh-cpp
           - eclipse-zenoh/zenoh-python
           - eclipse-zenoh/zenoh-java
           - eclipse-zenoh/zenoh-kotlin
+          - eclipse-zenoh/zenoh-ts
           - eclipse-zenoh/zenoh-plugin-dds
           - eclipse-zenoh/zenoh-plugin-mqtt
           - eclipse-zenoh/zenoh-plugin-ros2dds
@@ -61,7 +64,6 @@ jobs:
           - eclipse-zenoh/zenoh-backend-influxdb
           - eclipse-zenoh/zenoh-backend-rocksdb
           - eclipse-zenoh/zenoh-backend-s3
-          - eclipse-zenoh/zenoh-ts
           - eclipse-zenoh/zenoh-dissector
     steps:
       - name: Checkout ${{ matrix.dependant }}
