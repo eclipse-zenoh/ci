@@ -57,6 +57,7 @@ jobs:
           --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
           --repo "${{ inputs.repo }}"
           --auto
+          --merge
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
