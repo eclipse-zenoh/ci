@@ -35,14 +35,15 @@ jobs:
     steps:
       - name: Create PR
         id: cpr
-        run: >
-          pr_url=$(gh pr create
-          --title "chore: Merge release/${{ inputs.version }} into main"
-          --body "Open new development line"
-          --head release/${{ inputs.version }}
-          --base main
-          --label internal
-          -R ${{ inputs.repo }})
+        run: |
+          pr_url=$(gh pr create \
+          --title "chore: Merge release/${{ inputs.version }} into main" \
+          --body "Open new development line" \
+          --head release/${{ inputs.version }} \
+          --base main \
+          --label internal \
+          -R ${{ inputs.repo }} \
+          )
           echo "pull-request-operation=created" >> $GITHUB_OUTPUT
           pr_number="${pr_url##*/pull/}"
           echo "pull-request-number=$pr_number" >> $GITHUB_OUTPUT
