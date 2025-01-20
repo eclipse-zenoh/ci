@@ -81487,9 +81487,12 @@ function toDebianVersion(version, revision) {
  * Check if Package is already published in crates.io
  * @param pkg Package to check.
  */
-function isPublished(pkg) {
+function isPublished(pkg, env) {
+    const options = {
+        env,
+    };
     // Hackish but crates.io doesn't have a stable api anyway.
-    const results = sh(`cargo search ${pkg.name}`);
+    const results = sh(`cargo search ${pkg.name}`, options);
     if (!results) {
         return false;
     }
