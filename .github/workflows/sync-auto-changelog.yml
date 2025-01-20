@@ -1,4 +1,4 @@
-name: Sync auto changelog file
+name: Sync changelog config
 
 on:
   schedule:
@@ -96,7 +96,7 @@ jobs:
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
           author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
           base: ${{ inputs.branch }}
-          branch: eclipse-zenoh-bot/auto-changelog
+          branch: eclipse-zenoh-bot/sync-changelog-config
           delete-branch: true
           labels: internal
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
