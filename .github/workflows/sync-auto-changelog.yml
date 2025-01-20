@@ -1,0 +1,118 @@
+name: Sync changelog config
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # At the end of every day
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description:
+          The branch to sync across all depedant repositories. Defaults to the default branch on each repository
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fetch:
+    name: Fetch Zenoh's release.yml
+    runs-on: ubuntu-latest
+    outputs:
+      zenoh-head-hash: ${{ steps.info.outputs.head-hash }}
+      zenoh-head-date: ${{ steps.info.outputs.head-date }}
+    steps:
+      - name: Checkout Zenoh
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/zenoh
+          ref: ${{ inputs.branch }}
+
+      - id: info
+        name: Get HEAD info
+        run: |
+          echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
+          echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
+
+      - name: Upload release.yml
+        uses: actions/upload-artifact@v4
+        with:
+          name: .github/release.yml
+          path: release.yml
+
+  sync:
+    name: ${{ matrix.dependant }} sync release.yml
+    needs: fetch
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dependant:
+          - eclipse-zenoh/zenoh-c
+          - eclipse-zenoh/zenoh-pico
+          - eclipse-zenoh/zenoh-cpp
+          - eclipse-zenoh/zenoh-python
+          - eclipse-zenoh/zenoh-java
+          - eclipse-zenoh/zenoh-kotlin
+          - eclipse-zenoh/zenoh-ts
+          - eclipse-zenoh/zenoh-plugin-dds
+          - eclipse-zenoh/zenoh-plugin-mqtt
+          - eclipse-zenoh/zenoh-plugin-ros2dds
+          - eclipse-zenoh/zenoh-plugin-webserver
+          - eclipse-zenoh/zenoh-backend-filesystem
+          - eclipse-zenoh/zenoh-backend-influxdb
+          - eclipse-zenoh/zenoh-backend-rocksdb
+          - eclipse-zenoh/zenoh-backend-s3
+          - eclipse-zenoh/zenoh-dissector
+    steps:
+      - name: Checkout ${{ matrix.dependant }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.dependant }}
+          ref: ${{ inputs.branch }}
+          submodules: true
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Override ${{ matrix.dependant }} release.yml with Zenoh's
+        uses: actions/download-artifact@v4
+        with:
+          name: release.yml
+          path: .github/release.yml
+
+      - name: Create/Update a pull request if the release file changed
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: Sync `release.yml` with Zenoh `${{ needs.fetch.outputs.zenoh-head-hash }}` from `${{needs.fetch.outputs.zenoh-head-date }}`
+          body: |
+            This pull request synchronizes ${{ matrix.dependant }}'s release.yml automatic changelog generation with Zenoh's.
+
+            - **sha**: eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }}
+            - **date**: ${{ needs.fetch.outputs.zenoh-head-date }}
+            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
+          commit-message: "chore: Sync release.yml with Zenoh's"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          base: ${{ inputs.branch }}
+          branch: eclipse-zenoh-bot/sync-changelog-config
+          delete-branch: true
+          labels: internal
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Enable auto merge for the pull request
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        run: >
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
+          --subject "chore: Sync `release.yml` with eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }} from ${{ needs.fetch.outputs.zenoh-head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
+          --repo "${{ matrix.dependant }}"
+          --squash
+          --auto
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Add the PR as annotation to workflow run
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        run: >
+          echo "::notice:: Created PR: https://github.com/${{ matrix.dependant }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
