@@ -78,7 +78,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release.yml
-          path: .github/release.yml
+          path: .github/
 
       - name: Create/Update a pull request if the release file changed
         id: cpr
