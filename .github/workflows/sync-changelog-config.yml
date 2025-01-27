@@ -38,8 +38,8 @@ jobs:
       - name: Upload release.yml
         uses: actions/upload-artifact@v4
         with:
-          name: .github/release.yml
-          path: release.yml
+          name: release.yml
+          path: .github/release.yml
 
   sync:
     name: ${{ matrix.dependant }} sync release.yml
