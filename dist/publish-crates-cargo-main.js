@@ -81372,9 +81372,12 @@ function toDebianVersion(version, revision) {
  * Check if Package is already published in crates.io
  * @param pkg Package to check.
  */
-function isPublished(pkg) {
+function isPublished(pkg, env) {
+    const options = {
+        env,
+    };
     // Hackish but crates.io doesn't have a stable api anyway.
-    const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`);
+    const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`, options);
     if (!results) {
         return false;
     }
@@ -81709,7 +81712,7 @@ function publish(path, env, allowDirty = false) {
     };
     for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
         // Crates.io won't allow packages to be published with the same version
-        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_) && (package_.publish === undefined || package_.publish)) {
+        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_, env) && (package_.publish === undefined || package_.publish)) {
             const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");
