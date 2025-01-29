@@ -81369,16 +81369,17 @@ function toDebianVersion(version, revision) {
     return `${debVersion}`;
 }
 /**
- * Check if Package is already published in crates.io
+ * Check if Package is already published
  * @param pkg Package to check.
  */
 function isPublished(pkg, env) {
     const options = {
         env,
+        check: false,
     };
-    // Hackish but crates.io doesn't have a stable api anyway.
+    // Hackish but registries don't have a stable api anyway.
     const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`, options);
-    if (!results) {
+    if (!results || results.startsWith("error:")) {
         return false;
     }
     const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
