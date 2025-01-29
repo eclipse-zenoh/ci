@@ -125,7 +125,7 @@ async function publishToEstuary(
   const env = {
     CARGO_REGISTRY_DEFAULT: registry.name,
     [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_INDEX`]: registry.index
+    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_INDEX`]: registry.index,
   };
 
   publish(path, env, true);

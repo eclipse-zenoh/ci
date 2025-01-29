@@ -393,7 +393,7 @@ export function toDebianVersion(version: string, revision?: number): string {
  * @param pkg Package to check.
  */
 export function isPublished(pkg: Package, options?: CommandOptions): boolean {
-  options.check = false
+  options.check = false;
   // Hackish but registries don't have a stable api anyway.
   const results = sh(`cargo search ${pkg.name}`, options);
   if (!results || results.startsWith("error:")) {
