@@ -5,7 +5,7 @@ import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 
 import { TOML } from "./toml";
-import { sh } from "./command";
+import { sh, CommandOptions } from "./command";
 import { config } from "./config";
 import * as cargo from "./cargo";
 
@@ -392,11 +392,8 @@ export function toDebianVersion(version: string, revision?: number): string {
  * Check if Package is already published
  * @param pkg Package to check.
  */
-export function isPublished(pkg: Package, env: NodeJS.ProcessEnv): boolean {
-  const options = {
-    env,
-    check: false,
-  };
+export function isPublished(pkg: Package, options?: CommandOptions): boolean {
+  options.check = false
   // Hackish but registries don't have a stable api anyway.
   const results = sh(`cargo search ${pkg.name}`, options);
   if (!results || results.startsWith("error:")) {

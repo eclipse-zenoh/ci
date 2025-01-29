@@ -81372,11 +81372,8 @@ function toDebianVersion(version, revision) {
  * Check if Package is already published
  * @param pkg Package to check.
  */
-function isPublished(pkg, env) {
-    const options = {
-        env,
-        check: false,
-    };
+function isPublished(pkg, options) {
+    options.check = false;
     // Hackish but registries don't have a stable api anyway.
     const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`, options);
     if (!results || results.startsWith("error:")) {
@@ -81714,7 +81711,7 @@ function publish(path, env, allowDirty = false) {
     };
     for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
         // Crates.io won't allow packages to be published with the same version
-        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_, env) && (package_.publish === undefined || package_.publish)) {
+        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_, options) && (package_.publish === undefined || package_.publish)) {
             const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");

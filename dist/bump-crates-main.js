@@ -81487,11 +81487,8 @@ function toDebianVersion(version, revision) {
  * Check if Package is already published
  * @param pkg Package to check.
  */
-function isPublished(pkg, env) {
-    const options = {
-        env,
-        check: false,
-    };
+function isPublished(pkg, options) {
+    options.check = false;
     // Hackish but registries don't have a stable api anyway.
     const results = sh(`cargo search ${pkg.name}`, options);
     if (!results || results.startsWith("error:")) {
