@@ -176,4 +176,4 @@ jobs:
       - name: Add the PR as annotation to workflow run
         if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
         run: >
-          echo "::notice:: Created PR: https://github.com/${{ matrix.depedant }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
+          echo "::notice:: Created PR: https://github.com/${{ matrix.dependant }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
