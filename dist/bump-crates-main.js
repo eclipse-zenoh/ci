@@ -81134,7 +81134,7 @@ async function main(input) {
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
         if (input.bumpDepsRegExp != undefined) {
-            await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
+            await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .bumpDependencies */ .UR(workspace, input.bumpDepsRegExp, input.bumpDepsVersion);
             (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
             (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
                 cwd: repo,
@@ -81290,11 +81290,9 @@ async function bump(path, version) {
  * @param path Path to the Cargo workspace.
  * @param pattern A regular expression that matches the dependencies to be
  * @param version New version.
- * @param git Git repository location.
- * @param branch Branch of git repository location. bumped to @param version.
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function bumpDependencies(path, pattern, version, _branch) {
+async function bumpDependencies(path, pattern, version) {
     _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Bumping ${pattern} dependencies in ${path} to ${version}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
@@ -81311,15 +81309,6 @@ async function bumpDependencies(path, pattern, version, _branch) {
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
             await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
-            // FIXME(fuzzypixelz): Previously, we set the branch of the git source in dependencies,
-            // but as all dependencies are assumed to be on crates.io anyway, this is not necessary.
-            // Still, the API of all related actions/workflows should be updated to reflect this.
-            //
-            // if (branch != undefined) {
-            //   await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
-            // }
-            await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
-            await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
         }
     }
     for (const package_ of packages(path)) {
