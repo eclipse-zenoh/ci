@@ -8,20 +8,12 @@ on:
         type: string
         description: The release branch version to merge into main
         required: true
-      repo:
-        type: string
-        description: The repository to create the PR (org/repo format)
-        required: true
 
   workflow_dispatch:
     inputs:
       version:
         type: string
         description: The release branch version to merge into main
-        required: true
-      repo:
-        type: string
-        description: The repository to create the PR (org/repo format)
         required: true
 
 defaults:
@@ -60,7 +52,7 @@ jobs:
         with:
           version: ${{ inputs.version }}
           release-branch: release/${{ inputs.version }}
-          repo: ${{ inputs.repo }}
+          repo: ${{ matrix.repo }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
           deps-pattern: zenoh.*
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
@@ -84,7 +76,7 @@ jobs:
           --head ${{ steps.compute-branch.outputs.branch }}
           --base main \
           --label internal \
-          -R ${{ inputs.repo }} \
+          -R ${{ matrix.repo }} \
           )
           echo "pull-request-operation=created" >> $GITHUB_OUTPUT
           pr_number="${pr_url##*/pull/}"
@@ -98,7 +90,7 @@ jobs:
       #  run: >
       #    gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
       #    --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
-      #    --repo "${{ inputs.repo }}"
+      #    --repo "${{ matrix.repo }}"
       #    --auto
       #    --merge
       #  env:
@@ -107,4 +99,4 @@ jobs:
       - name: Add the PR as annotation to workflow run
         if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
         run: >
-          echo "::notice:: Created PR: https://github.com/${{ inputs.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
+          echo "::notice:: Created PR: https://github.com/${{ matrix.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
