@@ -81257,7 +81257,7 @@ async function setRegistry(path, pattern, registry) {
  * @param pattern A regular expression that matches the dependencies to be
  * updated
  */
-async function setGitBranch(path, pattern) {
+async function setGitBranch(path, pattern, gitUrl, gitBranch) {
     _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Setting ${pattern} dependencies' git/branch config`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
@@ -81271,14 +81271,12 @@ async function setGitBranch(path, pattern) {
         prefix = [];
         manifest = manifestRaw;
     }
-    const branch = "main";
-    const git_url = "https://github.com/eclipse-zenoh/zenoh.git";
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
             // if the dep has a path set, don't set the git/branch to avoid ambiguities
             if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path"))) {
-                await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), git_url);
-                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
+                await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
+                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
             }
         }
     }
@@ -81605,7 +81603,7 @@ async function main(input) {
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
-        await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(workspace, input.depsRegExp);
+        await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(workspace, input.depsRegExp, input.depsGitUrl, input.depsBranch);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("cargo check", { cwd: repo });

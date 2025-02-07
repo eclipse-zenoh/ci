@@ -15,7 +15,7 @@ export type Input = {
   githubToken: string;
   depsRegExp: RegExp;
   depsGitUrl: string;
-  depsBranch?: string;
+  depsBranch: string;
 };
 
 export function setup(): Input {
@@ -49,7 +49,7 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`ls ${workspace}`);
 
-    await cargo.setGitBranch(workspace, input.depsRegExp);
+    await cargo.setGitBranch(workspace, input.depsRegExp, input.depsGitUrl, input.depsBranch);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Update git/branch`, { cwd: repo, env: gitEnv });
 

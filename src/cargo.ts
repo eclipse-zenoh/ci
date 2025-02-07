@@ -259,7 +259,7 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
  * @param pattern A regular expression that matches the dependencies to be
  * updated
  */
-export async function setGitBranch(path: string, pattern: RegExp): Promise<void> {
+export async function setGitBranch(path: string, pattern: RegExp, gitUrl: string, gitBranch: string): Promise<void> {
   core.startGroup(`Setting ${pattern} dependencies' git/branch config`);
   const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = toml.get(manifestPath);
@@ -274,15 +274,12 @@ export async function setGitBranch(path: string, pattern: RegExp): Promise<void>
     manifest = manifestRaw as CargoManifest;
   }
 
-  const branch = "main";
-  const git_url = "https://github.com/eclipse-zenoh/zenoh.git";
-
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
       // if the dep has a path set, don't set the git/branch to avoid ambiguities
       if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path"))) {
-        await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), git_url);
-        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), branch);
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
       }
     }
   }

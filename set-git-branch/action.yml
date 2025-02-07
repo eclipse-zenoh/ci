@@ -3,9 +3,7 @@ name: Set git branch
 inputs:
   version:
     required: true
-  branch:
-    required: true
-  git_url:
+  release-branch:
     required: true
   repo:
     required: true
@@ -14,8 +12,11 @@ inputs:
   github-token:
     required: true
   deps-pattern:
-    required: false
-
+    required: true
+  deps-git-url:
+    required: true
+  deps-branch:
+    required: true
 runs:
   using: node20
   main: ../dist/set-git-branch-main.js
