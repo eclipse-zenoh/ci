@@ -1,0 +1,21 @@
+name: Set git branch
+
+inputs:
+  version:
+    required: true
+  branch:
+    required: true
+  git_url:
+    required: true
+  repo:
+    required: true
+  path:
+    required: false
+  github-token:
+    required: true
+  deps-pattern:
+    required: false
+
+runs:
+  using: node20
+  main: ../dist/set-git-branch-main.js
