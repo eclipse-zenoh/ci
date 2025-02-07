@@ -60,10 +60,10 @@ jobs:
 
       - name: Compute branch
         id: compute-branch
-        run: 
-          if [ "${{ matrix.repo }}" =~ eclipse-zenoh/zenoh(-pico|-cpp) ]] ; then
+        run:
+          if [ "${{ matrix.repo }}" =~ eclipse-zenoh\/zenoh(?:-(pico|cpp))? ]] ; then
             echo "branch=release/${{ inputs.version }}" >> $GITHUB_OUTPUT
-          else 
+          else
             echo "branch=eclipse-zenoh-bot/post-release-${{ inputs.version }}" >> $GITHUB_OUTPUT
           fi
 
