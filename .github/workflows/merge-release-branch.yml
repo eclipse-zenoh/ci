@@ -92,16 +92,17 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      - name: Enable auto merge for the pull request
-        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
-        run: >
-          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-          --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
-          --repo "${{ inputs.repo }}"
-          --auto
-          --merge
-        env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+      # Disable auto merge while testing
+      #- name: Enable auto merge for the pull request
+      #  if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+      #  run: >
+      #    gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
+      #    --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
+      #    --repo "${{ inputs.repo }}"
+      #    --auto
+      #    --merge
+      #  env:
+      #    GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Add the PR as annotation to workflow run
         if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
