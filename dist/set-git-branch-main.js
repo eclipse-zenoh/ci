@@ -81255,6 +81255,8 @@ async function setRegistry(path, pattern, registry) {
  *
  * @param path Path to the Cargo workspace.
  * @param pattern A regular expression that matches the dependencies to be
+ * @param gitUrl git url to set in Cargo.toml dependency
+ * @param gitBranch git branch to set in Cargo.toml dependency
  * updated
  */
 async function setGitBranch(path, pattern, gitUrl, gitBranch) {
