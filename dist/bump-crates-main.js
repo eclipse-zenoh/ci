@@ -81185,7 +81185,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
-/* unused harmony exports packages, packagesOrdered, setRegistry, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
+/* unused harmony exports packages, packagesOrdered, setRegistry, setGitBranch, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81368,6 +81368,39 @@ async function setRegistry(path, pattern, registry) {
         }
     }
     core.endGroup();
+}
+/**
+ * Sets the git/branch config of select dependencies.
+ *
+ * @param path Path to the Cargo workspace.
+ * @param pattern A regular expression that matches the dependencies to be
+ * @param gitUrl git url to set in Cargo.toml dependency
+ * @param gitBranch git branch to set in Cargo.toml dependency
+ * updated
+ */
+async function setGitBranch(path, pattern, gitUrl, gitBranch) {
+    core.startGroup(`Setting ${pattern} dependencies' git/branch config`);
+    const manifestPath = `${path}/Cargo.toml`;
+    const manifestRaw = toml.get(manifestPath);
+    let manifest;
+    let prefix;
+    if ("workspace" in manifestRaw) {
+        prefix = ["workspace"];
+        manifest = manifestRaw["workspace"];
+    }
+    else {
+        prefix = [];
+        manifest = manifestRaw;
+    }
+    for (const dep in manifest.dependencies) {
+        if (pattern.test(dep)) {
+            // if the dep has a path set, don't set the git/branch to avoid ambiguities
+            if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path"))) {
+                await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
+                await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
+            }
+        }
+    }
 }
 /**
  * Stores Cargo registry configuration in `.cargo/config.toml`.

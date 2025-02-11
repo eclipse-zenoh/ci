@@ -8,20 +8,12 @@ on:
         type: string
         description: The release branch version to merge into main
         required: true
-      repo:
-        type: string
-        description: The repository to create the PR (org/repo format)
-        required: true
 
   workflow_dispatch:
     inputs:
       version:
         type: string
         description: The release branch version to merge into main
-        required: true
-      repo:
-        type: string
-        description: The repository to create the PR (org/repo format)
         required: true
 
 defaults:
@@ -32,17 +24,59 @@ jobs:
   merge-release-branch:
     name: Submit PR to merge release branch into main
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - eclipse-zenoh/zenoh
+          - eclipse-zenoh/zenoh-pico
+          - eclipse-zenoh/zenoh-cpp
+          - eclipse-zenoh/zenoh-c
+          - eclipse-zenoh/zenoh-python
+          - eclipse-zenoh/zenoh-java
+          - eclipse-zenoh/zenoh-kotlin
+          - eclipse-zenoh/zenoh-plugin-dds
+          - eclipse-zenoh/zenoh-plugin-mqtt
+          - eclipse-zenoh/zenoh-plugin-ros2dds
+          - eclipse-zenoh/zenoh-plugin-webserver
+          - eclipse-zenoh/zenoh-backend-filesystem
+          - eclipse-zenoh/zenoh-backend-influxdb
+          - eclipse-zenoh/zenoh-backend-rocksdb
+          - eclipse-zenoh/zenoh-backend-s3
+          - eclipse-zenoh/zenoh-ts
+          - eclipse-zenoh/zenoh-dissector
     steps:
+      - name: Update git/branch in release branch
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
+        uses: ZettaScaleLabs/ci/set-git-branch@set-git-branch-action
+        with:
+          version: ${{ inputs.version }}
+          release-branch: release/${{ inputs.version }}
+          repo: ${{ matrix.repo }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          deps-pattern: zenoh.*
+          deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
+          deps-branch: main
+
+      - name: Compute branch
+        id: compute-branch
+        run:
+          if [ "${{ matrix.repo }}" =~ eclipse-zenoh\/zenoh(?:-(pico|cpp))? ]] ; then
+            echo "branch=release/${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "branch=eclipse-zenoh-bot/post-release-${{ inputs.version }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Create PR
         id: cpr
         run: |
           pr_url=$(gh pr create \
           --title "chore: Merge release/${{ inputs.version }} into main" \
           --body "Open new development line" \
-          --head release/${{ inputs.version }} \
+          --head ${{ steps.compute-branch.outputs.branch }}
           --base main \
           --label internal \
-          -R ${{ inputs.repo }} \
+          -R ${{ matrix.repo }} \
           )
           echo "pull-request-operation=created" >> $GITHUB_OUTPUT
           pr_number="${pr_url##*/pull/}"
@@ -50,18 +84,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      - name: Enable auto merge for the pull request
-        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
-        run: >
-          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-          --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
-          --repo "${{ inputs.repo }}"
-          --auto
-          --merge
-        env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+      # Disable auto merge while testing
+      #- name: Enable auto merge for the pull request
+      #  if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+      #  run: >
+      #    gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
+      #    --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
+      #    --repo "${{ matrix.repo }}"
+      #    --auto
+      #    --merge
+      #  env:
+      #    GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Add the PR as annotation to workflow run
         if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
         run: >
-          echo "::notice:: Created PR: https://github.com/${{ inputs.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
+          echo "::notice:: Created PR: https://github.com/${{ matrix.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
