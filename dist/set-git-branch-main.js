@@ -81607,7 +81607,7 @@ async function main(input) {
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
         await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(workspace, input.depsRegExp, input.depsGitUrl, input.depsBranch);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("cargo check", { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
             cwd: repo,
