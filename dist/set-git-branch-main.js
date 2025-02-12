@@ -81613,7 +81613,7 @@ async function main(input) {
             .filter(r => r);
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-            if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff --quiet", { cwd: repo })) {
+            if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}/Cargo.toml`);

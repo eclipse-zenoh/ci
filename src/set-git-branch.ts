@@ -56,7 +56,7 @@ export async function main(input: Input) {
 
     for (const path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-      if (sh("git diff --quiet", { cwd: repo })) {
+      if (sh("git diff", { cwd: repo, check: false })) {
         sh("git add .", { cwd: repo });
         sh(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: gitEnv });
 
