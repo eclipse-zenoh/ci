@@ -70,17 +70,27 @@ jobs:
       - name: Create PR
         id: cpr
         run: |
-          pr_url=$(gh pr create \
+          output=$(gh pr create \
           --title "chore: Merge release/${{ inputs.version }} into main" \
-          --body "Open new development line" \
+          --body ":warning: This needs to be a merge commit :warning:" \
           --head ${{ steps.compute-branch.outputs.branch }} \
           --base main \
           --label internal \
           -R ${{ matrix.repo }} \
-          )
-          echo "pull-request-operation=created" >> $GITHUB_OUTPUT
-          pr_number="${pr_url##*/pull/}"
-          echo "pull-request-number=$pr_number" >> $GITHUB_OUTPUT
+          ) || exit_code=$?
+          if [[ ${exit_code} == 0 ]]; then
+            echo "pull-request-operation=created" >> $GITHUB_OUTPUT
+            pr_number="${output##*/pull/}"
+            echo "pull-request-number=$pr_number" >> $GITHUB_OUTPUT
+          else
+            if [[ $output == *"No commits between"* ]]; then
+                exit 0
+            elif [[ $output == *"pull request for branch"* ]]; then
+                echo "pull-request-operation=updated"
+                pr_number="${output##*/pull/}"
+                echo "pull-request-number=$pr_number"
+            fi
+          fi
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
