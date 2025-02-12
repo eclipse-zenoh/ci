@@ -9,9 +9,14 @@ export class TOML {
     return new TOML();
   }
 
-  get(path: string, key?: string[]): Record<string, unknown> {
+  get(path: string, key?: string[]): Record<string, unknown> | undefined {
     const query = key == undefined ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path, query])) as Record<string, unknown>;
+    const out = exec("toml", ["get", path, query], { check: false });
+    if (out) {
+      return JSON.parse(out) as Record<string, unknown>;
+    } else {
+      return undefined;
+    }
   }
 
   async set(path: string, key: string[], value: string) {

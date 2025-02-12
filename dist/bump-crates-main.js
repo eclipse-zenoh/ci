@@ -81677,7 +81677,13 @@ class TOML {
     }
     get(path, key) {
         const query = key == undefined ? "." : key.join(".");
-        return JSON.parse((0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["get", path, query]));
+        const out = (0,_command__WEBPACK_IMPORTED_MODULE_1__/* .exec */ .G)("toml", ["get", path, query], { check: false });
+        if (out) {
+            return JSON.parse(out);
+        }
+        else {
+            return undefined;
+        }
     }
     async set(path, key, value) {
         const query = key.join(".");
