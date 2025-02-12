@@ -56,7 +56,7 @@ export async function main(input: Input) {
       sh("git add .", { cwd: repo });
       sh(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: gitEnv });
 
-      sh(`cargo check --manifest-path ${path}`, { cwd: repo });
+      sh(`cargo check --manifest-path ${path}/Cargo.toml`, { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,
