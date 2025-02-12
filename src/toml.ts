@@ -9,7 +9,7 @@ export class TOML {
     return new TOML();
   }
 
-  get(path: string, key?: string[]): Record<string, unknown> {
+  get(path: string, key?: string[]): Record<string, unknown> | undefined {
     const query = key == undefined ? "." : key.join(".");
     const out = exec("toml", ["get", path, query], { check: false });
     if (out) {
