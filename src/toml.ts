@@ -11,7 +11,7 @@ export class TOML {
 
   get(path: string, key?: string[]): Record<string, unknown> {
     const query = key == undefined ? "." : key.join(".");
-    const out = exec("toml", ["get", path, query], { check: false })
+    const out = exec("toml", ["get", path, query], { check: false });
     if (out) {
       return JSON.parse(out) as Record<string, unknown>;
     }
