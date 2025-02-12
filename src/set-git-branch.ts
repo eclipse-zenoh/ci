@@ -48,17 +48,21 @@ export async function main(input: Input) {
 
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`ls ${workspace}`);
+    // find all Cargo.toml files in the workspace
+    const cargoPaths = sh(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`).split("\n")
 
-    await cargo.setGitBranch(workspace, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-    sh("git add .", { cwd: repo });
-    sh(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: gitEnv });
+    for (const path of cargoPaths) {
+      await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
+      sh("git add .", { cwd: repo });
+      sh(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: gitEnv });
 
-    sh("cargo check", { cwd: repo });
-    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-      cwd: repo,
-      env: gitEnv,
-      check: false,
-    });
+      sh(`cargo check --manifest-path ${path}`, { cwd: repo });
+      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+        cwd: repo,
+        env: gitEnv,
+        check: false,
+      });
+    }
 
     sh(`git push --force ${remote} HEAD:eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
 

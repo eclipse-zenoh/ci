@@ -81605,15 +81605,19 @@ async function main(input) {
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
-        await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(workspace, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("cargo check", { cwd: repo });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-            cwd: repo,
-            env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
-            check: false,
-        });
+        // find all Cargo.toml files in the workspace
+        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`).split("\n");
+        for (const path of cargoPaths) {
+            await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}`, { cwd: repo });
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+                cwd: repo,
+                env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
+                check: false,
+            });
+        }
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} HEAD:eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         await cleanup(input);
     }
