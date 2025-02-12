@@ -61,7 +61,7 @@ jobs:
       - name: Compute branch
         id: compute-branch
         run: |
-          if [[ "${{ matrix.repo }}" =~ eclipse-zenoh\/zenoh(?:-(pico|cpp))? ]] ; then
+          if [[ "${{ matrix.repo }}" =~ ^eclipse-zenoh/zenoh(-cpp|-pico)?$ ]] ; then
             echo "branch=release/${{ inputs.version }}" >> $GITHUB_OUTPUT
           else
             echo "branch=eclipse-zenoh-bot/post-release-${{ inputs.version }}" >> $GITHUB_OUTPUT
@@ -73,7 +73,7 @@ jobs:
           pr_url=$(gh pr create \
           --title "chore: Merge release/${{ inputs.version }} into main" \
           --body "Open new development line" \
-          --head ${{ steps.compute-branch.outputs.branch }}
+          --head ${{ steps.compute-branch.outputs.branch }} \
           --base main \
           --label internal \
           -R ${{ matrix.repo }} \
