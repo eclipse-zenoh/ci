@@ -81605,8 +81605,10 @@ async function main(input) {
         const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
-        // find all Cargo.toml files in the workspace
-        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`).split("\n");
+        // find all Cargo.toml files in the workspace, filtering out the empty string from the array
+        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`)
+            .split("\n")
+            .filter(r => r);
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
             (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
