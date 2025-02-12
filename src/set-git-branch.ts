@@ -56,15 +56,17 @@ export async function main(input: Input) {
 
     for (const path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-      sh("git add .", { cwd: repo });
-      sh(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: gitEnv });
+      if (sh("git diff", { cwd: repo, check: false })) {
+        sh("git add .", { cwd: repo });
+        sh(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: gitEnv });
 
-      sh(`cargo check --manifest-path ${path}/Cargo.toml`);
-      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-        cwd: repo,
-        env: gitEnv,
-        check: false,
-      });
+        sh(`cargo check --manifest-path ${path}/Cargo.toml`);
+        sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+          cwd: repo,
+          env: gitEnv,
+          check: false,
+        });
+      }
     }
 
     sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });

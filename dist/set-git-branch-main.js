@@ -81275,8 +81275,9 @@ async function setGitBranch(path, pattern, gitUrl, gitBranch) {
     }
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
-            // if the dep has a path set, don't set the git/branch to avoid ambiguities
-            if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path"))) {
+            // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
+            if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) ||
+                !toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace"))) {
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
             }
@@ -81612,14 +81613,16 @@ async function main(input) {
             .filter(r => r);
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
-            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
-            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
-            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}/Cargo.toml`);
-            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-                cwd: repo,
-                env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
-                check: false,
-            });
+            if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}/Cargo.toml`);
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+                    cwd: repo,
+                    env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
+                    check: false,
+                });
+            }
         }
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         await cleanup(input);
