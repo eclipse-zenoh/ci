@@ -81787,6 +81787,9 @@ class TOML {
         if (out) {
             return JSON.parse(out);
         }
+        else {
+            return {};
+        }
     }
     async set(path, key, value) {
         const query = key.join(".");

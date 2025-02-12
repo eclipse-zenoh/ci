@@ -14,6 +14,8 @@ export class TOML {
     const out = exec("toml", ["get", path, query], { check: false });
     if (out) {
       return JSON.parse(out) as Record<string, unknown>;
+    } else {
+      return {} as Record<string, unknown>;
     }
   }
 
