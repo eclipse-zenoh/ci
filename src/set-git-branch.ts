@@ -56,7 +56,7 @@ export async function main(input: Input) {
     for (const path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
       sh("git add .", { cwd: repo });
-      sh(`git commit --message 'chore: Update git/branch'`, { cwd: repo, env: gitEnv });
+      sh(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: gitEnv });
 
       sh(`cargo check --manifest-path ${path}/Cargo.toml`);
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
