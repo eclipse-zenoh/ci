@@ -81614,7 +81614,7 @@ async function main(input) {
             env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
             check: false,
         });
-        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} HEAD:eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         await cleanup(input);
     }
     catch (error) {

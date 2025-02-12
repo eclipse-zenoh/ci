@@ -60,7 +60,7 @@ export async function main(input: Input) {
       check: false,
     });
 
-    sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git push --force ${remote} HEAD:eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {
