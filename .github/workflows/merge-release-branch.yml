@@ -84,11 +84,12 @@ jobs:
             echo "pull-request-number=$pr_number" >> $GITHUB_OUTPUT
           else
             if [[ $output == *"No commits between"* ]]; then
+                echo "pull-request-operation=none" >> $GITHUB_OUTPUT
                 exit 0
             elif [[ $output == *"pull request for branch"* ]]; then
-                echo "pull-request-operation=updated"
+                echo "pull-request-operation=updated" >> $GITHUB_OUTPUT
                 pr_number="${output##*/pull/}"
-                echo "pull-request-number=$pr_number"
+                echo "pull-request-number=$pr_number" >> $GITHUB_OUTPUT
             fi
           fi
         env:
@@ -107,6 +108,6 @@ jobs:
       #    GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Add the PR as annotation to workflow run
-        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        if: ${{ contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation ) }}
         run: >
           echo "::notice:: Created PR: https://github.com/${{ matrix.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
