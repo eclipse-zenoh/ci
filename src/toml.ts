@@ -15,7 +15,7 @@ export class TOML {
     if (out) {
       return JSON.parse(out) as Record<string, unknown>;
     } else {
-      return {} as Record<string, unknown>;
+      return {};
     }
   }
 
