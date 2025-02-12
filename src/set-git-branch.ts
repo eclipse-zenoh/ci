@@ -49,7 +49,7 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`ls ${workspace}`);
     // find all Cargo.toml files in the workspace
-    const cargoPaths = sh(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`).split("\n")
+    const cargoPaths = sh(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`).split("\n");
 
     for (const path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
