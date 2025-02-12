@@ -46,6 +46,12 @@ jobs:
           - eclipse-zenoh/zenoh-ts
           - eclipse-zenoh/zenoh-dissector
     steps:
+      - name: Setup rust toolchain
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: 1.75.0
+
       - name: Update git/branch in release branch
         if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
         uses: ZettaScaleLabs/ci/set-git-branch@set-git-branch-action
