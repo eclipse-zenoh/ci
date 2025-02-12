@@ -47,6 +47,7 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
 
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
+    sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
     // find all Cargo.toml files in the workspace, filtering out the empty string from the array
     const cargoPaths = sh(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`)
@@ -66,7 +67,7 @@ export async function main(input: Input) {
       });
     }
 
-    sh(`git push --force ${remote} HEAD:eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {
