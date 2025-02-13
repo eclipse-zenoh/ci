@@ -50,7 +50,7 @@ export async function main(input: Input) {
     sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
     // find all Cargo.toml files in the workspace, filtering out the empty string from the array
-    const cargoPaths = sh(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`)
+    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`)
       .split("\n")
       .filter(r => r);
 
@@ -58,14 +58,16 @@ export async function main(input: Input) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
       if (sh("git diff", { cwd: repo, check: false })) {
         sh("git add .", { cwd: repo });
-        sh(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: gitEnv });
+        sh(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: gitEnv });
 
-        sh(`cargo check --manifest-path ${path}/Cargo.toml`);
-        sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-          cwd: repo,
-          env: gitEnv,
-          check: false,
-        });
+        if (path.endsWith("Cargo.toml")) {
+          sh(`cargo check --manifest-path ${path}`);
+          sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+            cwd: repo,
+            env: gitEnv,
+            check: false,
+          });
+        }
       }
     }
 

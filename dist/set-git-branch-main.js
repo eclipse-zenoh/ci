@@ -81253,15 +81253,14 @@ async function setRegistry(path, pattern, registry) {
 /**
  * Sets the git/branch config of select dependencies.
  *
- * @param path Path to the Cargo workspace.
+ * @param manifestPath Path to the Cargo.toml file.
  * @param pattern A regular expression that matches the dependencies to be
  * @param gitUrl git url to set in Cargo.toml dependency
  * @param gitBranch git branch to set in Cargo.toml dependency
  * updated
  */
-async function setGitBranch(path, pattern, gitUrl, gitBranch) {
+async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
     _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Setting ${pattern} dependencies' git/branch config`);
-    const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     let manifest;
     let prefix;
@@ -81276,8 +81275,8 @@ async function setGitBranch(path, pattern, gitUrl, gitBranch) {
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
             // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
-            if (!toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) ||
-                !toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace"))) {
+            if (!(toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) ||
+                toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace")))) {
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
             }
@@ -81608,20 +81607,22 @@ async function main(input) {
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
         // find all Cargo.toml files in the workspace, filtering out the empty string from the array
-        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`)
+        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name "Cargo.toml*"`)
             .split("\n")
             .filter(r => r);
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
             if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git add .", { cwd: repo });
-                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}/Cargo.toml'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
-                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}/Cargo.toml`);
-                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-                    cwd: repo,
-                    env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
-                    check: false,
-                });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+                if (path.endsWith("Cargo.toml")) {
+                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}`);
+                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+                        cwd: repo,
+                        env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
+                        check: false,
+                    });
+                }
             }
         }
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
