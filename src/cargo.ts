@@ -280,8 +280,10 @@ export async function setGitBranch(path: string, pattern: RegExp, gitUrl: string
     if (pattern.test(dep)) {
       // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
       if (
-        !toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) ||
-        !toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace"))
+        !(
+          toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) ||
+          toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace"))
+        )
       ) {
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
