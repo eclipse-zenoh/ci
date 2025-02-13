@@ -92,6 +92,7 @@ jobs:
           --label internal \
           -R ${{ matrix.repo }} \
           2>&1) || exit_code=$?
+          echo $output
           if [[ ${exit_code} == 0 ]]; then
             echo "pull-request-operation=created" >> $GITHUB_OUTPUT
             pr_number="${output##*/pull/}"
