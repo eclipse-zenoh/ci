@@ -255,15 +255,14 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
 /**
  * Sets the git/branch config of select dependencies.
  *
- * @param path Path to the Cargo workspace.
+ * @param manifestPath Path to the Cargo.toml file.
  * @param pattern A regular expression that matches the dependencies to be
  * @param gitUrl git url to set in Cargo.toml dependency
  * @param gitBranch git branch to set in Cargo.toml dependency
  * updated
  */
-export async function setGitBranch(path: string, pattern: RegExp, gitUrl: string, gitBranch: string): Promise<void> {
+export async function setGitBranch(manifestPath: string, pattern: RegExp, gitUrl: string, gitBranch: string): Promise<void> {
   core.startGroup(`Setting ${pattern} dependencies' git/branch config`);
-  const manifestPath = `${path}/Cargo.toml`;
   const manifestRaw = toml.get(manifestPath);
 
   let manifest: CargoManifest;

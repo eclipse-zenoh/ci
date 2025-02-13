@@ -81253,15 +81253,14 @@ async function setRegistry(path, pattern, registry) {
 /**
  * Sets the git/branch config of select dependencies.
  *
- * @param path Path to the Cargo workspace.
+ * @param manifestPath Path to the Cargo.toml file.
  * @param pattern A regular expression that matches the dependencies to be
  * @param gitUrl git url to set in Cargo.toml dependency
  * @param gitBranch git branch to set in Cargo.toml dependency
  * updated
  */
-async function setGitBranch(path, pattern, gitUrl, gitBranch) {
+async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
     _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Setting ${pattern} dependencies' git/branch config`);
-    const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     let manifest;
     let prefix;
@@ -81608,7 +81607,7 @@ async function main(input) {
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
         // find all Cargo.toml files in the workspace, filtering out the empty string from the array
-        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name Cargo.toml -exec dirname {} \\;`)
+        const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name "Cargo.toml*"`)
             .split("\n")
             .filter(r => r);
         for (const path of cargoPaths) {
