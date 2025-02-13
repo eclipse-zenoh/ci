@@ -52,6 +52,14 @@ jobs:
         with:
           toolchain: 1.75.0
 
+      - name: Install dependencies for zenoh-dissector
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-dissector' }}
+        run: |
+          sudo apt install -y software-properties-common
+          sudo add-apt-repository -y ppa:wireshark-dev/stable
+          sudo apt install -y wireshark-dev
+          sudo apt install -y --allow-change-held-packages wireshark
+
       - name: Update git/branch in release branch
         if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
         uses: ZettaScaleLabs/ci/set-git-branch@set-git-branch-action
