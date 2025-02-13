@@ -261,7 +261,12 @@ export async function setRegistry(path: string, pattern: RegExp, registry: strin
  * @param gitBranch git branch to set in Cargo.toml dependency
  * updated
  */
-export async function setGitBranch(manifestPath: string, pattern: RegExp, gitUrl: string, gitBranch: string): Promise<void> {
+export async function setGitBranch(
+  manifestPath: string,
+  pattern: RegExp,
+  gitUrl: string,
+  gitBranch: string,
+): Promise<void> {
   core.startGroup(`Setting ${pattern} dependencies' git/branch config`);
   const manifestRaw = toml.get(manifestPath);
 
