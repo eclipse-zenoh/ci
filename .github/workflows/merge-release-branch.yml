@@ -62,7 +62,7 @@ jobs:
 
       - name: Update git/branch in release branch
         if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
-        uses: ZettaScaleLabs/ci/set-git-branch@set-git-branch-action
+        uses: eclipse-zenoh/ci/set-git-branch@main
         with:
           version: ${{ inputs.version }}
           release-branch: release/${{ inputs.version }}
@@ -92,6 +92,7 @@ jobs:
           --label internal \
           -R ${{ matrix.repo }} \
           2>&1) || exit_code=$?
+          echo $output
           if [[ ${exit_code} == 0 ]]; then
             echo "pull-request-operation=created" >> $GITHUB_OUTPUT
             pr_number="${output##*/pull/}"
@@ -110,19 +111,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
-      # Disable auto merge while testing
-      #- name: Enable auto merge for the pull request
-      #  if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
-      #  run: >
-      #    gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-      #    --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
-      #    --repo "${{ matrix.repo }}"
-      #    --auto
-      #    --merge
-      #  env:
-      #    GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+      - name: Enable auto merge for the pull request
+        if: ${{ steps.cpr.outputs.pull-request-operation == 'created' }}
+        run: >
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
+          --subject "chore: Merge release/${{ inputs.version }} into main (#${{ steps.cpr.outputs.pull-request-number }})"
+          --repo "${{ matrix.repo }}"
+          --auto
+          --merge
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Add the PR as annotation to workflow run
         if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
         run: >
-          echo "::notice:: Created PR: https://github.com/${{ matrix.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
+          echo "::notice:: PR ${{ steps.cpr.outputs.pull-request-operation }}: https://github.com/${{ matrix.repo }}/pull/${{ steps.cpr.outputs.pull-request-number }}"
