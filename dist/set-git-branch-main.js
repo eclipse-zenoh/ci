@@ -81613,11 +81613,11 @@ async function main(input) {
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
             if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
-                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git add **/Cargo.toml*`, { cwd: repo });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`shopt -s globstar; git add **/Cargo.toml*`, { cwd: repo });
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
                 if (path.endsWith("Cargo.toml")) {
                     (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}`);
-                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit **/Cargo.lock --message 'chore: Update Cargo lockfile'", {
+                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("shopt -s globstar; git commit **/Cargo.lock --message 'chore: Update Cargo lockfile'", {
                         cwd: repo,
                         env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,
                         check: false,
