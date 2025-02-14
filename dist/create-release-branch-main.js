@@ -24965,6 +24965,7 @@ function command_sh(cmd, options) {
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
     options.quiet = options.quiet != null ? options.quiet : false;
+    options.shell = options.shell != null ? options.shell : true;
     lib_core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,external_child_process_namespaceObject.spawnSync)(cmd, {
         // NOTE: Environment variables defined in `options.env` take precedence over
@@ -24974,7 +24975,7 @@ function command_sh(cmd, options) {
             ...options.env,
         },
         stdio: "pipe",
-        shell: true,
+        shell: options.shell,
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,
