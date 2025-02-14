@@ -57,12 +57,12 @@ export async function main(input: Input) {
     for (const path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
       if (sh("git diff", { cwd: repo, check: false })) {
-        sh(`git add **/Cargo.toml*`, { cwd: repo });
+        sh(`shopt -s globstar; git add **/Cargo.toml*`, { cwd: repo });
         sh(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: gitEnv });
 
         if (path.endsWith("Cargo.toml")) {
           sh(`cargo check --manifest-path ${path}`);
-          sh("git commit **/Cargo.lock --message 'chore: Update Cargo lockfile'", {
+          sh("shopt -s globstar; git commit **/Cargo.lock --message 'chore: Update Cargo lockfile'", {
             cwd: repo,
             env: gitEnv,
             check: false,
