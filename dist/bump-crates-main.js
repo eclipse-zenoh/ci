@@ -81558,7 +81558,6 @@ function sh(cmd, options) {
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
     options.quiet = options.quiet != null ? options.quiet : false;
-    options.shell = options.shell != null ? options.shell : true;
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync)(cmd, {
         // NOTE: Environment variables defined in `options.env` take precedence over
@@ -81568,7 +81567,7 @@ function sh(cmd, options) {
             ...options.env,
         },
         stdio: "pipe",
-        shell: options.shell,
+        shell: true,
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,

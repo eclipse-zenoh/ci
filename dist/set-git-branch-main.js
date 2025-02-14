@@ -81439,7 +81439,6 @@ function sh(cmd, options) {
     options.check = options.check != null ? options.check : true;
     options.input = options.input != null ? options.input : "";
     options.quiet = options.quiet != null ? options.quiet : false;
-    options.shell = options.shell != null ? options.shell : true;
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
     const returns = (0,child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync)(cmd, {
         // NOTE: Environment variables defined in `options.env` take precedence over
@@ -81449,7 +81448,7 @@ function sh(cmd, options) {
             ...options.env,
         },
         stdio: "pipe",
-        shell: options.shell,
+        shell: true,
         encoding: "utf-8",
         cwd: options.cwd,
         input: options.input,
@@ -81614,11 +81613,11 @@ async function main(input) {
         for (const path of cargoPaths) {
             await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setGitBranch */ .B0(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
             if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
-                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git add **/Cargo.toml*`, { cwd: repo, shell: "/bin/zsh" });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
                 if (path.endsWith("Cargo.toml")) {
                     (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`cargo check --manifest-path ${path}`);
-                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git add **/Cargo.lock`, { cwd: repo, shell: "/bin/zsh" });
+                    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
                     (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git commit --message 'chore: Update Cargo lockfile'", {
                         cwd: repo,
                         env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B,

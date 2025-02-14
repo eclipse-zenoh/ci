@@ -9,7 +9,6 @@ export type CommandOptions = {
   check?: boolean;
   input?: string;
   quiet?: boolean;
-  shell?: boolean | string;
 };
 
 export function sh(cmd: string, options?: CommandOptions): string {
@@ -19,7 +18,6 @@ export function sh(cmd: string, options?: CommandOptions): string {
   options.check = options.check != null ? options.check : true;
   options.input = options.input != null ? options.input : "";
   options.quiet = options.quiet != null ? options.quiet : false;
-  options.shell = options.shell != null ? options.shell : true;
 
   core.startGroup(`\u001b[1m\u001b[35m${cmd}\u001b[0m`);
 
@@ -31,7 +29,7 @@ export function sh(cmd: string, options?: CommandOptions): string {
       ...options.env,
     },
     stdio: "pipe",
-    shell: options.shell,
+    shell: true,
     encoding: "utf-8",
     cwd: options.cwd,
     input: options.input,
