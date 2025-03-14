@@ -81521,7 +81521,7 @@ function toDebianVersion(version, revision) {
  * @param pkg Package to check.
  */
 function isPublished(pkg, options) {
-    var optionsCopy = Object.assign({}, options);
+    const optionsCopy = Object.assign({}, options);
     optionsCopy.check = false;
     // Hackish but registries don't have a stable api anyway.
     const results = sh(`cargo search ${pkg.name}`, optionsCopy);
