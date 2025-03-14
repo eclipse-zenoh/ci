@@ -81064,13 +81064,11 @@ module.exports.implForWrapper = function (wrapper) {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
-/* harmony export */   "i8": () => (/* binding */ setRegistry),
-/* harmony export */   "p3": () => (/* binding */ configRegistry),
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered),
 /* harmony export */   "s9": () => (/* binding */ isPublished),
 /* harmony export */   "wS": () => (/* binding */ installBinaryFromGit)
 /* harmony export */ });
-/* unused harmony exports packages, bump, bumpDependencies, setGitBranch, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
+/* unused harmony exports packages, bump, bumpDependencies, setRegistry, setGitBranch, configRegistry, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81231,7 +81229,7 @@ async function bumpDependencies(path, pattern, version, _branch) {
  * @param registry The name of the Cargo alternative registry.
  */
 async function setRegistry(path, pattern, registry) {
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
+    core.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
     const manifestPath = `${path}/Cargo.toml`;
     const manifestRaw = toml.get(manifestPath);
     let manifest;
@@ -81252,7 +81250,7 @@ async function setRegistry(path, pattern, registry) {
             await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
         }
     }
-    _actions_core__WEBPACK_IMPORTED_MODULE_2__.endGroup();
+    core.endGroup();
 }
 /**
  * Sets the git/branch config of select dependencies.
@@ -81663,10 +81661,11 @@ async function main(input) {
     try {
         registry = await _estuary__WEBPACK_IMPORTED_MODULE_2__/* .spawn */ .C();
         if (input.publicationTest) {
-            for (const repo of input.unpublishedDepsRepos) {
-                await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
-            }
-            await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
+            _actions_core__WEBPACK_IMPORTED_MODULE_1__.notice("Publication test to estuary disabled");
+            //for (const repo of input.unpublishedDepsRepos) {
+            //  await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
+            //}
+            //await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
             await deleteRepos(input);
         }
         if (input.liveRun) {
@@ -81717,17 +81716,26 @@ async function deleteRepos(input) {
 function repoPath(repo) {
     return repo.split("/").at(1);
 }
-async function publishToEstuary(input, repo, registry, registryDepsRegExp, branch) {
-    clone(input, repo, branch);
-    const path = repoPath(repo);
-    await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .configRegistry */ .p3(path, registry.name, registry.index);
-    await _cargo__WEBPACK_IMPORTED_MODULE_3__/* .setRegistry */ .i8(path, registryDepsRegExp, registry.name);
-    const env = {
-        CARGO_REGISTRY_DEFAULT: registry.name,
-        [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-    };
-    publish(path, env, true);
-}
+//async function publishToEstuary(
+//  input: Input,
+//  repo: string,
+//  registry: estuary.Estuary,
+//  registryDepsRegExp: RegExp,
+//  branch?: string,
+//): Promise<void> {
+//  clone(input, repo, branch);
+//  const path = repoPath(repo);
+//
+//  await cargo.configRegistry(path, registry.name, registry.index);
+//  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
+//
+//  const env = {
+//    CARGO_REGISTRY_DEFAULT: registry.name,
+//    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
+//  };
+//
+//  publish(path, env, true);
+//}
 function publishToCratesIo(input, repo, branch) {
     clone(input, repo, branch);
     const path = repoPath(repo);
