@@ -46,11 +46,12 @@ export async function main(input: Input) {
     registry = await estuary.spawn();
 
     if (input.publicationTest) {
-      for (const repo of input.unpublishedDepsRepos) {
-        await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
-      }
+      core.notice("Publication test to estuary disabled");
+      //for (const repo of input.unpublishedDepsRepos) {
+      //  await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
+      //}
 
-      await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
+      //await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
 
       await deleteRepos(input);
     }
@@ -109,26 +110,26 @@ function repoPath(repo: string): string {
   return repo.split("/").at(1);
 }
 
-async function publishToEstuary(
-  input: Input,
-  repo: string,
-  registry: estuary.Estuary,
-  registryDepsRegExp: RegExp,
-  branch?: string,
-): Promise<void> {
-  clone(input, repo, branch);
-  const path = repoPath(repo);
-
-  await cargo.configRegistry(path, registry.name, registry.index);
-  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
-
-  const env = {
-    CARGO_REGISTRY_DEFAULT: registry.name,
-    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-  };
-
-  publish(path, env, true);
-}
+//async function publishToEstuary(
+//  input: Input,
+//  repo: string,
+//  registry: estuary.Estuary,
+//  registryDepsRegExp: RegExp,
+//  branch?: string,
+//): Promise<void> {
+//  clone(input, repo, branch);
+//  const path = repoPath(repo);
+//
+//  await cargo.configRegistry(path, registry.name, registry.index);
+//  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
+//
+//  const env = {
+//    CARGO_REGISTRY_DEFAULT: registry.name,
+//    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
+//  };
+//
+//  publish(path, env, true);
+//}
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
   clone(input, repo, branch);
