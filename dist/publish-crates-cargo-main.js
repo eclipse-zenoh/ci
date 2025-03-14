@@ -81744,7 +81744,7 @@ function publish(path, env, allowDirty = false) {
     for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
         // Crates.io won't allow packages to be published with the same version
         if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_, options) && (package_.publish === undefined || package_.publish)) {
-            const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
+            const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");
             }
