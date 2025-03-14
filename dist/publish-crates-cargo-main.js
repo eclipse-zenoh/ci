@@ -81406,9 +81406,10 @@ function toDebianVersion(version, revision) {
  * @param pkg Package to check.
  */
 function isPublished(pkg, options) {
-    options.check = false;
+    const optionsCopy = Object.assign({}, options);
+    optionsCopy.check = false;
     // Hackish but registries don't have a stable api anyway.
-    const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`, options);
+    const results = (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo search ${pkg.name}`, optionsCopy);
     if (!results || results.startsWith("error:")) {
         return false;
     }
