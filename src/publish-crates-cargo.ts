@@ -2,7 +2,6 @@ import { rm } from "fs/promises";
 
 import * as core from "@actions/core";
 
-import * as estuary from "./estuary";
 import * as cargo from "./cargo";
 import { sh } from "./command";
 
@@ -41,18 +40,9 @@ export function setup(): Input {
 }
 
 export async function main(input: Input) {
-  let registry: estuary.Estuary = undefined;
   try {
-    registry = await estuary.spawn();
-
     if (input.publicationTest) {
       core.notice("Publication test to estuary disabled");
-      //for (const repo of input.unpublishedDepsRepos) {
-      //  await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
-      //}
-
-      //await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
-
       await deleteRepos(input);
     }
 
@@ -63,27 +53,9 @@ export async function main(input: Input) {
 
       publishToCratesIo(input, input.repo, input.branch);
     }
-
-    await cleanup(input, registry);
   } catch (error) {
-    await cleanup(input, registry);
     if (error instanceof Error) core.setFailed(error.message);
   }
-}
-
-export async function cleanup(input: Input, registry?: estuary.Estuary) {
-  if (registry !== undefined) {
-    core.info(`Killing estuary process (${registry.proc.pid})`);
-    try {
-      process.kill(registry.proc.pid);
-    } catch (error) {
-      if (error instanceof Error) {
-        core.notice(`Could not kill estuary process (${registry.proc.pid}):\n${error.message}`);
-      }
-    }
-  }
-
-  await deleteRepos(input);
 }
 
 function clone(input: Input, repo: string, branch?: string): void {
@@ -109,27 +81,6 @@ async function deleteRepos(input: Input) {
 function repoPath(repo: string): string {
   return repo.split("/").at(1);
 }
-
-//async function publishToEstuary(
-//  input: Input,
-//  repo: string,
-//  registry: estuary.Estuary,
-//  registryDepsRegExp: RegExp,
-//  branch?: string,
-//): Promise<void> {
-//  clone(input, repo, branch);
-//  const path = repoPath(repo);
-//
-//  await cargo.configRegistry(path, registry.name, registry.index);
-//  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
-//
-//  const env = {
-//    CARGO_REGISTRY_DEFAULT: registry.name,
-//    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-//  };
-//
-//  publish(path, env, true);
-//}
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
   clone(input, repo, branch);

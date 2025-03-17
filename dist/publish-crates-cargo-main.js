@@ -41940,7 +41940,7 @@ Object.defineProperty(exports, "ValueType", ({ enumerable: true, get: function (
 var TextMapPropagator_1 = __nccwpck_require__(865);
 Object.defineProperty(exports, "defaultTextMapGetter", ({ enumerable: true, get: function () { return TextMapPropagator_1.defaultTextMapGetter; } }));
 Object.defineProperty(exports, "defaultTextMapSetter", ({ enumerable: true, get: function () { return TextMapPropagator_1.defaultTextMapSetter; } }));
-var ProxyTracer_1 = __nccwpck_require__(4387);
+var ProxyTracer_1 = __nccwpck_require__(3503);
 Object.defineProperty(exports, "ProxyTracer", ({ enumerable: true, get: function () { return ProxyTracer_1.ProxyTracer; } }));
 var ProxyTracerProvider_1 = __nccwpck_require__(2285);
 Object.defineProperty(exports, "ProxyTracerProvider", ({ enumerable: true, get: function () { return ProxyTracerProvider_1.ProxyTracerProvider; } }));
@@ -42853,7 +42853,7 @@ exports.NoopTracerProvider = NoopTracerProvider;
 
 /***/ }),
 
-/***/ 4387:
+/***/ 3503:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -42937,7 +42937,7 @@ exports.ProxyTracer = ProxyTracer;
  */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProxyTracerProvider = void 0;
-const ProxyTracer_1 = __nccwpck_require__(4387);
+const ProxyTracer_1 = __nccwpck_require__(3503);
 const NoopTracerProvider_1 = __nccwpck_require__(3259);
 const NOOP_TRACER_PROVIDER = new NoopTracerProvider_1.NoopTracerProvider();
 /**
@@ -81065,10 +81065,9 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "r4": () => (/* binding */ packagesOrdered),
-/* harmony export */   "s9": () => (/* binding */ isPublished),
-/* harmony export */   "wS": () => (/* binding */ installBinaryFromGit)
+/* harmony export */   "s9": () => (/* binding */ isPublished)
 /* harmony export */ });
-/* unused harmony exports packages, bump, bumpDependencies, setRegistry, setGitBranch, configRegistry, packagesDebian, build, hostTarget, buildDebian, toDebianVersion */
+/* unused harmony exports packages, bump, bumpDependencies, setRegistry, setGitBranch, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, toDebianVersion */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81311,7 +81310,7 @@ function packagesDebian(path) {
     return result;
 }
 function installBinaryFromGit(name, gitUrl, gitBranch) {
-    (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name} --locked`);
+    sh(`cargo +stable install --git ${gitUrl} --branch ${gitBranch} ${name} --locked`);
 }
 /**
  * Installs a cargo binary by compiling it from source using `cargo install`.
@@ -81538,63 +81537,6 @@ const gitEnv = {
 
 /***/ }),
 
-/***/ 3503:
-/***/ ((module, __webpack_exports__, __nccwpck_require__) => {
-
-"use strict";
-__nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "C": () => (/* binding */ spawn)
-/* harmony export */ });
-/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2081);
-/* harmony import */ var child_process__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(child_process__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3292);
-/* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(2037);
-/* harmony import */ var os__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(1017);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(2186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(8683);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(98);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_5__]);
-_cargo__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
-
-
-
-
-
-
-
-const name = "estuary";
-const baseUrl = "http://localhost:7878";
-const index = `${baseUrl}/git/index`;
-const token = "0000";
-const indexPath = "index";
-const cratePath = "crate";
-async function spawn() {
-    const tmp = await (0,fs_promises__WEBPACK_IMPORTED_MODULE_1__.mkdtemp)((0,path__WEBPACK_IMPORTED_MODULE_3__.join)((0,os__WEBPACK_IMPORTED_MODULE_2__.tmpdir)(), name));
-    const indexDir = (0,path__WEBPACK_IMPORTED_MODULE_3__.join)(tmp, indexPath);
-    const crateDir = (0,path__WEBPACK_IMPORTED_MODULE_3__.join)(tmp, cratePath);
-    const options = {
-        env: {
-            PATH: process.env.PATH,
-            RUST_LOG: "debug",
-        },
-        stdio: "inherit",
-    };
-    _cargo__WEBPACK_IMPORTED_MODULE_5__/* .installBinaryFromGit */ .wS(name, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].url, _config__WEBPACK_IMPORTED_MODULE_6__/* .config.lock.git */ .v.lock.git[name].branch);
-    const proc = child_process__WEBPACK_IMPORTED_MODULE_0__.spawn("estuary", ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir], options);
-    _actions_core__WEBPACK_IMPORTED_MODULE_4__.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
-    return { name, index, token, crateDir, indexDir, proc };
-}
-
-__webpack_async_result__();
-} catch(e) { __webpack_async_result__(e); } });
-
-/***/ }),
-
 /***/ 2846:
 /***/ ((module, __webpack_exports__, __nccwpck_require__) => {
 
@@ -81605,7 +81547,7 @@ __nccwpck_require__.r(__webpack_exports__);
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__]);
 _publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
-await (0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .main */ .DH)((0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .cY)());
+await (0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .main */ .D)((0,_publish_crates_cargo__WEBPACK_IMPORTED_MODULE_0__/* .setup */ .c)());
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } }, 1);
@@ -81618,20 +81560,17 @@ __webpack_async_result__();
 "use strict";
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "DH": () => (/* binding */ main),
-/* harmony export */   "cY": () => (/* binding */ setup)
+/* harmony export */   "D": () => (/* binding */ main),
+/* harmony export */   "c": () => (/* binding */ setup)
 /* harmony export */ });
-/* unused harmony export cleanup */
 /* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(3292);
 /* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _estuary__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(3503);
-/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(8683);
-/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(8121);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_estuary__WEBPACK_IMPORTED_MODULE_2__, _cargo__WEBPACK_IMPORTED_MODULE_3__]);
-([_estuary__WEBPACK_IMPORTED_MODULE_2__, _cargo__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
-
+/* harmony import */ var _cargo__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(8683);
+/* harmony import */ var _command__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(8121);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_cargo__WEBPACK_IMPORTED_MODULE_2__]);
+_cargo__WEBPACK_IMPORTED_MODULE_2__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
 
 
@@ -81657,15 +81596,9 @@ function setup() {
     };
 }
 async function main(input) {
-    let registry = undefined;
     try {
-        registry = await _estuary__WEBPACK_IMPORTED_MODULE_2__/* .spawn */ .C();
         if (input.publicationTest) {
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.notice("Publication test to estuary disabled");
-            //for (const repo of input.unpublishedDepsRepos) {
-            //  await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
-            //}
-            //await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
             await deleteRepos(input);
         }
         if (input.liveRun) {
@@ -81674,35 +81607,19 @@ async function main(input) {
             }
             publishToCratesIo(input, input.repo, input.branch);
         }
-        await cleanup(input, registry);
     }
     catch (error) {
-        await cleanup(input, registry);
         if (error instanceof Error)
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.setFailed(error.message);
     }
 }
-async function cleanup(input, registry) {
-    if (registry !== undefined) {
-        _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Killing estuary process (${registry.proc.pid})`);
-        try {
-            process.kill(registry.proc.pid);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                _actions_core__WEBPACK_IMPORTED_MODULE_1__.notice(`Could not kill estuary process (${registry.proc.pid}):\n${error.message}`);
-            }
-        }
-    }
-    await deleteRepos(input);
-}
 function clone(input, repo, branch) {
     const remote = `https://${input.githubToken}@github.com/${repo}.git`;
     if (branch === undefined) {
-        (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git clone --recursive ${remote}`);
+        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive ${remote}`);
     }
     else {
-        (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
+        (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive --single-branch --branch ${branch} ${remote}`);
     }
 }
 async function deleteRepos(input) {
@@ -81716,26 +81633,6 @@ async function deleteRepos(input) {
 function repoPath(repo) {
     return repo.split("/").at(1);
 }
-//async function publishToEstuary(
-//  input: Input,
-//  repo: string,
-//  registry: estuary.Estuary,
-//  registryDepsRegExp: RegExp,
-//  branch?: string,
-//): Promise<void> {
-//  clone(input, repo, branch);
-//  const path = repoPath(repo);
-//
-//  await cargo.configRegistry(path, registry.name, registry.index);
-//  await cargo.setRegistry(path, registryDepsRegExp, registry.name);
-//
-//  const env = {
-//    CARGO_REGISTRY_DEFAULT: registry.name,
-//    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token,
-//  };
-//
-//  publish(path, env, true);
-//}
 function publishToCratesIo(input, repo, branch) {
     clone(input, repo, branch);
     const path = repoPath(repo);
@@ -81750,17 +81647,17 @@ function publish(path, env, allowDirty = false) {
         cwd: path,
         check: true,
     };
-    for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_3__/* .packagesOrdered */ .r4(path)) {
+    for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_2__/* .packagesOrdered */ .r4(path)) {
         // Crates.io won't allow packages to be published with the same version
-        if (!_cargo__WEBPACK_IMPORTED_MODULE_3__/* .isPublished */ .s9(package_, options) && (package_.publish === undefined || package_.publish)) {
+        if (!_cargo__WEBPACK_IMPORTED_MODULE_2__/* .isPublished */ .s9(package_, options) && (package_.publish === undefined || package_.publish)) {
             const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
             if (allowDirty) {
                 command.push("--allow-dirty");
             }
-            (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)(command.join(" "), options);
+            (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(command.join(" "), options);
         }
     }
-    (0,_command__WEBPACK_IMPORTED_MODULE_4__.sh)("cargo clean", options);
+    (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("cargo clean", options);
 }
 
 __webpack_async_result__();
