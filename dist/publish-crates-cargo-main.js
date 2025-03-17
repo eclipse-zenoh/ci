@@ -81598,7 +81598,17 @@ function setup() {
 async function main(input) {
     try {
         if (input.publicationTest) {
-            _actions_core__WEBPACK_IMPORTED_MODULE_1__.notice("Publication test to estuary disabled");
+            _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Running cargo check before publication");
+            clone(input, input.repo, input.branch);
+            const path = repoPath(input.repo);
+            const options = {
+                cwd: path,
+                check: true,
+            };
+            for (const package_ of _cargo__WEBPACK_IMPORTED_MODULE_2__/* .packagesOrdered */ .r4(path)) {
+                const command = ["cargo", "check", "-p", package_.name, "--manifest-path", package_.manifestPath];
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(command.join(" "), options);
+            }
             await deleteRepos(input);
         }
         if (input.liveRun) {

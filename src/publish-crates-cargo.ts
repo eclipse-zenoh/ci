@@ -42,7 +42,19 @@ export function setup(): Input {
 export async function main(input: Input) {
   try {
     if (input.publicationTest) {
-      core.notice("Publication test to estuary disabled");
+      core.info("Running cargo check before publication");
+      clone(input, input.repo, input.branch);
+      const path = repoPath(input.repo);
+      const options = {
+        cwd: path,
+        check: true,
+      };
+
+      for (const package_ of cargo.packagesOrdered(path)) {
+        const command = ["cargo", "check", "-p", package_.name, "--manifest-path", package_.manifestPath];
+        sh(command.join(" "), options);
+      }
+
       await deleteRepos(input);
     }
 
