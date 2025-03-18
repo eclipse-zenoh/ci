@@ -38,7 +38,7 @@ export function setup(): Input {
     path: path === "" ? undefined : path,
     githubToken,
     bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
-    bumpDepsVersion: bumpDepsVersion === "" ? undefined : bumpDepsVersion,
+    bumpDepsVersion: bumpDepsVersion === "" ? version : bumpDepsVersion,
     bumpDepsBranch: bumpDepsBranch === "" ? undefined : bumpDepsBranch,
   };
 }
