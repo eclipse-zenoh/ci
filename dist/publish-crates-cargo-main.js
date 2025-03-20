@@ -81192,7 +81192,13 @@ async function bumpDependencies(path, pattern, version, _branch) {
     }
     for (const dep in manifest.dependencies) {
         if (pattern.test(dep)) {
-            await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
+            // Respect the pins if they exist in the dependency
+            const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"));
+            let depVersion = version;
+            if (v != undefined && String(v).startsWith("=")) {
+                depVersion = "=" + version;
+            }
+            await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
             // FIXME(fuzzypixelz): Previously, we set the branch of the git source in dependencies,
             // but as all dependencies are assumed to be on crates.io anyway, this is not necessary.
             // Still, the API of all related actions/workflows should be updated to reflect this.
