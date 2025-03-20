@@ -184,10 +184,10 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
       // Respect the pins if they exist in the dependency
-      const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"))
-      let depVersion = version
+      const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"));
+      let depVersion = version;
       if (v != undefined && String(v).startsWith("=")) {
-        depVersion = "=" + version
+        depVersion = "=" + version;
       }
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
 
