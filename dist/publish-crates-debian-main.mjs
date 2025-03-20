@@ -1,6 +1,5 @@
 // src/publish-crates-debian.ts
 import * as fs3 from "fs/promises";
-import * as zlib from "zlib";
 import * as core4 from "@actions/core";
 import { DefaultArtifactClient as DefaultArtifactClient2 } from "@actions/artifact";
 
@@ -126,7 +125,12 @@ var TOML = class _TOML {
   }
   get(path2, key) {
     const query = key == void 0 ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path2, query]));
+    const out = exec("toml", ["get", path2, query], { check: false });
+    if (out) {
+      return JSON.parse(out);
+    } else {
+      return void 0;
+    }
   }
   async set(path2, key, value) {
     const query = key.join(".");
@@ -152,6 +156,12 @@ var ci_config_default = {
       estuary: "0.1.1",
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
+    },
+    git: {
+      estuary: {
+        url: "https://github.com/ZettaScaleLabs/estuary.git",
+        branch: "main"
+      }
     }
   }
 };
@@ -211,17 +221,6 @@ function setup() {
     repo
   };
 }
-function gzip2(input) {
-  return new Promise((resolve, reject) => {
-    zlib.gzip(input, { level: 9 }, (error, buffer) => {
-      if (!error) {
-        resolve(buffer);
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
 async function main(input) {
   try {
     const results = await artifact2.listArtifacts({ latest: true });
@@ -243,9 +242,8 @@ async function main(input) {
     sh("sudo apt-get update");
     sh("sudo apt-get install -y dpkg-dev");
     await fs3.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
-    const packages = sh(`cat .Packages-*`, { quiet: true });
-    await fs3.writeFile(allPackagesPath, packages);
-    await fs3.writeFile(allPackagesGzippedPath, await gzip2(packages));
+    sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
+    sh(`gzip -k -9 ${allPackagesPath}`, { quiet: true });
     sh("ls -R");
     core4.info(`Adding a local Debian repository at ${process.cwd()}`);
     await fs3.writeFile(sourcesListName, `deb [trusted=yes] file:${process.cwd()} /`);

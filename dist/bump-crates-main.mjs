@@ -97,7 +97,12 @@ var TOML = class _TOML {
   }
   get(path, key) {
     const query = key == void 0 ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path, query]));
+    const out = exec("toml", ["get", path, query], { check: false });
+    if (out) {
+      return JSON.parse(out);
+    } else {
+      return void 0;
+    }
   }
   async set(path, key, value) {
     const query = key.join(".");
@@ -123,6 +128,12 @@ var ci_config_default = {
       estuary: "0.1.1",
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
+    },
+    git: {
+      estuary: {
+        url: "https://github.com/ZettaScaleLabs/estuary.git",
+        branch: "main"
+      }
     }
   }
 };
@@ -183,7 +194,12 @@ async function bumpDependencies(path, pattern, version, _branch) {
   }
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
-      await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), version);
+      const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"));
+      let depVersion = version;
+      if (v != void 0 && String(v).startsWith("=")) {
+        depVersion = "=" + version;
+      }
+      await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
       await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
       await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
     }
@@ -214,12 +230,27 @@ async function installBinaryCached(name) {
   }
 }
 function toDebianVersion(version, revision) {
-  return `${version.replace("-", "~")}-${revision ?? 1}`;
+  let debVersion = version;
+  if (version.includes("-")) {
+    debVersion = `${version.replace("-", "~")}-${revision ?? 1}`;
+  } else {
+    if (version.split(".").length == 4) {
+      if (version.endsWith(".0")) {
+        const pos = version.lastIndexOf(".0");
+        debVersion = `${version.substring(0, pos)}~dev-${revision ?? 1}`;
+      } else if (parseInt(version.substring(version.lastIndexOf(".") + 1)) > 0) {
+        const pos = version.lastIndexOf(".");
+        debVersion = `${version.substring(0, pos)}~pre.${version.substring(pos + 1)}-${revision ?? 1}`;
+      }
+    }
+  }
+  return `${debVersion}`;
 }
 
 // src/bump-crates.ts
 function setup() {
   const version = core3.getInput("version", { required: true });
+  const liveRun = core3.getBooleanInput("live-run", { required: true });
   const branch = core3.getInput("branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
   const path = core3.getInput("path");
@@ -229,12 +260,13 @@ function setup() {
   const bumpDepsBranch = core3.getInput("bump-deps-branch");
   return {
     version,
+    liveRun,
     branch,
     repo,
     path: path === "" ? void 0 : path,
     githubToken,
     bumpDepsRegExp: bumpDepsPattern === "" ? void 0 : new RegExp(bumpDepsPattern),
-    bumpDepsVersion: bumpDepsVersion === "" ? void 0 : bumpDepsVersion,
+    bumpDepsVersion: bumpDepsVersion === "" ? version : bumpDepsVersion,
     bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch
   };
 }
@@ -264,8 +296,10 @@ async function main(input) {
       });
     }
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
-    sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
-    sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+    if (input.liveRun) {
+      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+    }
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
     await cleanup(input);

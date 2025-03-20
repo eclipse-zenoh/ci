@@ -1,12 +1,5 @@
 // src/publish-crates-cargo.ts
 import { rm } from "fs/promises";
-import * as core4 from "@actions/core";
-
-// src/estuary.ts
-import * as child_process from "child_process";
-import { mkdtemp } from "fs/promises";
-import { tmpdir } from "os";
-import { join as join2 } from "path";
 import * as core3 from "@actions/core";
 
 // src/cargo.ts
@@ -105,7 +98,12 @@ var TOML = class _TOML {
   }
   get(path, key) {
     const query = key == void 0 ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path, query]));
+    const out = exec("toml", ["get", path, query], { check: false });
+    if (out) {
+      return JSON.parse(out);
+    } else {
+      return void 0;
+    }
   }
   async set(path, key, value) {
     const query = key.join(".");
@@ -131,6 +129,12 @@ var ci_config_default = {
       estuary: "0.1.1",
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
+    },
+    git: {
+      estuary: {
+        url: "https://github.com/ZettaScaleLabs/estuary.git",
+        branch: "main"
+      }
     }
   }
 };
@@ -170,93 +174,50 @@ function* packagesOrdered(path) {
   const seen = [];
   const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.includes(dep.name));
   while (allPackages.length != 0) {
-    for (const [index2, package_] of allPackages.entries()) {
+    for (const [index, package_] of allPackages.entries()) {
       if (isReady(package_)) {
         seen.push(package_.name);
-        allPackages.splice(index2, 1);
+        allPackages.splice(index, 1);
         yield package_;
       }
     }
   }
 }
-async function setRegistry(path, pattern, registry) {
-  core2.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
-  const manifestPath = `${path}/Cargo.toml`;
-  const manifestRaw = toml.get(manifestPath);
-  let manifest;
-  let prefix;
-  if ("workspace" in manifestRaw) {
-    prefix = ["workspace"];
-    manifest = manifestRaw["workspace"];
-  } else {
-    prefix = [];
-    manifest = manifestRaw;
-  }
-  for (const dep in manifest.dependencies) {
-    if (pattern.test(dep)) {
-      await toml.set(manifestPath, prefix.concat("dependencies", dep, "registry"), registry);
-      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));
-      await toml.unset(manifestPath, prefix.concat("dependencies", dep, "branch"));
-    }
-  }
-  core2.endGroup();
-}
-async function configRegistry(path, name2, index2) {
-  const configPath = `${path}/.cargo/config.toml`;
-  await toml.set(configPath, ["registries", name2, "index"], index2);
-}
-async function installBinaryCached(name2) {
+async function installBinaryCached(name) {
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
-    const version = config.lock.cratesio[name2];
-    const key = `${os.platform()}-${os.release()}-${os.arch()}-${name2}-${version}`;
+    const version = config.lock.cratesio[name];
+    const key = `${os.platform()}-${os.release()}-${os.arch()}-${name}-${version}`;
     const hit = await cache.restoreCache(paths, key);
     if (hit == void 0) {
-      sh(`cargo +stable install ${name2} --force`);
+      sh(`cargo +stable install ${name} --force`);
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name2}`);
+    sh(`cargo +stable install ${name}`);
   }
 }
-
-// src/estuary.ts
-var name = "estuary";
-var baseUrl = "http://localhost:7878";
-var index = `${baseUrl}/git/index`;
-var token = "0000";
-var indexPath = "index";
-var cratePath = "crate";
-async function spawn2() {
-  const tmp = await mkdtemp(join2(tmpdir(), name));
-  const indexDir = join2(tmp, indexPath);
-  const crateDir = join2(tmp, cratePath);
-  const options = {
-    env: {
-      PATH: process.env.PATH,
-      RUST_LOG: "debug"
-    },
-    stdio: "inherit"
-  };
-  await installBinaryCached(name);
-  const proc = child_process.spawn(
-    "estuary",
-    ["--base-url", baseUrl, "--crate-dir", crateDir, "--index-dir", indexDir],
-    options
-  );
-  core3.info(`Spawned estuary (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
-  return { name, index, token, crateDir, indexDir, proc };
+function isPublished(pkg, options) {
+  const optionsCopy = Object.assign({}, options);
+  optionsCopy.check = false;
+  const results = sh(`cargo search ${pkg.name}`, optionsCopy);
+  if (!results || results.startsWith("error:")) {
+    return false;
+  }
+  const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+  return publishedVersion === pkg.version;
 }
 
 // src/publish-crates-cargo.ts
 function setup() {
-  const liveRun = core4.getBooleanInput("live-run", { required: true });
-  const branch = core4.getInput("branch", { required: true });
-  const repo = core4.getInput("repo", { required: true });
-  const githubToken = core4.getInput("github-token", { required: true });
-  const cratesIoToken = core4.getInput("crates-io-token", { required: true });
-  const unpublishedDepsPatterns = core4.getInput("unpublished-deps-patterns");
-  const unpublishedDepsRepos = core4.getInput("unpublished-deps-repos");
+  const liveRun = core3.getBooleanInput("live-run", { required: true });
+  const branch = core3.getInput("branch", { required: true });
+  const repo = core3.getInput("repo", { required: true });
+  const githubToken = core3.getInput("github-token", { required: true });
+  const cratesIoToken = core3.getInput("crates-io-token", { required: true });
+  const unpublishedDepsPatterns = core3.getInput("unpublished-deps-patterns");
+  const unpublishedDepsRepos = core3.getInput("unpublished-deps-repos");
+  const publicationTest = core3.getBooleanInput("publication-test");
   return {
     liveRun,
     branch,
@@ -264,43 +225,35 @@ function setup() {
     githubToken,
     unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
     unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
-    cratesIoToken
+    cratesIoToken,
+    publicationTest
   };
 }
 async function main(input) {
-  let registry = void 0;
   try {
-    registry = await spawn2();
-    for (const repo of input.unpublishedDepsRepos) {
-      await publishToEstuary(input, repo, registry, input.unpublishedDepsRegExp);
+    if (input.publicationTest) {
+      core3.info("Running cargo check before publication");
+      clone(input, input.repo, input.branch);
+      const path = repoPath(input.repo);
+      const options = {
+        cwd: path,
+        check: true
+      };
+      for (const package_ of packagesOrdered(path)) {
+        const command = ["cargo", "check", "-p", package_.name, "--manifest-path", package_.manifestPath];
+        sh(command.join(" "), options);
+      }
+      await deleteRepos(input);
     }
-    await publishToEstuary(input, input.repo, registry, input.unpublishedDepsRegExp, input.branch);
-    await deleteRepos(input);
     if (input.liveRun) {
       for (const repo of input.unpublishedDepsRepos) {
         publishToCratesIo(input, repo);
       }
       publishToCratesIo(input, input.repo, input.branch);
     }
-    await cleanup(input, registry);
   } catch (error) {
-    await cleanup(input, registry);
-    if (error instanceof Error) core4.setFailed(error.message);
+    if (error instanceof Error) core3.setFailed(error.message);
   }
-}
-async function cleanup(input, registry) {
-  if (registry !== void 0) {
-    core4.info(`Killing estuary process (${registry.proc.pid})`);
-    try {
-      process.kill(registry.proc.pid);
-    } catch (error) {
-      if (error instanceof Error) {
-        core4.notice(`Could not kill estuary process (${registry.proc.pid}):
-${error.message}`);
-      }
-    }
-  }
-  await deleteRepos(input);
 }
 function clone(input, repo, branch) {
   const remote = `https://${input.githubToken}@github.com/${repo}.git`;
@@ -311,26 +264,15 @@ function clone(input, repo, branch) {
   }
 }
 async function deleteRepos(input) {
-  core4.info(`Deleting repository clone ${repoPath(input.repo)}`);
+  core3.info(`Deleting repository clone ${repoPath(input.repo)}`);
   await rm(repoPath(input.repo), { recursive: true, force: true });
   for (const repo of input.unpublishedDepsRepos) {
-    core4.info(`Deleting repository clone ${repoPath(repo)}`);
+    core3.info(`Deleting repository clone ${repoPath(repo)}`);
     await rm(repoPath(repo), { recursive: true, force: true });
   }
 }
 function repoPath(repo) {
   return repo.split("/").at(1);
-}
-async function publishToEstuary(input, repo, registry, registryDepsRegExp, branch) {
-  clone(input, repo, branch);
-  const path = repoPath(repo);
-  await configRegistry(path, registry.name, registry.index);
-  await setRegistry(path, registryDepsRegExp, registry.name);
-  const env = {
-    CARGO_REGISTRY_DEFAULT: registry.name,
-    [`CARGO_REGISTRIES_${registry.name.toUpperCase()}_TOKEN`]: registry.token
-  };
-  publish(path, env, true);
 }
 function publishToCratesIo(input, repo, branch) {
   clone(input, repo, branch);
@@ -347,8 +289,8 @@ function publish(path, env, allowDirty = false) {
     check: true
   };
   for (const package_ of packagesOrdered(path)) {
-    if (package_.publish === void 0 || package_.publish) {
-      const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
+    if (!isPublished(package_, options) && (package_.publish === void 0 || package_.publish)) {
+      const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
       if (allowDirty) {
         command.push("--allow-dirty");
       }

@@ -99,7 +99,12 @@ var TOML = class _TOML {
   }
   get(path2, key) {
     const query = key == void 0 ? "." : key.join(".");
-    return JSON.parse(exec("toml", ["get", path2, query]));
+    const out = exec("toml", ["get", path2, query], { check: false });
+    if (out) {
+      return JSON.parse(out);
+    } else {
+      return void 0;
+    }
   }
   async set(path2, key, value) {
     const query = key.join(".");
@@ -125,6 +130,12 @@ var ci_config_default = {
       estuary: "0.1.1",
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
+    },
+    git: {
+      estuary: {
+        url: "https://github.com/ZettaScaleLabs/estuary.git",
+        branch: "main"
+      }
     }
   }
 };

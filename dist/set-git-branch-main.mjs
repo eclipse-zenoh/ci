@@ -1,6 +1,7 @@
-// src/publish-crates-github.ts
-import * as core5 from "@actions/core";
-import { DefaultArtifactClient as DefaultArtifactClient3 } from "@actions/artifact";
+// src/set-git-branch.ts
+import { join as join2 } from "path";
+import { rm } from "fs/promises";
+import * as core3 from "@actions/core";
 
 // src/command.ts
 import { spawnSync } from "child_process";
@@ -81,13 +82,6 @@ ${returns.stderr}`);
   return returns.stdout;
 }
 
-// src/publish-crates-github.ts
-import path from "path";
-
-// src/build-crates-debian.ts
-import * as core3 from "@actions/core";
-import { DefaultArtifactClient } from "@actions/artifact";
-
 // src/cargo.ts
 import * as os from "os";
 import { join } from "path";
@@ -101,22 +95,22 @@ var TOML = class _TOML {
     await installBinaryCached("toml-cli2");
     return new _TOML();
   }
-  get(path2, key) {
+  get(path, key) {
     const query = key == void 0 ? "." : key.join(".");
-    const out = exec("toml", ["get", path2, query], { check: false });
+    const out = exec("toml", ["get", path, query], { check: false });
     if (out) {
       return JSON.parse(out);
     } else {
       return void 0;
     }
   }
-  async set(path2, key, value) {
+  async set(path, key, value) {
     const query = key.join(".");
-    await fs.writeFile(path2, exec("toml", ["set", path2, query, value]));
+    await fs.writeFile(path, exec("toml", ["set", path, query, value]));
   }
-  async unset(path2, key) {
+  async unset(path, key) {
     const query = key.join(".");
-    await fs.writeFile(path2, exec("toml", ["unset", path2, query]));
+    await fs.writeFile(path, exec("toml", ["unset", path, query]));
   }
 };
 
@@ -155,6 +149,27 @@ var gitEnv = {
 
 // src/cargo.ts
 var toml = await TOML.init();
+async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
+  core2.startGroup(`Setting ${pattern} dependencies' git/branch config`);
+  const manifestRaw = toml.get(manifestPath);
+  let manifest;
+  let prefix;
+  if ("workspace" in manifestRaw) {
+    prefix = ["workspace"];
+    manifest = manifestRaw["workspace"];
+  } else {
+    prefix = [];
+    manifest = manifestRaw;
+  }
+  for (const dep in manifest.dependencies) {
+    if (pattern.test(dep)) {
+      if (!(toml.get(manifestPath, prefix.concat("dependencies", dep, "path")) || toml.get(manifestPath, prefix.concat("dependencies", dep, "workspace")))) {
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
+        await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
+      }
+    }
+  }
+}
 async function installBinaryCached(name) {
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
@@ -170,89 +185,64 @@ async function installBinaryCached(name) {
   }
 }
 
-// src/build-crates-debian.ts
-var artifact = new DefaultArtifactClient();
-var toml2 = await TOML.init();
-var artifactRegExp = /^.*-debian\.zip$/;
-
-// src/build-crates-standalone.ts
-import * as core4 from "@actions/core";
-import { DefaultArtifactClient as DefaultArtifactClient2 } from "@actions/artifact";
-var artifact2 = new DefaultArtifactClient2();
-var artifactRegExp2 = /^.*-standalone\.zip$/;
-
-// src/publish-crates-github.ts
-var artifact3 = new DefaultArtifactClient3();
+// src/set-git-branch.ts
 function setup() {
-  const liveRun = core5.getBooleanInput("live-run", { required: true });
-  const repo = core5.getInput("repo", { required: true });
-  const version = core5.getInput("version", { required: true });
-  const branch = core5.getInput("branch", { required: true });
-  const githubToken = core5.getInput("github-token", { required: true });
-  const archivePatterns = core5.getInput("archive-patterns", { required: false });
+  const version = core3.getInput("version", { required: true });
+  const releaseBranch = core3.getInput("release-branch", { required: true });
+  const repo = core3.getInput("repo", { required: true });
+  const path = core3.getInput("path");
+  const githubToken = core3.getInput("github-token", { required: true });
+  const depsPattern = core3.getInput("deps-pattern");
+  const depsGitUrl = core3.getInput("deps-git-url");
+  const depsBranch = core3.getInput("deps-branch");
   return {
-    liveRun,
     version,
-    branch,
+    releaseBranch,
     repo,
+    path: path === "" ? void 0 : path,
     githubToken,
-    archiveRegExp: archivePatterns == "" ? void 0 : new RegExp(archivePatterns.split("\n").join("|"))
+    depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern),
+    depsGitUrl: depsGitUrl === "" ? void 0 : depsGitUrl,
+    depsBranch: depsBranch === "" ? void 0 : depsBranch
   };
 }
 async function main(input) {
   try {
-    const env = {
-      GH_TOKEN: input.githubToken
-    };
-    const releasesRaw = (
-      // NOTE: We use compute the latest release (or pre-release) and use its tag name as the
-      // starting tag for the next release.
-      sh(`gh release list --repo ${input.repo} --exclude-drafts --order desc --json tagName`, { env })
-    );
-    const releases = JSON.parse(releasesRaw);
-    const releaseLatest = releases.at(0);
-    if (input.liveRun) {
-      const command = ["gh", "release", "create", input.version];
-      command.push("--repo", input.repo);
-      command.push("--target", input.branch);
-      command.push("--verify-tag");
-      command.push("--generate-notes");
-      if (releaseLatest != void 0) {
-        command.push("--notes-start-tag", releaseLatest.tagName);
-      }
-      if (isPreRelease(input.version)) {
-        command.push("--prerelease");
-      }
-      sh(command.join(" "), { env });
-    }
-    const shouldPublishArtifact = (name) => {
-      if (input.archiveRegExp == void 0) {
-        return artifactRegExp2.test(name) || artifactRegExp.test(name);
-      } else {
-        return input.archiveRegExp.test(name);
-      }
-    };
-    const results = await artifact3.listArtifacts({ latest: true });
-    for (const result of results.artifacts) {
-      if (shouldPublishArtifact(result.name)) {
-        const { downloadPath } = await artifact3.downloadArtifact(result.id);
-        const archive = path.join(downloadPath, result.name);
-        core5.info(`Uploading ${archive} to github.com/${input.repo}`);
-        if (input.liveRun) {
-          sh(`gh release upload ${input.version} ${archive} --repo ${input.repo} --clobber`, { env });
+    const repo = input.repo.split("/")[1];
+    const workspace = input.path === void 0 ? repo : join2(repo, input.path);
+    const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
+    sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
+    sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`ls ${workspace}`);
+    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`).split("\n").filter((r) => r);
+    for (const path of cargoPaths) {
+      await setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
+      if (sh("git diff", { cwd: repo, check: false })) {
+        sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
+        sh(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: gitEnv });
+        if (path.endsWith("Cargo.toml")) {
+          sh(`cargo check --manifest-path ${path}`);
+          sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
+          sh("git commit --message 'chore: Update Cargo lockfile'", {
+            cwd: repo,
+            env: gitEnv,
+            check: false
+          });
         }
       }
     }
+    sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    await cleanup(input);
   } catch (error) {
-    if (error instanceof Error) core5.setFailed(error.message);
+    await cleanup(input);
+    if (error instanceof Error) core3.setFailed(error.message);
   }
 }
-function isPreRelease(version) {
-  if (version.indexOf("-") > 0 || version.split(".").length == 4) {
-    return true;
-  }
-  return false;
+async function cleanup(input) {
+  const repo = input.repo.split("/")[1];
+  core3.info(`Deleting repository clone ${repo}`);
+  await rm(repo, { recursive: true, force: true });
 }
 
-// src/publish-crates-github-main.ts
+// src/set-git-branch-main.ts
 await main(setup());
