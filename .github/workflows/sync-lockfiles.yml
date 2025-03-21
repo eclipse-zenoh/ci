@@ -80,7 +80,9 @@ jobs:
       - name: Install Rust toolchain
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
-        run: rustup update ${{ inputs.toolchain || '1.75.0' }}
+        run: |
+          rustup update ${{ inputs.toolchain || '1.75.0' }}
+          rustup component add --toolchain ${{ inputs.toolchain || '1.75.0'}} clippy
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
