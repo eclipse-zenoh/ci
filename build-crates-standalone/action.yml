@@ -22,4 +22,4 @@ outputs:
 
 runs:
   using: node20
-  main: ../dist/build-crates-standalone-main.mjs
+  main: ../dist/build-crates-standalone-main.js

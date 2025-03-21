@@ -26,4 +26,4 @@ inputs:
 
 runs:
   using: node20
-  main: ../dist/publish-crates-homebrew-main.mjs
+  main: ../dist/publish-crates-homebrew-main.js

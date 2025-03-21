@@ -20,4 +20,4 @@ inputs:
 
 runs:
   using: node20
-  main: ../dist/publish-crates-cargo-main.mjs
+  main: ../dist/publish-crates-cargo-main.js

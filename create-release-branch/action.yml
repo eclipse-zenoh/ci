@@ -23,4 +23,4 @@ outputs:
 
 runs:
   using: node20
-  main: ../dist/create-release-branch-main.mjs
+  main: ../dist/create-release-branch-main.js
