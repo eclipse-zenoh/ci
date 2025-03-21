@@ -22,7 +22,7 @@ jobs:
       - run: npm run build
 
       - name: Check that dist/ is correctly generated
-        run: git diff --quiet HEAD -- dist
+        run: git diff HEAD -- dist
 
   # NOTE: In GitHub repository settings, the "Require status checks to pass
   # before merging" branch protection rule ensures that commits are only merged
