@@ -35,5 +35,11 @@
     "ts-jest": "^29.1.2",
     "tsup": "^8.4.0",
     "typescript": "^5.3.3"
+  },
+  "tsup": {
+    "dts": true,
+    "splitting": false,
+    "clean": true,
+    "skipNodeModulesBundle": true
   }
 }
