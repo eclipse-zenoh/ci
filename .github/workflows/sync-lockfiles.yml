@@ -67,7 +67,6 @@ jobs:
           - eclipse-zenoh/zenoh-backend-rocksdb
           - eclipse-zenoh/zenoh-backend-s3
           - eclipse-zenoh/zenoh-ts
-          - eclipse-zenoh/zenoh-dissector
     steps:
       - name: Checkout ${{ matrix.dependant }}
         uses: actions/checkout@v4
@@ -86,14 +85,6 @@ jobs:
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
-
-      - name: Install build dependencies (zenoh-dissector)
-        if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-dissector' }}
-        run: |
-          sudo apt install -y software-properties-common
-          sudo add-apt-repository -y ppa:wireshark-dev/stable
-          sudo apt install -y wireshark-dev
-          sudo apt install -y --allow-change-held-packages wireshark
 
       # NOTE: Not all Zenoh dependants have their Cargo manifest and lockfile
       # at the repository's toplevel. The only exception being zenoh-kotlin and
@@ -141,7 +132,6 @@ jobs:
           cargo +${{ inputs.toolchain || '1.75.0' }} clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --features $features -- --deny warnings
 
       - name: cargo update ${{ matrix.dependant }}
-        if: ${{ matrix.dependant != 'eclipse-zenoh/zenoh-dissector' }}
         run: cargo +${{ inputs.toolchain || '1.75.0' }} update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
 
       - name: cargo update for zenoh-c build-resources
