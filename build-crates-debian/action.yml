@@ -18,4 +18,4 @@ outputs:
 
 runs:
   using: node20
-  main: ../dist/build-crates-debian-main.mjs
+  main: ../dist/build-crates-debian-main.js
