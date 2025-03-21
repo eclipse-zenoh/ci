@@ -10,6 +10,11 @@ on:
         description:
           The branch to sync across all depedant repositories. Defaults to the default branch on each repository
         required: false
+      toolchain:
+        type: string
+        description:
+          The rust toolchain to use. Defaults to 1.75.0
+        required: false
 
 defaults:
   run:
@@ -75,7 +80,7 @@ jobs:
       - name: Install Rust toolchain
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
-        run: rustup show
+        run: rustup update ${{ inputs.toolchain || '1.75.0' }}
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
@@ -124,22 +129,22 @@ jobs:
       - name: Rectify lockfile
         # NOTE: Checking the package for errors will rectify the Cargo.lock while preserving
         # the dependency versions fetched from source.
-        run: cargo clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets ${{ steps.clippy-options.outputs.value }} -- --deny warnings
+        run: cargo +${{ inputs.toolchain || '1.75.0' }} clippy --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml  --all-targets ${{ steps.clippy-options.outputs.value }} -- --deny warnings
 
       - name: Rectify lockfile for zenoh-c opaque-types
         if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
         # Disable panic feature for zenoh-c opaque-types
         run: |
           features=$(cargo tree --manifest-path build-resources/opaque-types/Cargo.toml -f "{p} {f}" --all-features| grep opaque-types | cut -d" " -f4 | sed s/panic,//)
-          cargo clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --features $features -- --deny warnings
+          cargo +${{ inputs.toolchain || '1.75.0' }} clippy --manifest-path build-resources/opaque-types/Cargo.toml --all-targets --features $features -- --deny warnings
 
       - name: cargo update ${{ matrix.dependant }}
         if: ${{ matrix.dependant != 'eclipse-zenoh/zenoh-dissector' }}
-        run: cargo update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
+        run: cargo +${{ inputs.toolchain || '1.75.0' }} update zenoh --manifest-path ${{ steps.crate-path.outputs.value }}/Cargo.toml
 
       - name: cargo update for zenoh-c build-resources
         if: ${{ matrix.dependant == 'eclipse-zenoh/zenoh-c' }}
-        run: cargo update zenoh --manifest-path build-resources/opaque-types/Cargo.toml
+        run: cargo +${{ inputs.toolchain || '1.75.0' }} update zenoh --manifest-path build-resources/opaque-types/Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
