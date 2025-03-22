@@ -9,5 +9,11 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "exclude": ["./dist", "./node_modules", "./__tests__", "./build.js"]
+  "exclude": [
+    "./dist",
+    "./node_modules",
+    "./__tests__",
+    "./build.js",
+    "./tsup.config.ts"
+  ]
 }
