@@ -2,12 +2,26 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "es2022",
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "./src",
     "outDir": "./dist",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "declarationMap": false,
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "ES2022"
+    ],
+    "newLine": "lf",
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "pretty": true,
+    "strict": false,
+    "strictNullChecks": true,
   },
   "exclude": [
     "./dist",

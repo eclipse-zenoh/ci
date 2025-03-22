@@ -5,8 +5,13 @@ export default defineConfig({
         /(.*)/
     ],
     dts: false,
-    splitting: false,
+    splitting: true,
     clean: false,
     skipNodeModulesBundle: true,
-    shims: true
+    shims: true,
+    cjsInterop: false,
+    format: 'esm',
+    banner: {
+        js: `import { createRequire } from 'module'; const require = createRequire(import.meta.url);`,
+    },
 })
