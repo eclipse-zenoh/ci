@@ -341,8 +341,8 @@ export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: st
  * The executable is cached using GitHub's `@actions/cache`.
  * @param name Name of the cargo binary on crates.io
  */
-export async function installBinaryCached(name: string) {
-  if (process.env["GITHUB_ACTIONS"] != undefined) {
+export async function installBinaryCached(name: string, useCache?: boolean) {
+  if (process.env["GITHUB_ACTIONS"] != undefined && useCache == true) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
     const key = `${os.platform()}-${os.release()}-${os.arch()}-${name}-${version}`;
