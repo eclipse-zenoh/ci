@@ -17,8 +17,7 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
-      # FIXME: Re-enable this once tests can reliably run in GitHub Actions
-      # - run: npm run test
+      - run: npm run test
       - run: npm run build
 
       - name: Check that dist/ is correctly generated
