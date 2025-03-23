@@ -73591,7 +73591,7 @@ async function installBinaryCached(name) {
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install --force ${name}`);
+    sh(`cargo +stable install ${name}`);
   }
 }
 

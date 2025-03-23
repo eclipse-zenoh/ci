@@ -14,6 +14,6 @@
     "__tests__/",
     "node_modules/",
     "build.js",
-    "./tsup.config.ts"
+    "tsup.config.ts"
   ]
 }
