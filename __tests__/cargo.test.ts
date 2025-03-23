@@ -25,6 +25,8 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 
   return new Promise(resolve => {
     https.get(url, res => {
+      console.log(res.statusCode);
+      console.log(res.statusMessage);
       const archiveName = join(tmp, "archive.tar.gz");
       const archive = createWriteStream(archiveName);
       res.pipe(archive);
