@@ -67,7 +67,7 @@ export function packages(path: string): Package[] {
           name: dep.name,
           req: dep.req,
           path: dep.path,
-        })),
+        } as WorkspaceDependency)),
     });
   }
 
@@ -80,7 +80,7 @@ export function packages(path: string): Package[] {
  */
 export function* packagesOrdered(path: string): Generator<Package> {
   const allPackages = packages(path);
-  const seen = [];
+  const seen: string[] = [];
 
   const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
 
@@ -208,13 +208,15 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
 
     if (
       "metadata" in manifest.package &&
+      manifest.package.metadata != undefined &&
       "deb" in manifest.package.metadata &&
+      manifest.package.metadata.deb != undefined &&
       "depends" in manifest.package.metadata.deb &&
       manifest.package.metadata.deb.depends != "$auto" &&
       pattern.test(manifest.package.metadata.deb.name)
     ) {
       const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`);
+      const depends = deb.depends ? deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`) : "";
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
       await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
@@ -324,7 +326,7 @@ export function packagesDebian(path: string): Package[] {
     const manifestRaw = toml.get(package_.manifestPath);
     const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
-    if ("metadata" in manifest.package && "deb" in manifest.package.metadata) {
+    if (manifest.package && manifest.package.metadata != undefined && "deb" in manifest.package.metadata) {
       result.push(package_);
     }
   }
@@ -377,14 +379,15 @@ export function build(path: string, target: string) {
 }
 
 export function hostTarget(): string {
-  return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
+  const match = sh("rustc --version --verbose").match(/host: (?<target>.*)/);
+  return match?.groups?.["target"] ?? "";
 }
 
 export function buildDebian(path: string, target: string, version: string) {
   for (const package_ of packagesDebian(path)) {
     const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
-    if ("variants" in manifest.package.metadata.deb) {
+    if (manifest.package.metadata != undefined && manifest.package.metadata.deb != undefined && "variants" in manifest.package.metadata.deb) {
       for (const variant in manifest.package.metadata.deb.variants) {
         sh(
           `cargo deb --no-build --no-strip \
@@ -450,6 +453,6 @@ export function isPublished(pkg: Package, options?: CommandOptions): boolean {
   if (!results || results.startsWith("error:")) {
     return false;
   }
-  const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+  const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }
