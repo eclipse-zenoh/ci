@@ -14,10 +14,14 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - name: Setup rust-cache
-        uses: Swatinem/rust-cache@v2
+      - uses: actions/cache@v4
         with:
-          cache-bin: false
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-${{ runner.arch }}
 
       - run: npm ci
       - run: npm run format:check
