@@ -73569,11 +73569,13 @@ function packages(path) {
       version: elem.version,
       manifestPath: elem.manifest_path,
       publish: elem.publish == null ? void 0 : false,
-      workspaceDependencies: elem.dependencies.filter((dep) => "path" in dep).map((dep) => ({
-        name: dep.name,
-        req: dep.req,
-        path: dep.path
-      }))
+      workspaceDependencies: elem.dependencies.filter((dep) => "path" in dep).map(
+        (dep) => ({
+          name: dep.name,
+          req: dep.req,
+          path: dep.path
+        })
+      )
     });
   }
   return result;

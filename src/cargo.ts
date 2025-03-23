@@ -63,11 +63,14 @@ export function packages(path: string): Package[] {
       publish: elem.publish == null ? undefined : false,
       workspaceDependencies: elem.dependencies
         .filter(dep => "path" in dep)
-        .map(dep => ({
-          name: dep.name,
-          req: dep.req,
-          path: dep.path,
-        } as WorkspaceDependency)),
+        .map(
+          dep =>
+            ({
+              name: dep.name,
+              req: dep.req,
+              path: dep.path,
+            }) as WorkspaceDependency,
+        ),
     });
   }
 
@@ -216,7 +219,9 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
       pattern.test(manifest.package.metadata.deb.name)
     ) {
       const deb = manifest.package.metadata.deb;
-      const depends = deb.depends ? deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`) : "";
+      const depends = deb.depends
+        ? deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`)
+        : "";
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
       await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
@@ -387,7 +392,11 @@ export function buildDebian(path: string, target: string, version: string) {
   for (const package_ of packagesDebian(path)) {
     const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
-    if (manifest.package.metadata != undefined && manifest.package.metadata.deb != undefined && "variants" in manifest.package.metadata.deb) {
+    if (
+      manifest.package.metadata != undefined &&
+      manifest.package.metadata.deb != undefined &&
+      "variants" in manifest.package.metadata.deb
+    ) {
       for (const variant in manifest.package.metadata.deb.variants) {
         sh(
           `cargo deb --no-build --no-strip \
