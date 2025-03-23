@@ -27,7 +27,8 @@
     "./dist",
     "./node_modules",
     "./__tests__",
-    "./build.js",
-    "./tsup.config.ts"
+    "./build.cjs",
+    "./tsup.config.ts",
+    "./eslint.config.mjs"
   ]
 }

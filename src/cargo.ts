@@ -187,9 +187,9 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
       // Respect the pins if they exist in the dependency
-      const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"));
+      const d = manifest.dependencies[dep] as CargoManifestDependencyTable;
       let depVersion = version;
-      if (v != undefined && String(v).startsWith("=")) {
+      if (d.version.startsWith("=")) {
         depVersion = "=" + version;
       }
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
