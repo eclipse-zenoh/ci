@@ -15,6 +15,7 @@ const toml = await TOML.init();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
+const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
@@ -39,10 +40,7 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 
 describe("cargo", () => {
   test("list packages zenoh-plugin-ros2dds", async () => {
-    const tmp = await downloadGitHubRepo(
-      "eclipse-zenoh/zenoh-plugin-ros2dds",
-      "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5",
-    );
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
 
     const packages = cargo.packages(tmp);
     await rm(tmp, { recursive: true, force: true });
