@@ -73403,13 +73403,13 @@ init_esm_shims();
 
 // src/bump-crates.ts
 init_esm_shims();
-var core3 = __toESM(require_core());
+var core3 = __toESM(require_core(), 1);
 import { join as join2 } from "path";
 import { rm } from "fs/promises";
 
 // src/command.ts
 init_esm_shims();
-var core = __toESM(require_core());
+var core = __toESM(require_core(), 1);
 import { spawnSync } from "child_process";
 var MAX_BUFFER = 10 * 1024 * 1024;
 function sh(cmd, options) {
@@ -73489,8 +73489,8 @@ ${returns.stderr}`);
 
 // src/cargo.ts
 init_esm_shims();
-var core2 = __toESM(require_core());
-var cache = __toESM(require_cache2());
+var core2 = __toESM(require_core(), 1);
+var cache = __toESM(require_cache2(), 1);
 import * as os3 from "os";
 import { join } from "path";
 
@@ -73508,7 +73508,7 @@ var TOML = class _TOML {
     if (out) {
       return JSON.parse(out);
     } else {
-      return void 0;
+      return {};
     }
   }
   async set(path, key, value) {
@@ -73616,9 +73616,9 @@ async function bumpDependencies(path, pattern, version3, _branch) {
   }
   for (const package_ of packages(path)) {
     const manifest2 = toml.get(package_.manifestPath);
-    if ("metadata" in manifest2.package && "deb" in manifest2.package.metadata && "depends" in manifest2.package.metadata.deb && manifest2.package.metadata.deb.depends != "$auto" && pattern.test(manifest2.package.metadata.deb.name)) {
+    if ("metadata" in manifest2.package && manifest2.package.metadata != void 0 && "deb" in manifest2.package.metadata && manifest2.package.metadata.deb != void 0 && "depends" in manifest2.package.metadata.deb && manifest2.package.metadata.deb.depends != "$auto" && pattern.test(manifest2.package.metadata.deb.name)) {
       const deb = manifest2.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${toDebianVersion(version3)})`);
+      const depends = deb.depends ? deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${toDebianVersion(version3)})`) : "";
       core2.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
       await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
@@ -73636,7 +73636,7 @@ async function installBinaryCached(name) {
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`);
+    sh(`cargo +stable install --force ${name}`);
   }
 }
 function toDebianVersion(version3, revision) {

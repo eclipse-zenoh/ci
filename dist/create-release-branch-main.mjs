@@ -19127,12 +19127,12 @@ init_esm_shims();
 
 // src/create-release-branch.ts
 init_esm_shims();
-var core2 = __toESM(require_core());
+var core2 = __toESM(require_core(), 1);
 import { rm } from "fs/promises";
 
 // src/command.ts
 init_esm_shims();
-var core = __toESM(require_core());
+var core = __toESM(require_core(), 1);
 import { spawnSync } from "child_process";
 var MAX_BUFFER = 10 * 1024 * 1024;
 function sh(cmd, options) {

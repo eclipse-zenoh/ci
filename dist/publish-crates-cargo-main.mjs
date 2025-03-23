@@ -73403,13 +73403,13 @@ init_esm_shims();
 
 // src/publish-crates-cargo.ts
 init_esm_shims();
-var core3 = __toESM(require_core());
+var core3 = __toESM(require_core(), 1);
 import { rm } from "fs/promises";
 
 // src/cargo.ts
 init_esm_shims();
-var core2 = __toESM(require_core());
-var cache = __toESM(require_cache2());
+var core2 = __toESM(require_core(), 1);
+var cache = __toESM(require_cache2(), 1);
 import * as os3 from "os";
 import { join } from "path";
 
@@ -73419,7 +73419,7 @@ import * as fs2 from "fs/promises";
 
 // src/command.ts
 init_esm_shims();
-var core = __toESM(require_core());
+var core = __toESM(require_core(), 1);
 import { spawnSync } from "child_process";
 var MAX_BUFFER = 10 * 1024 * 1024;
 function sh(cmd, options) {
@@ -73509,7 +73509,7 @@ var TOML = class _TOML {
     if (out) {
       return JSON.parse(out);
     } else {
-      return void 0;
+      return {};
     }
   }
   async set(path, key, value) {
@@ -73604,7 +73604,7 @@ async function installBinaryCached(name) {
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`);
+    sh(`cargo +stable install --force ${name}`);
   }
 }
 function isPublished(pkg, options) {
@@ -73614,7 +73614,7 @@ function isPublished(pkg, options) {
   if (!results || results.startsWith("error:")) {
     return false;
   }
-  const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+  const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }
 
