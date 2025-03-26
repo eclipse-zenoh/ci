@@ -50,7 +50,11 @@ describe("cargo", () => {
 
       const packages = cargo.packages(tmp);
       console.log(packages);
-      await rm(tmp, { recursive: true, force: true });
+      try {
+        await rm(tmp, { recursive: true, force: true });
+      } catch (e) {
+        console.log(e);
+      }
 
       const expectedPackages = [
         {
