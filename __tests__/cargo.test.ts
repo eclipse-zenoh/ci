@@ -16,6 +16,7 @@ const toml = await TOML.init();
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
 const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
+const SECONDS = 1000;
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
@@ -75,7 +76,7 @@ describe("cargo", () => {
     //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
     //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
     expect(packages).toStrictEqual(expectedPackages);
-  });
+  }, 10 * SECONDS);
 
   test("list packages zenoh-backend-s3", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-backend-s3", "3761d5986fa12318e175341bc97524fe5a961cfa");
