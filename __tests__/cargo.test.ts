@@ -71,7 +71,7 @@ describe("cargo", () => {
     ];
     //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
     //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
-    expect(packages).toStrictEqual(expectedPackages)
+    expect(packages).toStrictEqual(expectedPackages);
   });
 
   test("list packages zenoh-backend-s3", async () => {
