@@ -43,8 +43,10 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 describe("cargo", () => {
   test("list packages zenoh-plugin-ros2dds", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
+    console.log(tmp);
 
     const packages = cargo.packages(tmp);
+    console.log(packages);
     await rm(tmp, { recursive: true, force: true });
 
     const expectedPackages = [
@@ -69,6 +71,7 @@ describe("cargo", () => {
         workspaceDependencies: [],
       },
     ];
+    console.log(expectedPackages);
     //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
     //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
     expect(packages).toStrictEqual(expectedPackages);
