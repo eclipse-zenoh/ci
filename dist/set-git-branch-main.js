@@ -81064,7 +81064,8 @@ module.exports.implForWrapper = function (wrapper) {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "B0": () => (/* binding */ setGitBranch),
-/* harmony export */   "Mj": () => (/* binding */ installBinaryCached)
+/* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
+/* harmony export */   "yB": () => (/* binding */ setCargoLockVersion)
 /* harmony export */ });
 /* unused harmony exports packages, packagesOrdered, bump, bumpDependencies, setRegistry, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, toDebianVersion, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
@@ -81287,6 +81288,18 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
             }
         }
+    }
+}
+/**
+ *  Set Cargo.lock version to 3 for compatibility with Rust 1.75 toolchain.
+ * @param cargoLockPath
+ *
+ */
+async function setCargoLockVersion(cargoLockPath) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Setting Cargo.lock version`);
+    const record = toml.get(cargoLockPath, ["version"]);
+    if (record != undefined && record["version"] != "3") {
+        await toml.set(cargoLockPath, ["version"], "3");
     }
 }
 /**
@@ -81613,6 +81626,17 @@ async function main(input) {
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
         (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`ls ${workspace}`);
+        // Correct Cargo.lock version to 1.75 toolchain compatible version
+        const cargoLockPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name "Cargo.lock"`)
+            .split("\n")
+            .filter(r => r);
+        for (const path of cargoLockPaths) {
+            await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setCargoLockVersion */ .yB(path);
+            if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
+                (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update Cargo.lock version ${path}'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
+            }
+        }
         // find all Cargo.toml files in the workspace, filtering out the empty string from the array
         const cargoPaths = (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`find ${workspace} -name "Cargo.toml*"`)
             .split("\n")
