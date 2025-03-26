@@ -42,41 +42,45 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 }
 
 describe("cargo", () => {
-  test("list packages zenoh-plugin-ros2dds", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
-    console.log(tmp);
+  test(
+    "list packages zenoh-plugin-ros2dds",
+    async () => {
+      const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
+      console.log(tmp);
 
-    const packages = cargo.packages(tmp);
-    console.log(packages);
-    await rm(tmp, { recursive: true, force: true });
+      const packages = cargo.packages(tmp);
+      console.log(packages);
+      await rm(tmp, { recursive: true, force: true });
 
-    const expectedPackages = [
-      {
-        name: "zenoh-bridge-ros2dds",
-        version: "0.11.0-dev",
-        manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
-        publish: undefined,
-        workspaceDependencies: [
-          {
-            name: "zenoh-plugin-ros2dds",
-            path: `${tmp}/zenoh-plugin-ros2dds`,
-            req: "^0.11.0-dev",
-          },
-        ],
-      },
-      {
-        name: "zenoh-plugin-ros2dds",
-        version: "0.11.0-dev",
-        manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
-        publish: undefined,
-        workspaceDependencies: [],
-      },
-    ];
-    console.log(expectedPackages);
-    //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
-    //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
-    expect(packages).toStrictEqual(expectedPackages);
-  }, 10 * SECONDS);
+      const expectedPackages = [
+        {
+          name: "zenoh-bridge-ros2dds",
+          version: "0.11.0-dev",
+          manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
+          publish: undefined,
+          workspaceDependencies: [
+            {
+              name: "zenoh-plugin-ros2dds",
+              path: `${tmp}/zenoh-plugin-ros2dds`,
+              req: "^0.11.0-dev",
+            },
+          ],
+        },
+        {
+          name: "zenoh-plugin-ros2dds",
+          version: "0.11.0-dev",
+          manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
+          publish: undefined,
+          workspaceDependencies: [],
+        },
+      ];
+      console.log(expectedPackages);
+      //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
+      //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
+      expect(packages).toStrictEqual(expectedPackages);
+    },
+    10 * SECONDS,
+  );
 
   test("list packages zenoh-backend-s3", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-backend-s3", "3761d5986fa12318e175341bc97524fe5a961cfa");
