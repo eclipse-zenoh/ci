@@ -49,13 +49,6 @@ describe("cargo", () => {
 
     const expectedPackages = [
       {
-        name: "zenoh-plugin-ros2dds",
-        version: "0.11.0-dev",
-        manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
-        publish: undefined,
-        workspaceDependencies: [],
-      },
-      {
         name: "zenoh-bridge-ros2dds",
         version: "0.11.0-dev",
         manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
@@ -67,6 +60,13 @@ describe("cargo", () => {
             req: "^0.11.0-dev",
           },
         ],
+      },
+      {
+        name: "zenoh-plugin-ros2dds",
+        version: "0.11.0-dev",
+        manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
+        publish: undefined,
+        workspaceDependencies: [],
       },
     ];
     //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
