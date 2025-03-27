@@ -102486,7 +102486,6 @@ ${returns.stderr}`);
 // src/toml.ts
 var TOML = class _TOML {
   static async init() {
-    await installBinaryCached("toml-cli2");
     return new _TOML();
   }
   get(path2, key) {

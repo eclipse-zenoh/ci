@@ -317,8 +317,11 @@ export function setCargoLockVersion(cargoLockPath: string) {
   core.startGroup(`Setting Cargo.lock version`);
   const record = toml.get(cargoLockPath, ["version"]);
   if (record != undefined && record["version"] != 3) {
-    // toml-cli2 doesn't support setting non-string values
-    sh(`sed -i 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
+    // toml-cli2 doesn't support setting non-string values so we use sed.
+    // sed on macos/linux have different syntax, so use the format below to avoid issues
+    const sedCommand = `sed -i.bak 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`;
+    sh(sedCommand);
+    sh(`rm -f ${cargoLockPath}.bak`); // remove backup file
   }
 }
 
