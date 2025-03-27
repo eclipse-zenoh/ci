@@ -76,6 +76,9 @@ export async function main(input: Input) {
     for (const result of results.artifacts) {
       if (shouldPublishArtifact(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
+        if (downloadPath == undefined) {
+          throw new Error(`Failed to download artifact ${result.id}`);
+        }
         const archive = path.join(downloadPath, result.name);
 
         core.info(`Uploading ${archive} to github.com/${input.repo}`);

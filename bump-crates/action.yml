@@ -22,4 +22,4 @@ inputs:
 
 runs:
   using: node20
-  main: ../dist/bump-crates-main.js
+  main: ../dist/bump-crates-main.mjs
