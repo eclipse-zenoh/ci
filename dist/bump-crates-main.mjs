@@ -63445,10 +63445,7 @@ var cache = __toESM(require_cache3(), 1);
 // src/toml.ts
 init_esm_shims();
 import * as fs2 from "fs/promises";
-var TOML = class _TOML {
-  static async init() {
-    return new _TOML();
-  }
+var TOML = class {
   get(path, key) {
     const query = key == void 0 ? "." : key.join(".");
     const out = exec("toml", ["get", path, query], { check: false });
@@ -63505,7 +63502,7 @@ var gitEnv = {
 };
 
 // src/cargo.ts
-var toml = await TOML.init();
+var toml = new TOML();
 function packages(path) {
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path });
   const metadata2 = JSON.parse(metadataContents);

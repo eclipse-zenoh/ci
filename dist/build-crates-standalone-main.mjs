@@ -102483,10 +102483,7 @@ ${returns.stderr}`);
 }
 
 // src/toml.ts
-var TOML = class _TOML {
-  static async init() {
-    return new _TOML();
-  }
+var TOML = class {
   get(path2, key) {
     const query = key == void 0 ? "." : key.join(".");
     const out = exec("toml", ["get", path2, query], { check: false });
@@ -102543,7 +102540,7 @@ var gitEnv = {
 };
 
 // src/cargo.ts
-var toml = await TOML.init();
+var toml = new TOML();
 async function installBinaryCached(name) {
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];

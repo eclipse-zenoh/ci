@@ -9,7 +9,7 @@ import { sh, CommandOptions } from "./command";
 import { config } from "./config";
 import * as cargo from "./cargo";
 
-const toml = await TOML.init();
+const toml = new TOML();
 
 export type Package = {
   name: string;

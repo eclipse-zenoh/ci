@@ -102486,10 +102486,7 @@ var cache = __toESM(require_cache3(), 1);
 // src/toml.ts
 init_esm_shims();
 import * as fs2 from "fs/promises";
-var TOML = class _TOML {
-  static async init() {
-    return new _TOML();
-  }
+var TOML = class {
   get(path2, key) {
     const query = key == void 0 ? "." : key.join(".");
     const out = exec("toml", ["get", path2, query], { check: false });
@@ -102546,14 +102543,14 @@ var gitEnv = {
 };
 
 // src/cargo.ts
-var toml = await TOML.init();
+var toml = new TOML();
 
 // src/zip.ts
 init_esm_shims();
 
 // src/build-crates-debian.ts
 var artifact = new import_artifact.DefaultArtifactClient();
-var toml2 = await TOML.init();
+var toml2 = new TOML();
 var artifactRegExp = /^.*-debian\.zip$/;
 
 // src/build-crates-standalone.ts
