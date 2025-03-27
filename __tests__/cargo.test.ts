@@ -15,6 +15,7 @@ const toml = await TOML.init();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
+const SHA_ZENOH_PLUGIN_MQTT: string = "f38489f60911fa78befd3c073511bedb764f99f9";
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
@@ -182,7 +183,7 @@ describe("cargo", () => {
   });
 
   test("setCargoLockVersion()", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-mqtt", SHA_ZENOH_PLUGIN_MQTT);
 
     const path = join(tmp, "Cargo.lock");
     cargo.setCargoLockVersion(path);

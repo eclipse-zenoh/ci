@@ -81300,7 +81300,7 @@ function setCargoLockVersion(cargoLockPath) {
     const record = toml.get(cargoLockPath, ["version"]);
     if (record != undefined && record["version"] != 3) {
         // toml-cli2 doesn't support setting non-string values
-        sh(`sed 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
+        sh(`sed -i 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
     }
 }
 /**
