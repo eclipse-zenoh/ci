@@ -81185,7 +81185,7 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__, __we
 /* harmony export */   "Mj": () => (/* binding */ installBinaryCached),
 /* harmony export */   "UR": () => (/* binding */ bumpDependencies)
 /* harmony export */ });
-/* unused harmony exports packages, packagesOrdered, setRegistry, setGitBranch, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
+/* unused harmony exports packages, packagesOrdered, setRegistry, setGitBranch, setCargoLockVersion, configRegistry, packagesDebian, installBinaryFromGit, build, hostTarget, buildDebian, isPublished */
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2037);
 /* harmony import */ var os__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(os__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(1017);
@@ -81406,6 +81406,18 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
                 await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
             }
         }
+    }
+}
+/**
+ *  Set Cargo.lock version to 3 for compatibility with Rust 1.75 toolchain.
+ * @param cargoLockPath
+ *
+ */
+async function setCargoLockVersion(cargoLockPath) {
+    core.startGroup(`Setting Cargo.lock version`);
+    const record = toml.get(cargoLockPath, ["version"]);
+    if (record != undefined && record["version"] != "3") {
+        await toml.set(cargoLockPath, ["version"], "3");
     }
 }
 /**
