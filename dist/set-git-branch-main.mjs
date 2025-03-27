@@ -63530,6 +63530,13 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
     }
   }
 }
+function setCargoLockVersion(cargoLockPath) {
+  core2.startGroup(`Setting Cargo.lock version`);
+  const record = toml.get(cargoLockPath, ["version"]);
+  if (record != void 0 && record["version"] != 3) {
+    sh(`sed -i 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
+  }
+}
 async function installBinaryCached(name) {
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];
@@ -63574,6 +63581,14 @@ async function main(input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
+    const cargoLockPaths = sh(`find ${workspace} -name "Cargo.lock"`).split("\n").filter((r) => r);
+    for (const path of cargoLockPaths) {
+      setCargoLockVersion(path);
+      if (sh("git diff", { cwd: repo, check: false })) {
+        sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
+        sh(`git commit --message 'chore: Update Cargo.lock version ${path}'`, { cwd: repo, env: gitEnv });
+      }
+    }
     const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`).split("\n").filter((r) => r);
     for (const path of cargoPaths) {
       await setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
