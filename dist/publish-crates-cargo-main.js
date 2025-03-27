@@ -81295,11 +81295,12 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
  * @param cargoLockPath
  *
  */
-async function setCargoLockVersion(cargoLockPath) {
+function setCargoLockVersion(cargoLockPath) {
     core.startGroup(`Setting Cargo.lock version`);
     const record = toml.get(cargoLockPath, ["version"]);
-    if (record != undefined && record["version"] != "3") {
-        await toml.set(cargoLockPath, ["version"], "3");
+    if (record != undefined && record["version"] != 3) {
+        // toml-cli2 doesn't support setting non-string values
+        sh(`sed 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
     }
 }
 /**

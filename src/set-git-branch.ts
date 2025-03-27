@@ -54,7 +54,7 @@ export async function main(input: Input) {
       .split("\n")
       .filter(r => r);
     for (const path of cargoLockPaths) {
-      await cargo.setCargoLockVersion(path);
+      cargo.setCargoLockVersion(path);
       if (sh("git diff", { cwd: repo, check: false })) {
         sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
         sh(`git commit --message 'chore: Update Cargo.lock version ${path}'`, { cwd: repo, env: gitEnv });
