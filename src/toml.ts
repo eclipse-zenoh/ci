@@ -1,11 +1,11 @@
 import * as fs from "fs/promises";
 
 import { exec } from "./command";
-import * as cargo from "./cargo";
+//import * as cargo from "./cargo";
 
 export class TOML {
   static async init(): Promise<TOML> {
-    await cargo.installBinaryCached("toml-cli2");
+    //await cargo.installBinaryCached("toml-cli2");
     return new TOML();
   }
 
