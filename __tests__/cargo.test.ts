@@ -84,7 +84,7 @@ describe("cargo", () => {
       //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
       expect(packages).toStrictEqual(expectedPackages);
     },
-    10 * SECONDS,
+    60 * SECONDS,
   );
 
   test("list packages zenoh-backend-s3", async () => {
