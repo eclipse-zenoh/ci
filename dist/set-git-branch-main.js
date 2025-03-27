@@ -81295,11 +81295,12 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
  * @param cargoLockPath
  *
  */
-async function setCargoLockVersion(cargoLockPath) {
+function setCargoLockVersion(cargoLockPath) {
     _actions_core__WEBPACK_IMPORTED_MODULE_2__.startGroup(`Setting Cargo.lock version`);
     const record = toml.get(cargoLockPath, ["version"]);
-    if (record != undefined && record["version"] != "3") {
-        await toml.set(cargoLockPath, ["version"], "3");
+    if (record != undefined && record["version"] != 3) {
+        // toml-cli2 doesn't support setting non-string values
+        (0,_command__WEBPACK_IMPORTED_MODULE_5__.sh)(`sed 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
     }
 }
 /**
@@ -81631,7 +81632,7 @@ async function main(input) {
             .split("\n")
             .filter(r => r);
         for (const path of cargoLockPaths) {
-            await _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setCargoLockVersion */ .yB(path);
+            _cargo__WEBPACK_IMPORTED_MODULE_4__/* .setCargoLockVersion */ .yB(path);
             if ((0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("git diff", { cwd: repo, check: false })) {
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
                 (0,_command__WEBPACK_IMPORTED_MODULE_3__.sh)(`git commit --message 'chore: Update Cargo.lock version ${path}'`, { cwd: repo, env: _config__WEBPACK_IMPORTED_MODULE_5__/* .gitEnv */ .B });
