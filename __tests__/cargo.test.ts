@@ -180,4 +180,14 @@ describe("cargo", () => {
     expect(cargo.toDebianVersion("1.0.0.1")).toEqual("1.0.0~pre.1-1");
     expect(cargo.toDebianVersion("1.0.0.1", 2)).toEqual("1.0.0~pre.1-2");
   });
+
+  test("setCargoLockVersion()", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
+
+    const path = join(tmp, "Cargo.lock");
+    cargo.setCargoLockVersion(path);
+
+    const version = toml.get(path, ["version"]);
+    expect(version).toStrictEqual(3);
+  });
 });
