@@ -27,8 +27,6 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 
   return new Promise(resolve => {
     https.get(url, res => {
-      console.log(res.statusCode);
-      console.log(res.statusMessage);
       const archiveName = join(tmp, "archive.tar.gz");
       const archive = createWriteStream(archiveName);
       res.pipe(archive);
@@ -47,10 +45,8 @@ describe("cargo", () => {
     "list packages zenoh-plugin-ros2dds",
     async () => {
       const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
-      console.log(tmp);
 
       const packages = cargo.packages(tmp);
-      console.log(packages);
       try {
         await rm(tmp, { recursive: true, force: true });
       } catch (e) {
@@ -79,9 +75,6 @@ describe("cargo", () => {
           workspaceDependencies: [],
         },
       ];
-      console.log(expectedPackages);
-      //const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
-      //expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
       expect(packages).toStrictEqual(expectedPackages);
     },
     60 * SECONDS,
