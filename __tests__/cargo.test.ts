@@ -15,6 +15,7 @@ const toml = await TOML.init();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
+const SHA_ZENOH_PLUGIN_MQTT: string = "f38489f60911fa78befd3c073511bedb764f99f9";
 const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
 const SECONDS = 1000;
 
@@ -192,5 +193,15 @@ describe("cargo", () => {
     expect(cargo.toDebianVersion("1.0.0")).toEqual("1.0.0");
     expect(cargo.toDebianVersion("1.0.0.1")).toEqual("1.0.0~pre.1-1");
     expect(cargo.toDebianVersion("1.0.0.1", 2)).toEqual("1.0.0~pre.1-2");
+  });
+
+  test("setCargoLockVersion()", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-mqtt", SHA_ZENOH_PLUGIN_MQTT);
+
+    const path = join(tmp, "Cargo.lock");
+    cargo.setCargoLockVersion(path);
+
+    const version = toml.get(path, ["version"]);
+    expect(version).toStrictEqual(3);
   });
 });

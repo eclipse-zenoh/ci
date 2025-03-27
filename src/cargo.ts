@@ -308,6 +308,19 @@ export async function setGitBranch(
     }
   }
 }
+/**
+ *  Set Cargo.lock version to 3 for compatibility with Rust 1.75 toolchain.
+ * @param cargoLockPath
+ *
+ */
+export function setCargoLockVersion(cargoLockPath: string) {
+  core.startGroup(`Setting Cargo.lock version`);
+  const record = toml.get(cargoLockPath, ["version"]);
+  if (record != undefined && record["version"] != 3) {
+    // toml-cli2 doesn't support setting non-string values
+    sh(`sed -i 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
+  }
+}
 
 /**
  * Stores Cargo registry configuration in `.cargo/config.toml`.
