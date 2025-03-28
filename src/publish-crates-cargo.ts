@@ -69,10 +69,10 @@ export async function main(input: Input) {
     }
 
     let publishFn: (input: Input, repo: string, branch?: string) => void;
-    if (input.cratesIoToken != undefined) {
-      publishFn = publishToCratesIo;
-    } else if (input.artifactoryToken != undefined) {
+    if (input.artifactoryToken) {
       publishFn = publishToArtifactory;
+    } else if (input.cratesIoToken) {
+      publishFn = publishToCratesIo;
     } else {
       throw new Error("No token provided for publication");
     }

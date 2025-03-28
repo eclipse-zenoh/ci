@@ -81638,11 +81638,11 @@ async function main(input) {
             await deleteRepos(input);
         }
         let publishFn;
-        if (input.cratesIoToken != undefined) {
-            publishFn = publishToCratesIo;
-        }
-        else if (input.artifactoryToken != undefined) {
+        if (input.artifactoryToken) {
             publishFn = publishToArtifactory;
+        }
+        else if (input.cratesIoToken) {
+            publishFn = publishToCratesIo;
         }
         else {
             throw new Error("No token provided for publication");
