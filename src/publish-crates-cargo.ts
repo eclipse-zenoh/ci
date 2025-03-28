@@ -54,6 +54,7 @@ export async function main(input: Input) {
       core.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
       const path = getPath(input);
+      core.info(`Got path: ${path}`);
       const options = {
         cwd: path,
         check: true,
@@ -124,6 +125,7 @@ function getPath(input: Input): string {
 function publishToArtifactory(input: Input, repo: string, branch?: string) {
   clone(input, repo, branch);
   const path = getPath(input);
+  core.info(`Got path: ${path}`);
 
   const env = {
     CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,

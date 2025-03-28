@@ -81626,6 +81626,7 @@ async function main(input) {
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Running cargo check before publication");
             clone(input, input.repo, input.branch);
             const path = getPath(input);
+            _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Got path: ${path}`);
             const options = {
                 cwd: path,
                 check: true,
@@ -81689,6 +81690,7 @@ function getPath(input) {
 function publishToArtifactory(input, repo, branch) {
     clone(input, repo, branch);
     const path = getPath(input);
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Got path: ${path}`);
     const env = {
         CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
         CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
