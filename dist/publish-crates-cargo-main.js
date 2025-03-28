@@ -81695,6 +81695,7 @@ function publishToArtifactory(input, repo, branch) {
     const env = {
         CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
         CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+        CARGO_REGISTRY_DEFAULT: "artifactory",
     };
     publish(path, env);
 }
