@@ -131,6 +131,7 @@ function publishToArtifactory(input: Input, repo: string, branch?: string) {
   const env = {
     CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
     CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+    CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
     CARGO_REGISTRY_DEFAULT: "artifactory",
   };
 
