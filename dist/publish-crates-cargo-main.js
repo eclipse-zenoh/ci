@@ -81625,11 +81625,7 @@ async function main(input) {
         if (input.publicationTest) {
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Running cargo check before publication");
             clone(input, input.repo, input.branch);
-            let path;
-            path = repoPath(input.repo);
-            if (input.submodulePath) {
-                path = repoPath(input.repo) + "/" + input.submodulePath;
-            }
+            const path = getPath(input);
             const options = {
                 cwd: path,
                 check: true,
@@ -81682,13 +81678,17 @@ async function deleteRepos(input) {
 function repoPath(repo) {
     return repo.split("/").at(1);
 }
-function publishToArtifactory(input, repo, branch) {
-    clone(input, repo, branch);
+function getPath(input) {
     let path;
     path = repoPath(input.repo);
     if (input.submodulePath) {
         path = repoPath(input.repo) + "/" + input.submodulePath;
     }
+    return path;
+}
+function publishToArtifactory(input, repo, branch) {
+    clone(input, repo, branch);
+    const path = getPath(input);
     const env = {
         CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
         CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,

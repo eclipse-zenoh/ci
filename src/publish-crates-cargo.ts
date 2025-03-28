@@ -53,11 +53,7 @@ export async function main(input: Input) {
     if (input.publicationTest) {
       core.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
-      let path: string;
-      path = repoPath(input.repo);
-      if (input.submodulePath) {
-        path = repoPath(input.repo) + "/" + input.submodulePath;
-      }
+      const path = getPath(input);
       const options = {
         cwd: path,
         check: true,
@@ -116,13 +112,18 @@ function repoPath(repo: string): string {
   return repo.split("/").at(1);
 }
 
-function publishToArtifactory(input: Input, repo: string, branch?: string) {
-  clone(input, repo, branch);
+function getPath(input: Input): string {
   let path: string;
   path = repoPath(input.repo);
   if (input.submodulePath) {
     path = repoPath(input.repo) + "/" + input.submodulePath;
   }
+  return path;
+}
+
+function publishToArtifactory(input: Input, repo: string, branch?: string) {
+  clone(input, repo, branch);
+  const path = getPath(input);
 
   const env = {
     CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
