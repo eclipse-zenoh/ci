@@ -81637,17 +81637,17 @@ async function main(input) {
             }
             await deleteRepos(input);
         }
-        let publishFn;
-        if (input.artifactoryToken) {
-            publishFn = publishToArtifactory;
-        }
-        else if (input.cratesIoToken) {
-            publishFn = publishToCratesIo;
-        }
-        else {
-            throw new Error("No token provided for publication");
-        }
         if (input.liveRun) {
+            let publishFn;
+            if (input.artifactoryToken) {
+                publishFn = publishToArtifactory;
+            }
+            else if (input.cratesIoToken) {
+                publishFn = publishToCratesIo;
+            }
+            else {
+                throw new Error("No token provided for publication");
+            }
             for (const repo of input.unpublishedDepsRepos) {
                 publishFn(input, repo);
             }

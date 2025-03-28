@@ -68,16 +68,16 @@ export async function main(input: Input) {
       await deleteRepos(input);
     }
 
-    let publishFn: (input: Input, repo: string, branch?: string) => void;
-    if (input.artifactoryToken) {
-      publishFn = publishToArtifactory;
-    } else if (input.cratesIoToken) {
-      publishFn = publishToCratesIo;
-    } else {
-      throw new Error("No token provided for publication");
-    }
-
     if (input.liveRun) {
+      let publishFn: (input: Input, repo: string, branch?: string) => void;
+      if (input.artifactoryToken) {
+        publishFn = publishToArtifactory;
+      } else if (input.cratesIoToken) {
+        publishFn = publishToCratesIo;
+      } else {
+        throw new Error("No token provided for publication");
+      }
+
       for (const repo of input.unpublishedDepsRepos) {
         publishFn(input, repo);
       }
