@@ -81599,7 +81599,9 @@ function setup() {
     const branch = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("branch", { required: true });
     const repo = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("repo", { required: true });
     const githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("github-token", { required: true });
-    const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token", { required: true });
+    const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token");
+    const artifactoryToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("artifactory-token");
+    const artifactoryIndex = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("artifactory-index");
     const unpublishedDepsPatterns = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-patterns");
     const unpublishedDepsRepos = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-repos");
     const publicationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("publication-test");
@@ -81611,6 +81613,8 @@ function setup() {
         unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
         unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
         cratesIoToken,
+        artifactoryToken,
+        artifactoryIndex,
         publicationTest,
     };
 }
@@ -81630,11 +81634,21 @@ async function main(input) {
             }
             await deleteRepos(input);
         }
+        let publishFn;
+        if (input.cratesIoToken != undefined) {
+            publishFn = publishToCratesIo;
+        }
+        else if (input.artifactoryToken != undefined) {
+            publishFn = publishToArtifactory;
+        }
+        else {
+            throw new Error("No token provided for publication");
+        }
         if (input.liveRun) {
             for (const repo of input.unpublishedDepsRepos) {
-                publishToCratesIo(input, repo);
+                publishFn(input, repo);
             }
-            publishToCratesIo(input, input.repo, input.branch);
+            publishFn(input, input.repo, input.branch);
         }
     }
     catch (error) {
@@ -81661,6 +81675,15 @@ async function deleteRepos(input) {
 }
 function repoPath(repo) {
     return repo.split("/").at(1);
+}
+function publishToArtifactory(input, repo, branch) {
+    clone(input, repo, branch);
+    const path = repoPath(repo);
+    const env = {
+        CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+        CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+    };
+    publish(path, env);
 }
 function publishToCratesIo(input, repo, branch) {
     clone(input, repo, branch);

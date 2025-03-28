@@ -13,6 +13,8 @@ export type Input = {
   unpublishedDepsRegExp: RegExp;
   unpublishedDepsRepos: string[];
   cratesIoToken?: string;
+  artifactoryToken?: string;
+  artifactoryIndex?: string;
   publicationTest: boolean;
 };
 
@@ -21,7 +23,9 @@ export function setup(): Input {
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const githubToken = core.getInput("github-token", { required: true });
-  const cratesIoToken = core.getInput("crates-io-token", { required: true });
+  const cratesIoToken = core.getInput("crates-io-token");
+  const artifactoryToken = core.getInput("artifactory-token");
+  const artifactoryIndex = core.getInput("artifactory-index");
   const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns");
   const unpublishedDepsRepos = core.getInput("unpublished-deps-repos");
   const publicationTest = core.getBooleanInput("publication-test");
@@ -35,6 +39,8 @@ export function setup(): Input {
       unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
     unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
+    artifactoryToken,
+    artifactoryIndex,
     publicationTest,
   };
 }
@@ -58,12 +64,21 @@ export async function main(input: Input) {
       await deleteRepos(input);
     }
 
+    let publishFn: (input: Input, repo: string, branch?: string) => void;
+    if (input.cratesIoToken != undefined) {
+      publishFn = publishToCratesIo;
+    } else if (input.artifactoryToken != undefined) {
+      publishFn = publishToArtifactory;
+    } else {
+      throw new Error("No token provided for publication");
+    }
+
     if (input.liveRun) {
       for (const repo of input.unpublishedDepsRepos) {
-        publishToCratesIo(input, repo);
+        publishFn(input, repo);
       }
 
-      publishToCratesIo(input, input.repo, input.branch);
+      publishFn(input, input.repo, input.branch);
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
@@ -92,6 +107,18 @@ async function deleteRepos(input: Input) {
 
 function repoPath(repo: string): string {
   return repo.split("/").at(1);
+}
+
+function publishToArtifactory(input: Input, repo: string, branch?: string) {
+  clone(input, repo, branch);
+  const path = repoPath(repo);
+
+  const env = {
+    CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+    CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+  };
+
+  publish(path, env);
 }
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
