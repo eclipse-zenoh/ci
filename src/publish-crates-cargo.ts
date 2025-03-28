@@ -123,6 +123,7 @@ function getPath(input: Input): string {
 }
 
 function publishToArtifactory(input: Input, repo: string, branch?: string) {
+  core.info("Publishing to Artifactory");
   clone(input, repo, branch);
   const path = getPath(input);
   core.info(`Got path: ${path}`);
@@ -136,6 +137,7 @@ function publishToArtifactory(input: Input, repo: string, branch?: string) {
 }
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
+  core.info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path = repoPath(repo);
 

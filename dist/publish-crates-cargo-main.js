@@ -81688,6 +81688,7 @@ function getPath(input) {
     return path;
 }
 function publishToArtifactory(input, repo, branch) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Publishing to Artifactory");
     clone(input, repo, branch);
     const path = getPath(input);
     _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Got path: ${path}`);
@@ -81698,6 +81699,7 @@ function publishToArtifactory(input, repo, branch) {
     publish(path, env);
 }
 function publishToCratesIo(input, repo, branch) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Publishing to CratesIo");
     clone(input, repo, branch);
     const path = repoPath(repo);
     const env = {
