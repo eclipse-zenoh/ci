@@ -81598,6 +81598,7 @@ function setup() {
     const liveRun = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("live-run", { required: true });
     const branch = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("branch", { required: true });
     const repo = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("repo", { required: true });
+    const submodulePath = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("submodule-path");
     const githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("github-token", { required: true });
     const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token");
     const artifactoryToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("artifactory-token");
@@ -81609,6 +81610,7 @@ function setup() {
         liveRun,
         branch,
         repo,
+        submodulePath,
         githubToken,
         unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
         unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
@@ -81623,7 +81625,11 @@ async function main(input) {
         if (input.publicationTest) {
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Running cargo check before publication");
             clone(input, input.repo, input.branch);
-            const path = repoPath(input.repo);
+            let path;
+            path = repoPath(input.repo);
+            if (input.submodulePath) {
+                path = repoPath(input.repo) + "/" + input.submodulePath;
+            }
             const options = {
                 cwd: path,
                 check: true,
@@ -81678,7 +81684,11 @@ function repoPath(repo) {
 }
 function publishToArtifactory(input, repo, branch) {
     clone(input, repo, branch);
-    const path = repoPath(repo);
+    let path;
+    path = repoPath(input.repo);
+    if (input.submodulePath) {
+        path = repoPath(input.repo) + "/" + input.submodulePath;
+    }
     const env = {
         CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
         CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,

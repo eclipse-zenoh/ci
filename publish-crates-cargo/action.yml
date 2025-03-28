@@ -7,6 +7,8 @@ inputs:
     required: true
   repo:
     required: true
+  submodule-path:
+    required: false
   github-token:
     required: true
   crates-io-token:

@@ -9,6 +9,7 @@ export type Input = {
   liveRun: boolean;
   branch: string;
   repo: string;
+  submodulePath?: string;
   githubToken: string;
   unpublishedDepsRegExp: RegExp;
   unpublishedDepsRepos: string[];
@@ -22,6 +23,7 @@ export function setup(): Input {
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
+  const submodulePath = core.getInput("submodule-path");
   const githubToken = core.getInput("github-token", { required: true });
   const cratesIoToken = core.getInput("crates-io-token");
   const artifactoryToken = core.getInput("artifactory-token");
@@ -34,6 +36,7 @@ export function setup(): Input {
     liveRun,
     branch,
     repo,
+    submodulePath,
     githubToken,
     unpublishedDepsRegExp:
       unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
@@ -50,7 +53,11 @@ export async function main(input: Input) {
     if (input.publicationTest) {
       core.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
-      const path = repoPath(input.repo);
+      let path: string;
+      path = repoPath(input.repo);
+      if (input.submodulePath) {
+        path = repoPath(input.repo) + "/" + input.submodulePath;
+      }
       const options = {
         cwd: path,
         check: true,
@@ -111,7 +118,11 @@ function repoPath(repo: string): string {
 
 function publishToArtifactory(input: Input, repo: string, branch?: string) {
   clone(input, repo, branch);
-  const path = repoPath(repo);
+  let path: string;
+  path = repoPath(input.repo);
+  if (input.submodulePath) {
+    path = repoPath(input.repo) + "/" + input.submodulePath;
+  }
 
   const env = {
     CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
