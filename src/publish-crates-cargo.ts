@@ -110,7 +110,11 @@ async function deleteRepos(input: Input) {
 }
 
 function repoPath(repo: string): string {
-  return repo.split("/").at(1);
+  const path = repo.split("/").at(1);
+  if (!path) {
+    throw new Error(`Invalid repository path: ${repo}`);
+  }
+  return path;
 }
 
 function getPath(input: Input): string {

@@ -63508,7 +63508,6 @@ function packages(path, options) {
   if (options == void 0) {
     options = { cwd: path };
   }
-  ;
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata2 = JSON.parse(metadataContents);
   const result = [];
@@ -63553,7 +63552,6 @@ function isPublished(pkg, options) {
   if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
     return false;
   }
-  ;
   const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }
@@ -63637,7 +63635,11 @@ async function deleteRepos(input) {
   }
 }
 function repoPath(repo) {
-  return repo.split("/").at(1);
+  const path = repo.split("/").at(1);
+  if (!path) {
+    throw new Error(`Invalid repository path: ${repo}`);
+  }
+  return path;
 }
 function getPath(input) {
   let path;

@@ -63507,7 +63507,6 @@ function packages(path, options) {
   if (options == void 0) {
     options = { cwd: path };
   }
-  ;
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata2 = JSON.parse(metadataContents);
   const result = [];

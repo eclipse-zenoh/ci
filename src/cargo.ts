@@ -53,7 +53,7 @@ type CargoMetadata = {
 export function packages(path: string, options?: CommandOptions): Package[] {
   if (options == undefined) {
     options = { cwd: path };
-  };
+  }
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata = JSON.parse(metadataContents) as CargoMetadata;
 
@@ -484,7 +484,7 @@ export function isPublished(pkg: Package, options?: CommandOptions): boolean {
   // Make sure the returned package matches the one we're looking for
   if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
     return false;
-  };
+  }
   const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }
