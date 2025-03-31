@@ -50,8 +50,11 @@ type CargoMetadata = {
  * @param path Path to the Cargo workspace or crate.
  * @returns The list of Cargo packages present in the workspace or crate.
  */
-export function packages(path: string): Package[] {
-  const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path });
+export function packages(path: string, options?: CommandOptions): Package[] {
+  if (options == undefined) {
+    options = { cwd: path };
+  }
+  const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata = JSON.parse(metadataContents) as CargoMetadata;
 
   const result = [] as Package[];
@@ -81,8 +84,8 @@ export function packages(path: string): Package[] {
  * Yields packages in topological (suitable for publishing) order in a workspace.
  * @param path Path to the Cargo workspace.
  */
-export function* packagesOrdered(path: string): Generator<Package> {
-  const allPackages = packages(path);
+export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
+  const allPackages = packages(path, options);
   const seen: string[] = [];
 
   const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
@@ -476,6 +479,10 @@ export function isPublished(pkg: Package, options?: CommandOptions): boolean {
   // Hackish but registries don't have a stable api anyway.
   const results = sh(`cargo search ${pkg.name}`, optionsCopy);
   if (!results || results.startsWith("error:")) {
+    return false;
+  }
+  // Make sure the returned package matches the one we're looking for
+  if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
     return false;
   }
   const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);

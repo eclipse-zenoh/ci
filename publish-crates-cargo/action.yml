@@ -7,10 +7,16 @@ inputs:
     required: true
   repo:
     required: true
+  submodule-path:
+    required: false
   github-token:
     required: true
   crates-io-token:
-    required: true
+    required: false
+  artifactory-token:
+    required: false
+  artifactory-index:
+    required: false
   unpublished-deps-patterns:
     required: false
   unpublished-deps-repos:

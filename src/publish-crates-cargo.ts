@@ -9,10 +9,13 @@ export type Input = {
   liveRun: boolean;
   branch: string;
   repo: string;
+  submodulePath?: string;
   githubToken: string;
   unpublishedDepsRegExp: RegExp;
   unpublishedDepsRepos: string[];
   cratesIoToken?: string;
+  artifactoryToken?: string;
+  artifactoryIndex?: string;
   publicationTest: boolean;
 };
 
@@ -20,8 +23,11 @@ export function setup(): Input {
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
+  const submodulePath = core.getInput("submodule-path");
   const githubToken = core.getInput("github-token", { required: true });
-  const cratesIoToken = core.getInput("crates-io-token", { required: true });
+  const cratesIoToken = core.getInput("crates-io-token");
+  const artifactoryToken = core.getInput("artifactory-token");
+  const artifactoryIndex = core.getInput("artifactory-index");
   const unpublishedDepsPatterns = core.getInput("unpublished-deps-patterns");
   const unpublishedDepsRepos = core.getInput("unpublished-deps-repos");
   const publicationTest = core.getBooleanInput("publication-test");
@@ -30,11 +36,14 @@ export function setup(): Input {
     liveRun,
     branch,
     repo,
+    submodulePath,
     githubToken,
     unpublishedDepsRegExp:
       unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
     unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
+    artifactoryToken,
+    artifactoryIndex,
     publicationTest,
   };
 }
@@ -44,7 +53,7 @@ export async function main(input: Input) {
     if (input.publicationTest) {
       core.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
-      const path = repoPath(input.repo);
+      const path = getPath(input);
       const options = {
         cwd: path,
         check: true,
@@ -59,11 +68,20 @@ export async function main(input: Input) {
     }
 
     if (input.liveRun) {
-      for (const repo of input.unpublishedDepsRepos) {
-        publishToCratesIo(input, repo);
+      let publishFn: (input: Input, repo: string, branch?: string) => void;
+      if (input.artifactoryToken) {
+        publishFn = publishToArtifactory;
+      } else if (input.cratesIoToken) {
+        publishFn = publishToCratesIo;
+      } else {
+        throw new Error("No token provided for publication");
       }
 
-      publishToCratesIo(input, input.repo, input.branch);
+      for (const repo of input.unpublishedDepsRepos) {
+        publishFn(input, repo);
+      }
+
+      publishFn(input, input.repo, input.branch);
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
@@ -91,10 +109,40 @@ async function deleteRepos(input: Input) {
 }
 
 function repoPath(repo: string): string {
-  return repo.split("/").at(1);
+  const path = repo.split("/").at(1);
+  if (!path) {
+    throw new Error(`Invalid repository path: ${repo}`);
+  }
+  return path;
+}
+
+function getPath(input: Input): string {
+  let path: string;
+  path = repoPath(input.repo);
+  if (input.submodulePath) {
+    path = repoPath(input.repo) + "/" + input.submodulePath;
+  }
+  core.info(`Using path ${path}`);
+  return path;
+}
+
+function publishToArtifactory(input: Input, repo: string, branch?: string) {
+  core.info("Publishing to Artifactory");
+  clone(input, repo, branch);
+  const path = getPath(input);
+
+  const env = {
+    CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+    CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+    CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+    CARGO_REGISTRY_DEFAULT: "artifactory",
+  };
+
+  publish(path, env);
 }
 
 function publishToCratesIo(input: Input, repo: string, branch?: string) {
+  core.info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path = repoPath(repo);
 
@@ -112,7 +160,7 @@ function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = fal
     check: true,
   };
 
-  for (const package_ of cargo.packagesOrdered(path)) {
+  for (const package_ of cargo.packagesOrdered(path, options)) {
     // Crates.io won't allow packages to be published with the same version
     if (!cargo.isPublished(package_, options) && (package_.publish === undefined || package_.publish)) {
       const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];

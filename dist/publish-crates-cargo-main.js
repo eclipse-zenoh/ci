@@ -81598,8 +81598,11 @@ function setup() {
     const liveRun = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("live-run", { required: true });
     const branch = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("branch", { required: true });
     const repo = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("repo", { required: true });
+    const submodulePath = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("submodule-path");
     const githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("github-token", { required: true });
-    const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token", { required: true });
+    const cratesIoToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("crates-io-token");
+    const artifactoryToken = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("artifactory-token");
+    const artifactoryIndex = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("artifactory-index");
     const unpublishedDepsPatterns = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-patterns");
     const unpublishedDepsRepos = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unpublished-deps-repos");
     const publicationTest = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getBooleanInput("publication-test");
@@ -81607,10 +81610,13 @@ function setup() {
         liveRun,
         branch,
         repo,
+        submodulePath,
         githubToken,
         unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
         unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
         cratesIoToken,
+        artifactoryToken,
+        artifactoryIndex,
         publicationTest,
     };
 }
@@ -81619,7 +81625,8 @@ async function main(input) {
         if (input.publicationTest) {
             _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Running cargo check before publication");
             clone(input, input.repo, input.branch);
-            const path = repoPath(input.repo);
+            const path = getPath(input);
+            _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Got path: ${path}`);
             const options = {
                 cwd: path,
                 check: true,
@@ -81631,10 +81638,20 @@ async function main(input) {
             await deleteRepos(input);
         }
         if (input.liveRun) {
-            for (const repo of input.unpublishedDepsRepos) {
-                publishToCratesIo(input, repo);
+            let publishFn;
+            if (input.artifactoryToken) {
+                publishFn = publishToArtifactory;
             }
-            publishToCratesIo(input, input.repo, input.branch);
+            else if (input.cratesIoToken) {
+                publishFn = publishToCratesIo;
+            }
+            else {
+                throw new Error("No token provided for publication");
+            }
+            for (const repo of input.unpublishedDepsRepos) {
+                publishFn(input, repo);
+            }
+            publishFn(input, input.repo, input.branch);
         }
     }
     catch (error) {
@@ -81662,7 +81679,29 @@ async function deleteRepos(input) {
 function repoPath(repo) {
     return repo.split("/").at(1);
 }
+function getPath(input) {
+    let path;
+    path = repoPath(input.repo);
+    if (input.submodulePath) {
+        path = repoPath(input.repo) + "/" + input.submodulePath;
+    }
+    return path;
+}
+function publishToArtifactory(input, repo, branch) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Publishing to Artifactory");
+    clone(input, repo, branch);
+    const path = getPath(input);
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info(`Got path: ${path}`);
+    const env = {
+        CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+        CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+        CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+        CARGO_REGISTRY_DEFAULT: "artifactory",
+    };
+    publish(path, env);
+}
 function publishToCratesIo(input, repo, branch) {
+    _actions_core__WEBPACK_IMPORTED_MODULE_1__.info("Publishing to CratesIo");
     clone(input, repo, branch);
     const path = repoPath(repo);
     const env = {
