@@ -63589,7 +63589,6 @@ async function main(input) {
       core3.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
       const path = getPath(input);
-      core3.info(`Got path: ${path}`);
       const options = {
         cwd: path,
         check: true
@@ -63647,13 +63646,13 @@ function getPath(input) {
   if (input.submodulePath) {
     path = repoPath(input.repo) + "/" + input.submodulePath;
   }
+  core3.info(`Using path ${path}`);
   return path;
 }
 function publishToArtifactory(input, repo, branch) {
   core3.info("Publishing to Artifactory");
   clone(input, repo, branch);
   const path = getPath(input);
-  core3.info(`Got path: ${path}`);
   const env = {
     CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
     CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
