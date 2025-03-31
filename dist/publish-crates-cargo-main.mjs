@@ -63550,6 +63550,10 @@ function isPublished(pkg, options) {
   if (!results || results.startsWith("error:")) {
     return false;
   }
+  if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
+    return false;
+  }
+  ;
   const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }

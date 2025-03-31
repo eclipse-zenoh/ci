@@ -481,6 +481,10 @@ export function isPublished(pkg: Package, options?: CommandOptions): boolean {
   if (!results || results.startsWith("error:")) {
     return false;
   }
+  // Make sure the returned package matches the one we're looking for
+  if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
+    return false;
+  };
   const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }
