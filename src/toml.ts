@@ -1,8 +1,14 @@
 import * as fs from "fs/promises";
 
 import { exec } from "./command";
+import * as cargo from "./cargo";
 
 export class TOML {
+  static async init(): Promise<TOML> {
+    await cargo.installBinaryCached("toml-cli2");
+    return new TOML();
+  }
+
   get(path: string, key?: string[]): Record<string, unknown> {
     const query = key == undefined ? "." : key.join(".");
     const out = exec("toml", ["get", path, query], { check: false });

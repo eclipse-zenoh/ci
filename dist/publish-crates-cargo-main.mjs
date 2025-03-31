@@ -112,11 +112,11 @@ var require_command = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.issue = exports2.issueCommand = void 0;
-    var os2 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var utils_1 = require_utils();
     function issueCommand(command, properties, message) {
       const cmd = new Command(command, properties, message);
-      process.stdout.write(cmd.toString() + os2.EOL);
+      process.stdout.write(cmd.toString() + os3.EOL);
     }
     exports2.issueCommand = issueCommand;
     function issue(name, message = "") {
@@ -201,7 +201,7 @@ var require_file_command = __commonJS({
     exports2.prepareKeyValueMessage = exports2.issueFileCommand = void 0;
     var crypto = __importStar(__require("crypto"));
     var fs3 = __importStar(__require("fs"));
-    var os2 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var utils_1 = require_utils();
     function issueFileCommand(command, message) {
       const filePath = process.env[`GITHUB_${command}`];
@@ -211,7 +211,7 @@ var require_file_command = __commonJS({
       if (!fs3.existsSync(filePath)) {
         throw new Error(`Missing file at path: ${filePath}`);
       }
-      fs3.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os2.EOL}`, {
+      fs3.appendFileSync(filePath, `${(0, utils_1.toCommandValue)(message)}${os3.EOL}`, {
         encoding: "utf8"
       });
     }
@@ -225,7 +225,7 @@ var require_file_command = __commonJS({
       if (convertedValue.includes(delimiter2)) {
         throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter2}"`);
       }
-      return `${key}<<${delimiter2}${os2.EOL}${convertedValue}${os2.EOL}${delimiter2}`;
+      return `${key}<<${delimiter2}${os3.EOL}${convertedValue}${os3.EOL}${delimiter2}`;
     }
     exports2.prepareKeyValueMessage = prepareKeyValueMessage;
   }
@@ -19051,7 +19051,7 @@ var require_toolrunner = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.argStringToArray = exports2.ToolRunner = void 0;
-    var os2 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var events = __importStar(__require("events"));
     var child = __importStar(__require("child_process"));
     var path = __importStar(__require("path"));
@@ -19106,12 +19106,12 @@ var require_toolrunner = __commonJS({
       _processLineBuffer(data, strBuffer, onLine) {
         try {
           let s = strBuffer + data.toString();
-          let n = s.indexOf(os2.EOL);
+          let n = s.indexOf(os3.EOL);
           while (n > -1) {
             const line = s.substring(0, n);
             onLine(line);
-            s = s.substring(n + os2.EOL.length);
-            n = s.indexOf(os2.EOL);
+            s = s.substring(n + os3.EOL.length);
+            n = s.indexOf(os3.EOL);
           }
           return s;
         } catch (err) {
@@ -19280,7 +19280,7 @@ var require_toolrunner = __commonJS({
             }
             const optionsNonNull = this._cloneExecOptions(this.options);
             if (!optionsNonNull.silent && optionsNonNull.outStream) {
-              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os2.EOL);
+              optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
             }
             const state3 = new ExecState(optionsNonNull, this.toolPath);
             state3.on("debug", (message) => {
@@ -19771,7 +19771,7 @@ var require_core = __commonJS({
     var command_1 = require_command();
     var file_command_1 = require_file_command();
     var utils_1 = require_utils();
-    var os2 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var path = __importStar(__require("path"));
     var oidc_utils_1 = require_oidc_utils();
     var ExitCode;
@@ -19839,7 +19839,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       if (filePath) {
         return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name, value));
       }
-      process.stdout.write(os2.EOL);
+      process.stdout.write(os3.EOL);
       (0, command_1.issueCommand)("set-output", { name }, (0, utils_1.toCommandValue)(value));
     }
     exports2.setOutput = setOutput;
@@ -19873,7 +19873,7 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports2.notice = notice;
     function info4(message) {
-      process.stdout.write(message + os2.EOL);
+      process.stdout.write(message + os3.EOL);
     }
     exports2.info = info4;
     function startGroup3(name) {
@@ -21155,7 +21155,7 @@ var require_internal_pattern = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.Pattern = void 0;
-    var os2 = __importStar(__require("os"));
+    var os3 = __importStar(__require("os"));
     var path = __importStar(__require("path"));
     var pathHelper = __importStar(require_internal_path_helper());
     var assert_1 = __importDefault(__require("assert"));
@@ -21164,7 +21164,7 @@ var require_internal_pattern = __commonJS({
     var internal_path_1 = require_internal_path();
     var IS_WINDOWS = process.platform === "win32";
     var Pattern = class _Pattern {
-      constructor(patternOrNegate, isImplicitPattern = false, segments, homedir) {
+      constructor(patternOrNegate, isImplicitPattern = false, segments, homedir2) {
         this.negate = false;
         let pattern;
         if (typeof patternOrNegate === "string") {
@@ -21183,7 +21183,7 @@ var require_internal_pattern = __commonJS({
           this.negate = !this.negate;
           pattern = pattern.substr(1).trim();
         }
-        pattern = _Pattern.fixupPattern(pattern, homedir);
+        pattern = _Pattern.fixupPattern(pattern, homedir2);
         this.segments = new internal_path_1.Path(pattern).segments;
         this.trailingSeparator = pathHelper.normalizeSeparators(pattern).endsWith(path.sep);
         pattern = pathHelper.safeTrimTrailingSeparator(pattern);
@@ -21239,7 +21239,7 @@ var require_internal_pattern = __commonJS({
       /**
        * Normalizes slashes and ensures absolute root
        */
-      static fixupPattern(pattern, homedir) {
+      static fixupPattern(pattern, homedir2) {
         assert_1.default(pattern, "pattern cannot be empty");
         const literalSegments = new internal_path_1.Path(pattern).segments.map((x) => _Pattern.getLiteral(x));
         assert_1.default(literalSegments.every((x, i) => (x !== "." || i === 0) && x !== ".."), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
@@ -21248,10 +21248,10 @@ var require_internal_pattern = __commonJS({
         if (pattern === "." || pattern.startsWith(`.${path.sep}`)) {
           pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
         } else if (pattern === "~" || pattern.startsWith(`~${path.sep}`)) {
-          homedir = homedir || os2.homedir();
-          assert_1.default(homedir, "Unable to determine HOME directory");
-          assert_1.default(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
-          pattern = _Pattern.globEscape(homedir) + pattern.substr(1);
+          homedir2 = homedir2 || os3.homedir();
+          assert_1.default(homedir2, "Unable to determine HOME directory");
+          assert_1.default(pathHelper.hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
+          pattern = _Pattern.globEscape(homedir2) + pattern.substr(1);
         } else if (IS_WINDOWS && (pattern.match(/^[A-Z]:$/i) || pattern.match(/^[A-Z]:[^\\]/i))) {
           let root = pathHelper.ensureAbsoluteRoot("C:\\dummy-root", pattern.substr(0, 2));
           if (pattern.length > 2 && !root.endsWith("\\")) {
@@ -21957,8 +21957,8 @@ var require_semver = __commonJS({
         }
       } while (++i2);
     };
-    SemVer.prototype.inc = function(release2, identifier) {
-      switch (release2) {
+    SemVer.prototype.inc = function(release3, identifier) {
+      switch (release3) {
         case "premajor":
           this.prerelease.length = 0;
           this.patch = 0;
@@ -22034,20 +22034,20 @@ var require_semver = __commonJS({
           }
           break;
         default:
-          throw new Error("invalid increment argument: " + release2);
+          throw new Error("invalid increment argument: " + release3);
       }
       this.format();
       this.raw = this.version;
       return this;
     };
     exports2.inc = inc;
-    function inc(version2, release2, loose, identifier) {
+    function inc(version2, release3, loose, identifier) {
       if (typeof loose === "string") {
         identifier = loose;
         loose = void 0;
       }
       try {
-        return new SemVer(version2, loose).inc(release2, identifier).version;
+        return new SemVer(version2, loose).inc(release3, identifier).version;
       } catch (er) {
         return null;
       }
@@ -25250,7 +25250,7 @@ var require_supports_color = __commonJS({
   "node_modules/supports-color/index.js"(exports2, module) {
     "use strict";
     init_esm_shims();
-    var os2 = __require("os");
+    var os3 = __require("os");
     var tty = __require("tty");
     var hasFlag = require_has_flag();
     var { env } = process;
@@ -25298,7 +25298,7 @@ var require_supports_color = __commonJS({
         return min;
       }
       if (process.platform === "win32") {
-        const osRelease = os2.release().split(".");
+        const osRelease = os3.release().split(".");
         if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
           return Number(osRelease[2]) >= 14931 ? 3 : 2;
         }
@@ -63360,6 +63360,8 @@ import { rm } from "fs/promises";
 init_esm_shims();
 var core2 = __toESM(require_core(), 1);
 var cache = __toESM(require_cache3(), 1);
+import * as os2 from "os";
+import { join } from "path";
 
 // src/toml.ts
 init_esm_shims();
@@ -63446,7 +63448,11 @@ ${returns.stderr}`);
 }
 
 // src/toml.ts
-var TOML = class {
+var TOML = class _TOML {
+  static async init() {
+    await installBinaryCached("toml-cli2");
+    return new _TOML();
+  }
   get(path, key) {
     const query = key == void 0 ? "." : key.join(".");
     const out = exec("toml", ["get", path, query], { check: false });
@@ -63503,7 +63509,7 @@ var gitEnv = {
 };
 
 // src/cargo.ts
-var toml = new TOML();
+var toml = await TOML.init();
 function packages(path) {
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path });
   const metadata2 = JSON.parse(metadataContents);
@@ -63537,6 +63543,20 @@ function* packagesOrdered(path) {
         yield package_;
       }
     }
+  }
+}
+async function installBinaryCached(name) {
+  if (process.env["GITHUB_ACTIONS"] != void 0) {
+    const paths = [join(os2.homedir(), ".cargo", "bin")];
+    const version2 = config.lock.cratesio[name];
+    const key = `${os2.platform()}-${os2.release()}-${os2.arch()}-${name}-${version2}`;
+    const hit = await cache.restoreCache(paths, key);
+    if (hit == void 0) {
+      sh(`cargo +stable install ${name} --force`);
+      await cache.saveCache(paths, key);
+    }
+  } else {
+    sh(`cargo +stable install ${name}`);
   }
 }
 function isPublished(pkg, options) {

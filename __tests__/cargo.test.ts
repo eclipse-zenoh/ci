@@ -11,7 +11,7 @@ import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
 import { TOML } from "../src/toml";
 
-const toml = new TOML();
+const toml = await TOML.init();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";

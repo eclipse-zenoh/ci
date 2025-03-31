@@ -102484,7 +102484,11 @@ ${returns.stderr}`);
 }
 
 // src/toml.ts
-var TOML = class {
+var TOML = class _TOML {
+  static async init() {
+    await installBinaryCached("toml-cli2");
+    return new _TOML();
+  }
   get(path2, key) {
     const query = key == void 0 ? "." : key.join(".");
     const out = exec("toml", ["get", path2, query], { check: false });
@@ -102541,7 +102545,7 @@ var gitEnv = {
 };
 
 // src/cargo.ts
-var toml = new TOML();
+var toml = await TOML.init();
 function packages(path2) {
   const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path2 });
   const metadata2 = JSON.parse(metadataContents);
@@ -102648,7 +102652,7 @@ async function fromDirectory(output, dir2, pattern) {
 
 // src/build-crates-debian.ts
 var artifact = new import_artifact.DefaultArtifactClient();
-var toml2 = new TOML();
+var toml2 = await TOML.init();
 function setup() {
   const repo = core3.getInput("repo", { required: true });
   const version2 = core3.getInput("version", { required: true });
