@@ -45,6 +45,9 @@ export async function main(input: Input) {
     // GitHub-hosted runner because it doesn't support paths longer than 260
     // characters.
     const repoName = input.repo.split("/").at(1);
+    if (repoName == undefined) {
+      throw new Error(`Failed to determine repoName from input.repo: ${input.repo}`);
+    }
     const repoPath = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : repoName;
 
     git.cloneFromGitHub(input.repo, {

@@ -11,11 +11,13 @@ import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
 import { TOML } from "../src/toml";
 
-const toml = await TOML.init();
+const toml = new TOML();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
 const SHA_ZENOH_PLUGIN_MQTT: string = "f38489f60911fa78befd3c073511bedb764f99f9";
+const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
+const SECONDS = 1000;
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
   const url = `https://codeload.github.com/${repo}/tar.gz/${ref}`;
@@ -39,40 +41,44 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
 }
 
 describe("cargo", () => {
-  test("list packages zenoh-plugin-ros2dds", async () => {
-    const tmp = await downloadGitHubRepo(
-      "eclipse-zenoh/zenoh-plugin-ros2dds",
-      "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5",
-    );
+  test(
+    "list packages zenoh-plugin-ros2dds",
+    async () => {
+      const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-plugin-ros2dds", SHA_ZENOH_PLUGIN_ROS2DDS);
 
-    const packages = cargo.packages(tmp);
-    await rm(tmp, { recursive: true, force: true });
+      const packages = cargo.packages(tmp);
+      try {
+        await rm(tmp, { recursive: true, force: true });
+      } catch (e) {
+        console.log(e);
+      }
 
-    const expectedPackages = [
-      {
-        name: "zenoh-plugin-ros2dds",
-        version: "0.11.0-dev",
-        manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
-        publish: undefined,
-        workspaceDependencies: [],
-      },
-      {
-        name: "zenoh-bridge-ros2dds",
-        version: "0.11.0-dev",
-        manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
-        publish: undefined,
-        workspaceDependencies: [
-          {
-            name: "zenoh-plugin-ros2dds",
-            path: `${tmp}/zenoh-plugin-ros2dds`,
-            req: "^0.11.0-dev",
-          },
-        ],
-      },
-    ];
-    const compareFn = (p: cargo.Package, q: cargo.Package) => p.name.localeCompare(q.name);
-    expect(packages.sort(compareFn)).toStrictEqual(expectedPackages.sort(compareFn));
-  });
+      const expectedPackages = [
+        {
+          name: "zenoh-bridge-ros2dds",
+          version: "0.11.0-dev",
+          manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
+          publish: undefined,
+          workspaceDependencies: [
+            {
+              name: "zenoh-plugin-ros2dds",
+              path: `${tmp}/zenoh-plugin-ros2dds`,
+              req: "^0.11.0-dev",
+            },
+          ],
+        },
+        {
+          name: "zenoh-plugin-ros2dds",
+          version: "0.11.0-dev",
+          manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
+          publish: undefined,
+          workspaceDependencies: [],
+        },
+      ];
+      expect(packages).toStrictEqual(expectedPackages);
+    },
+    60 * SECONDS,
+  );
 
   test("list packages zenoh-backend-s3", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-backend-s3", "3761d5986fa12318e175341bc97524fe5a961cfa");

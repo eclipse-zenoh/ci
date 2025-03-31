@@ -9,7 +9,7 @@ import { sh, CommandOptions } from "./command";
 import { config } from "./config";
 import * as cargo from "./cargo";
 
-const toml = await TOML.init();
+const toml = new TOML();
 
 export type Package = {
   name: string;
@@ -63,11 +63,14 @@ export function packages(path: string): Package[] {
       publish: elem.publish == null ? undefined : false,
       workspaceDependencies: elem.dependencies
         .filter(dep => "path" in dep)
-        .map(dep => ({
-          name: dep.name,
-          req: dep.req,
-          path: dep.path,
-        })),
+        .map(
+          dep =>
+            ({
+              name: dep.name,
+              req: dep.req,
+              path: dep.path,
+            }) as WorkspaceDependency,
+        ),
     });
   }
 
@@ -80,7 +83,7 @@ export function packages(path: string): Package[] {
  */
 export function* packagesOrdered(path: string): Generator<Package> {
   const allPackages = packages(path);
-  const seen = [];
+  const seen: string[] = [];
 
   const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
 
@@ -184,9 +187,9 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
       // Respect the pins if they exist in the dependency
-      const v = toml.get(manifestPath, prefix.concat("dependencies", dep, "version"));
+      const d = manifest.dependencies[dep] as CargoManifestDependencyTable;
       let depVersion = version;
-      if (v != undefined && String(v).startsWith("=")) {
+      if (d.version.startsWith("=")) {
         depVersion = "=" + version;
       }
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
@@ -208,13 +211,17 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
 
     if (
       "metadata" in manifest.package &&
+      manifest.package.metadata != undefined &&
       "deb" in manifest.package.metadata &&
+      manifest.package.metadata.deb != undefined &&
       "depends" in manifest.package.metadata.deb &&
       manifest.package.metadata.deb.depends != "$auto" &&
       pattern.test(manifest.package.metadata.deb.name)
     ) {
       const deb = manifest.package.metadata.deb;
-      const depends = deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`);
+      const depends = deb.depends
+        ? deb.depends.replaceAll(/\(=[^\(\)]+\)/g, `(=${cargo.toDebianVersion(version)})`)
+        : "";
       core.info(`Changing ${deb.depends} to ${depends} in ${package_.name}`);
       await toml.set(package_.manifestPath, ["package", "metadata", "deb", "depends"], depends);
     }
@@ -310,8 +317,11 @@ export function setCargoLockVersion(cargoLockPath: string) {
   core.startGroup(`Setting Cargo.lock version`);
   const record = toml.get(cargoLockPath, ["version"]);
   if (record != undefined && record["version"] != 3) {
-    // toml-cli2 doesn't support setting non-string values
-    sh(`sed -i 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`);
+    // toml-cli2 doesn't support setting non-string values so we use sed.
+    // sed on macos/linux have different syntax, so use the format below to avoid issues
+    const sedCommand = `sed -i.bak 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`;
+    sh(sedCommand);
+    sh(`rm -f ${cargoLockPath}.bak`); // remove backup file
   }
 }
 
@@ -337,7 +347,7 @@ export function packagesDebian(path: string): Package[] {
     const manifestRaw = toml.get(package_.manifestPath);
     const manifest = ("workspace" in manifestRaw ? manifestRaw["workspace"] : manifestRaw) as CargoManifest;
 
-    if ("metadata" in manifest.package && "deb" in manifest.package.metadata) {
+    if (manifest.package && manifest.package.metadata != undefined && "deb" in manifest.package.metadata) {
       result.push(package_);
     }
   }
@@ -390,14 +400,19 @@ export function build(path: string, target: string) {
 }
 
 export function hostTarget(): string {
-  return sh("rustc --version --verbose").match(/host: (?<target>.*)/).groups["target"];
+  const match = sh("rustc --version --verbose").match(/host: (?<target>.*)/);
+  return match?.groups?.["target"] ?? "";
 }
 
 export function buildDebian(path: string, target: string, version: string) {
   for (const package_ of packagesDebian(path)) {
     const manifest = toml.get(package_.manifestPath) as CargoManifest;
 
-    if ("variants" in manifest.package.metadata.deb) {
+    if (
+      manifest.package.metadata != undefined &&
+      manifest.package.metadata.deb != undefined &&
+      "variants" in manifest.package.metadata.deb
+    ) {
       for (const variant in manifest.package.metadata.deb.variants) {
         sh(
           `cargo deb --no-build --no-strip \
@@ -463,6 +478,6 @@ export function isPublished(pkg: Package, options?: CommandOptions): boolean {
   if (!results || results.startsWith("error:")) {
     return false;
   }
-  const publishedVersion = results.split("\n").at(0).match(/".*"/g).at(0).slice(1, -1);
+  const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
   return publishedVersion === pkg.version;
 }

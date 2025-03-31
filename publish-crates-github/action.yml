@@ -16,4 +16,4 @@ inputs:
 
 runs:
   using: node20
-  main: ../dist/publish-crates-github-main.js
+  main: ../dist/publish-crates-github-main.mjs
