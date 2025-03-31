@@ -63504,8 +63504,9 @@ var gitEnv = {
 
 // src/cargo.ts
 var toml = new TOML();
-function packages(path) {
-  const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path });
+function packages(path, options) {
+  options.cwd = path;
+  const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata2 = JSON.parse(metadataContents);
   const result = [];
   for (const elem of metadata2.packages) {
@@ -63525,8 +63526,8 @@ function packages(path) {
   }
   return result;
 }
-function* packagesOrdered(path) {
-  const allPackages = packages(path);
+function* packagesOrdered(path, options) {
+  const allPackages = packages(path, options);
   const seen = [];
   const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.includes(dep.name));
   while (allPackages.length != 0) {
@@ -63555,8 +63556,11 @@ function setup() {
   const liveRun = core3.getBooleanInput("live-run", { required: true });
   const branch = core3.getInput("branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
+  const submodulePath = core3.getInput("submodule-path");
   const githubToken = core3.getInput("github-token", { required: true });
-  const cratesIoToken = core3.getInput("crates-io-token", { required: true });
+  const cratesIoToken = core3.getInput("crates-io-token");
+  const artifactoryToken = core3.getInput("artifactory-token");
+  const artifactoryIndex = core3.getInput("artifactory-index");
   const unpublishedDepsPatterns = core3.getInput("unpublished-deps-patterns");
   const unpublishedDepsRepos = core3.getInput("unpublished-deps-repos");
   const publicationTest = core3.getBooleanInput("publication-test");
@@ -63564,10 +63568,13 @@ function setup() {
     liveRun,
     branch,
     repo,
+    submodulePath,
     githubToken,
     unpublishedDepsRegExp: unpublishedDepsPatterns === "" ? /^$/ : new RegExp(unpublishedDepsPatterns.split("\n").join("|")),
     unpublishedDepsRepos: unpublishedDepsRepos === "" ? [] : unpublishedDepsRepos.split("\n"),
     cratesIoToken,
+    artifactoryToken,
+    artifactoryIndex,
     publicationTest
   };
 }
@@ -63576,7 +63583,8 @@ async function main(input) {
     if (input.publicationTest) {
       core3.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
-      const path = repoPath(input.repo);
+      const path = getPath(input);
+      core3.info(`Got path: ${path}`);
       const options = {
         cwd: path,
         check: true
@@ -63588,10 +63596,18 @@ async function main(input) {
       await deleteRepos(input);
     }
     if (input.liveRun) {
-      for (const repo of input.unpublishedDepsRepos) {
-        publishToCratesIo(input, repo);
+      let publishFn;
+      if (input.artifactoryToken) {
+        publishFn = publishToArtifactory;
+      } else if (input.cratesIoToken) {
+        publishFn = publishToCratesIo;
+      } else {
+        throw new Error("No token provided for publication");
       }
-      publishToCratesIo(input, input.repo, input.branch);
+      for (const repo of input.unpublishedDepsRepos) {
+        publishFn(input, repo);
+      }
+      publishFn(input, input.repo, input.branch);
     }
   } catch (error) {
     if (error instanceof Error) core3.setFailed(error.message);
@@ -63616,7 +63632,29 @@ async function deleteRepos(input) {
 function repoPath(repo) {
   return repo.split("/").at(1);
 }
+function getPath(input) {
+  let path;
+  path = repoPath(input.repo);
+  if (input.submodulePath) {
+    path = repoPath(input.repo) + "/" + input.submodulePath;
+  }
+  return path;
+}
+function publishToArtifactory(input, repo, branch) {
+  core3.info("Publishing to Artifactory");
+  clone(input, repo, branch);
+  const path = getPath(input);
+  core3.info(`Got path: ${path}`);
+  const env = {
+    CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+    CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+    CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+    CARGO_REGISTRY_DEFAULT: "artifactory"
+  };
+  publish(path, env);
+}
 function publishToCratesIo(input, repo, branch) {
+  core3.info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path = repoPath(repo);
   const env = {
@@ -63630,7 +63668,7 @@ function publish(path, env, allowDirty = false) {
     cwd: path,
     check: true
   };
-  for (const package_ of packagesOrdered(path)) {
+  for (const package_ of packagesOrdered(path, options)) {
     if (!isPublished(package_, options) && (package_.publish === void 0 || package_.publish)) {
       const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
       if (allowDirty) {

@@ -102542,8 +102542,9 @@ var gitEnv = {
 
 // src/cargo.ts
 var toml = new TOML();
-function packages(path2) {
-  const metadataContents = sh("cargo metadata --no-deps --format-version=1", { cwd: path2 });
+function packages(path2, options) {
+  options.cwd = path2;
+  const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
   const metadata2 = JSON.parse(metadataContents);
   const result = [];
   for (const elem of metadata2.packages) {
