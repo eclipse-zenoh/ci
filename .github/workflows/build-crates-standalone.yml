@@ -58,6 +58,12 @@ jobs:
           - { target: x86_64-pc-windows-msvc, os: windows-2022}
           - { target: x86_64-pc-windows-gnu, os: windows-2022}
     steps:
+      # cyclors does not compile with cmake 4
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.x'
+
       - id: build
         uses: eclipse-zenoh/ci/build-crates-standalone@main
         with:
