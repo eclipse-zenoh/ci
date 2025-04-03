@@ -83,6 +83,12 @@ jobs:
           rustup update ${{ inputs.toolchain || '1.75.0' }}
           rustup component add --toolchain ${{ inputs.toolchain || '1.75.0'}} clippy
 
+      # cyclors does not compile with cmake 4
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.x'
+
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
 
