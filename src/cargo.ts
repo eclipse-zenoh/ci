@@ -126,11 +126,11 @@ type CargoManifestDependencies = {
 
 type MetadataBin = {
   [key: string]: CargoManifestDependencies;
-}
+};
 type CargoManifest = {
   package: CargoManifestPackage;
   dependencies: CargoManifestDependencies;
-  'build-dependencies'?: CargoManifestDependencies;
+  "build-dependencies"?: CargoManifestDependencies;
   metadata?: MetadataBin;
 };
 
@@ -316,7 +316,7 @@ export async function setGitBranch(
     }
   }
 
-  for (const dep in manifest['build-dependencies']) {
+  for (const dep in manifest["build-dependencies"]) {
     if (pattern.test(dep)) {
       // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
       if (
@@ -345,7 +345,6 @@ export async function setGitBranch(
           await toml.set(manifestPath, prefix.concat("metadata", "bin", dep, "branch"), gitBranch);
         }
       }
-
     }
   }
 }
