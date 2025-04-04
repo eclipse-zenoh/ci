@@ -124,9 +124,14 @@ type CargoManifestDependencies = {
   [key: string]: string | CargoManifestDependencyTable;
 };
 
+type MetadataBin = {
+  [key: string]: CargoManifestDependencies;
+};
 type CargoManifest = {
   package: CargoManifestPackage;
   dependencies: CargoManifestDependencies;
+  "build-dependencies"?: CargoManifestDependencies;
+  metadata?: MetadataBin;
 };
 
 /**
@@ -307,6 +312,38 @@ export async function setGitBranch(
       ) {
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
+      }
+    }
+  }
+
+  for (const dep in manifest["build-dependencies"]) {
+    if (pattern.test(dep)) {
+      // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
+      if (
+        !(
+          toml.get(manifestPath, prefix.concat("build-dependencies", dep, "path")) ||
+          toml.get(manifestPath, prefix.concat("build-dependencies", dep, "workspace"))
+        )
+      ) {
+        await toml.set(manifestPath, prefix.concat("build-dependencies", dep, "git"), gitUrl);
+        await toml.set(manifestPath, prefix.concat("build-dependencies", dep, "branch"), gitBranch);
+      }
+    }
+  }
+
+  if (manifest.metadata != undefined) {
+    for (const dep in manifest.metadata["bin"]) {
+      if (pattern.test(dep)) {
+        // if the dep has a path set or is part of workspace, don't set the git/branch to avoid ambiguities
+        if (
+          !(
+            toml.get(manifestPath, prefix.concat("metadata", "bin", dep, "path")) ||
+            toml.get(manifestPath, prefix.concat("metadata", "bin", dep, "workspace"))
+          )
+        ) {
+          await toml.set(manifestPath, prefix.concat("metadata", "bin", dep, "git"), gitUrl);
+          await toml.set(manifestPath, prefix.concat("metadata", "bin", dep, "branch"), gitBranch);
+        }
       }
     }
   }
