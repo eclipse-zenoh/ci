@@ -82,6 +82,8 @@ export async function main(input: Input) {
         }
       }
     }
+    // Avoid Cargo.lock conflicts by merging the main branch into the post-release branch keeping our changes.
+    sh("git merge -Xours origin/main", { cwd: repo, env: gitEnv });
 
     sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
 
