@@ -63459,7 +63459,7 @@ var TOML = class _TOML {
     if (out) {
       return JSON.parse(out);
     } else {
-      return {};
+      return null;
     }
   }
   async set(path, key, value) {
