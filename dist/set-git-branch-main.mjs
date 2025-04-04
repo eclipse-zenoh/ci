@@ -63529,6 +63529,24 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
       }
     }
   }
+  for (const dep in manifest["build-dependencies"]) {
+    if (pattern.test(dep)) {
+      if (!(toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "path")) || toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "workspace")))) {
+        await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "git"), gitUrl);
+        await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "branch"), gitBranch);
+      }
+    }
+  }
+  if (manifest.metadata != void 0) {
+    for (const dep in manifest.metadata["bin"]) {
+      if (pattern.test(dep)) {
+        if (!(toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "path")) || toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "workspace")))) {
+          await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "git"), gitUrl);
+          await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "branch"), gitBranch);
+        }
+      }
+    }
+  }
 }
 function setCargoLockVersion(cargoLockPath) {
   core2.startGroup(`Setting Cargo.lock version`);

@@ -14,6 +14,8 @@ import { TOML } from "../src/toml";
 const toml = await TOML.init();
 
 const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
+const SHA_ZENOH_C: string = "ffa4bddc947f7ed6c0e3b4546205dd1b73e7df81";
+const SHA_ZENOH_TS: string = "d0ee49fd8ccb4016d90b03be431de4c3cb087bdd";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
 const SHA_ZENOH_PLUGIN_MQTT: string = "f38489f60911fa78befd3c073511bedb764f99f9";
 const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
@@ -196,5 +198,31 @@ describe("cargo", () => {
 
     const version = toml.get(path, ["version"]);
     expect(version).toStrictEqual(3);
+  });
+
+  test("setGitBranch() build-dependencies", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-c", SHA_ZENOH_C);
+    const path = join(tmp, "Cargo.toml");
+    const expectedGitUrl = "https://foo.bar";
+    const expectedBranch = "foo-branch";
+    await cargo.setGitBranch(path, new RegExp("zenoh.*"), expectedGitUrl, expectedBranch);
+
+    const gitUrl = toml.get(path, ["build-dependencies", "zenoh", "git"]);
+    const branch = toml.get(path, ["build-dependencies", "zenoh", "branch"]);
+    expect(gitUrl).toStrictEqual(expectedGitUrl);
+    expect(branch).toStrictEqual(expectedBranch);
+  });
+
+  test("setGitBranch() workspace.metadata.bin", async () => {
+    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-ts", SHA_ZENOH_TS);
+    const path = join(tmp, "Cargo.toml");
+    const expectedGitUrl = "https://foo.bar";
+    const expectedBranch = "foo-branch";
+    await cargo.setGitBranch(path, new RegExp("zenoh.*"), expectedGitUrl, expectedBranch);
+
+    const gitUrl = toml.get(path, ["workspace", "metadata", "bin", "zenohd", "git"]);
+    const branch = toml.get(path, ["workspace", "metadata", "bin", "zenohd", "branch"]);
+    expect(gitUrl).toStrictEqual(expectedGitUrl);
+    expect(branch).toStrictEqual(expectedBranch);
   });
 });
