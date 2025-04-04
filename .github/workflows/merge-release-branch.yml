@@ -22,7 +22,7 @@ defaults:
 
 jobs:
   merge-release-branch:
-    name: Submit PR to merge release branch into main
+    name: ${{ matrix.repo }} PR to merge release branch into main
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

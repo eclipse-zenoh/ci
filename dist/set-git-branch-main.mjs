@@ -63608,6 +63608,7 @@ async function main(input) {
         }
       }
     }
+    sh("git merge -Xours origin/main", { cwd: repo, env: gitEnv });
     sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
     await cleanup(input);
   } catch (error) {
