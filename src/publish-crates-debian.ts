@@ -88,19 +88,20 @@ export async function main(input: Input) {
     sh("sudo apt-get update");
 
     if (input.installationTest) {
-      const debs: Set<string> = new Set();
+      const debs: Set<[string, string]> = new Set();
       for await (const dirent of await fs.opendir(input.version)) {
         const debPath = path.join(dirent.path, dirent.name);
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
-        debs.add(package_);
+        const version_ = sh(`dpkg-deb --field ${debPath} Version`).trim();
+        debs.add([package_, version_]);
       }
 
       debs.forEach(deb => {
-        sh(`sudo apt-get install -y ${deb}`);
+        sh(`sudo apt-get install -y ${deb[0]}=${deb[1]}`);
       });
 
       debs.forEach(deb => {
-        sh(`sudo dpkg --purge --force-all ${deb}`);
+        sh(`sudo dpkg --purge --force-all ${deb[0]}`);
       });
     }
 
