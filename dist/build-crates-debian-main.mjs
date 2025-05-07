@@ -102620,7 +102620,11 @@ function buildDebian(path2, target, version2) {
 function toDebianVersion(version2, revision) {
   let debVersion = version2;
   if (version2.includes("-")) {
-    debVersion = `${version2.replace("-", "~")}-${revision ?? 1}`;
+    if (version2.includes("alpha") || version2.includes("beta") || version2.includes("rc")) {
+      debVersion = `${version2.replace("-", "~").replaceAll("-", ".")}-${revision ?? 1}`;
+    } else {
+      debVersion = `${version2.replace("-", "+").replaceAll("-", ".")}-${revision ?? 1}`;
+    }
   } else {
     if (version2.split(".").length == 4) {
       if (version2.endsWith(".0")) {
