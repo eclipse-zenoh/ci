@@ -490,7 +490,11 @@ export function toDebianVersion(version: string, revision?: number): string {
   // Check if version is semver or cmake version
   if (version.includes("-")) {
     // HACK(fuzzypixelz): This is an oversimplification of the Debian Policy
-    debVersion = `${version.replace("-", "~")}-${revision ?? 1}`;
+    if (version.includes("alpha") || version.includes("beta") || version.includes("rc")) {
+      debVersion = `${version.replace("-", "~").replaceAll("-", ".")}-${revision ?? 1}`;
+    } else {
+      debVersion = `${version.replace("-", "+").replaceAll("-", ".")}-${revision ?? 1}`;
+    }
   } else {
     // check cmake version has tweak component
     if (version.split(".").length == 4) {
