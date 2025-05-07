@@ -190,7 +190,7 @@ describe("cargo", () => {
     expect(cargo.toDebianVersion("1.0.0-alpha.1")).toEqual("1.0.0~alpha.1-1");
     expect(cargo.toDebianVersion("1.0.0-beta.1")).toEqual("1.0.0~beta.1-1");
     expect(cargo.toDebianVersion("1.0.0-rc.1")).toEqual("1.0.0~rc.1-1");
-    expect(cargo.toDebianVersion("1.0.0-1-g7591ec739")).toEqual("1.0.0+1.g7591ec739");
+    expect(cargo.toDebianVersion("1.0.0-1-g7591ec739")).toEqual("1.0.0+1.g7591ec739-1");
     expect(cargo.toDebianVersion("1.0.0-1-g7591ec739", 2)).toEqual("1.0.0+1.g7591ec739-2");
   });
 
