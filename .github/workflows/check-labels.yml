@@ -2,13 +2,18 @@ name: Check labels
 
 on:
   workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: "ubuntu-latest"
     secrets:
       github-token:
         required: true
 
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     steps:
       - name: Check Labels
         shell: python
