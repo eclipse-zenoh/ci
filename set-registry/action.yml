@@ -7,6 +7,8 @@ inputs:
     required: true
   registry:
     required: true
+  registry-index:
+    required: true
   release-branch:
     required: true
   repo:

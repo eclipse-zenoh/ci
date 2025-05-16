@@ -63531,6 +63531,10 @@ async function setRegistry(path, pattern, registry) {
   }
   core2.endGroup();
 }
+async function configRegistry(path, name, index) {
+  const configPath = `${path}/.cargo/config.toml`;
+  await toml.set(configPath, ["registries", name, "index"], index);
+}
 async function installBinaryCached(name) {
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];
@@ -63551,6 +63555,7 @@ function setup() {
   const version2 = core3.getInput("version", { required: true });
   const liveRun = core3.getBooleanInput("live-run", { required: true });
   const registry = core3.getInput("registry", { required: true });
+  const registryIndex = core3.getInput("registry-index", { required: true });
   const releaseBranch = core3.getInput("release-branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
   const path = core3.getInput("path");
@@ -63560,6 +63565,7 @@ function setup() {
     version: version2,
     liveRun,
     registry,
+    registryIndex,
     releaseBranch,
     repo,
     path: path === "" ? void 0 : path,
@@ -63574,6 +63580,11 @@ async function main(input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`ls ${workspace}`);
+    await configRegistry(workspace, input.registry, input.registryIndex);
+    if (sh("git diff", { cwd: repo, check: false })) {
+      sh("git add .cargo/config.toml", { cwd: repo });
+      sh(`git commit --message 'chore: add ${input.registry} to .cargo/config.toml'`, { cwd: repo, env: gitEnv });
+    }
     await setRegistry(workspace, input.depsRegExp, input.registry);
     if (sh("git diff", { cwd: repo, check: false })) {
       sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });

@@ -11,6 +11,7 @@ export type Input = {
   version: string;
   liveRun: boolean;
   registry: string;
+  registryIndex: string;
   releaseBranch: string;
   repo: string;
   path?: string;
@@ -22,6 +23,7 @@ export function setup(): Input {
   const version = core.getInput("version", { required: true });
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const registry = core.getInput("registry", { required: true });
+  const registryIndex = core.getInput("registry-index", { required: true });
   const releaseBranch = core.getInput("release-branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
@@ -32,6 +34,7 @@ export function setup(): Input {
     version,
     liveRun,
     registry,
+    registryIndex,
     releaseBranch,
     repo,
     path: path === "" ? undefined : path,
@@ -48,6 +51,12 @@ export async function main(input: Input) {
 
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`ls ${workspace}`);
+
+    await cargo.configRegistry(workspace, input.registry, input.registryIndex);
+    if (sh("git diff", { cwd: repo, check: false })) {
+      sh("git add .cargo/config.toml", { cwd: repo });
+      sh(`git commit --message 'chore: add ${input.registry} to .cargo/config.toml'`, { cwd: repo, env: gitEnv });
+    }
 
     await cargo.setRegistry(workspace, input.depsRegExp, input.registry);
     if (sh("git diff", { cwd: repo, check: false })) {
