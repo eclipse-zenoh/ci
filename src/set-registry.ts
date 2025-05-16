@@ -33,7 +33,7 @@ export function setup(): Input {
     repo,
     path: path === "" ? undefined : path,
     githubToken,
-    depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
+    depsRegExp: depsPattern === "" ? new RegExp("$^") : new RegExp(depsPattern),
   };
 }
 
