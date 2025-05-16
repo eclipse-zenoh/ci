@@ -3,6 +3,8 @@ name: Set git branch
 inputs:
   version:
     required: true
+  registry:
+    required: true
   release-branch:
     required: true
   repo:
