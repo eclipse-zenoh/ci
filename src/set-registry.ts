@@ -49,7 +49,7 @@ export async function main(input: Input) {
     await cargo.setRegistry(workspace, input.depsRegExp, input.registry);
     if (sh("git diff", { cwd: repo, check: false })) {
       sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
-      sh(`git commit --message 'chore: Update Cargo.toml to use ${input.registry}`, { cwd: repo, env: gitEnv });
+      sh(`git commit --message 'chore: Update Cargo.toml to use ${input.registry}'`, { cwd: repo, env: gitEnv });
 
       sh(`cargo check`, { cwd: repo });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });

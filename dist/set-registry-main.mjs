@@ -63562,7 +63562,7 @@ function setup() {
     repo,
     path: path === "" ? void 0 : path,
     githubToken,
-    depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern)
+    depsRegExp: depsPattern === "" ? new RegExp("$^") : new RegExp(depsPattern)
   };
 }
 async function main(input) {
@@ -63575,7 +63575,7 @@ async function main(input) {
     await setRegistry(workspace, input.depsRegExp, input.registry);
     if (sh("git diff", { cwd: repo, check: false })) {
       sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
-      sh(`git commit --message 'chore: Update Cargo.toml to use ${input.registry}`, { cwd: repo, env: gitEnv });
+      sh(`git commit --message 'chore: Update Cargo.toml to use ${input.registry}'`, { cwd: repo, env: gitEnv });
       sh(`cargo check`, { cwd: repo });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
