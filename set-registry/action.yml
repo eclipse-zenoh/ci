@@ -3,6 +3,8 @@ name: Set git branch
 inputs:
   version:
     required: true
+  tag:
+    required: false
   live-run:
     required: true
   registry:

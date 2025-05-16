@@ -9,6 +9,7 @@ import { gitEnv } from "./config";
 
 export type Input = {
   version: string;
+  tag: string;
   liveRun: boolean;
   registry: string;
   registryIndex: string;
@@ -21,6 +22,7 @@ export type Input = {
 
 export function setup(): Input {
   const version = core.getInput("version", { required: true });
+  const tag = core.getInput("tag");
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const registry = core.getInput("registry", { required: true });
   const registryIndex = core.getInput("registry-index", { required: true });
@@ -32,6 +34,7 @@ export function setup(): Input {
 
   return {
     version,
+    tag,
     liveRun,
     registry,
     registryIndex,
@@ -75,8 +78,9 @@ export async function main(input: Input) {
     sh(`git push --force ${remote} ${input.releaseBranch}`, { cwd: repo });
 
     if (input.liveRun) {
-      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
-      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+      const tag = input.tag === "" ? input.version : input.tag
+      sh(`git tag --force ${tag} --message v${tag}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${tag}`, { cwd: repo });
     }
 
     sh("git log -10", { cwd: repo });

@@ -63553,6 +63553,7 @@ async function installBinaryCached(name) {
 // src/set-registry.ts
 function setup() {
   const version2 = core3.getInput("version", { required: true });
+  const tag = core3.getInput("tag");
   const liveRun = core3.getBooleanInput("live-run", { required: true });
   const registry = core3.getInput("registry", { required: true });
   const registryIndex = core3.getInput("registry-index", { required: true });
@@ -63563,6 +63564,7 @@ function setup() {
   const depsPattern = core3.getInput("deps-pattern");
   return {
     version: version2,
+    tag,
     liveRun,
     registry,
     registryIndex,
@@ -63599,8 +63601,9 @@ async function main(input) {
     }
     sh(`git push --force ${remote} ${input.releaseBranch}`, { cwd: repo });
     if (input.liveRun) {
-      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
-      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+      const tag = input.tag === "" ? input.version : input.tag;
+      sh(`git tag --force ${tag} --message v${tag}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${tag}`, { cwd: repo });
     }
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
