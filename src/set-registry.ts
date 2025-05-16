@@ -9,6 +9,7 @@ import { gitEnv } from "./config";
 
 export type Input = {
   version: string;
+  liveRun: boolean;
   registry: string;
   releaseBranch: string;
   repo: string;
@@ -19,6 +20,7 @@ export type Input = {
 
 export function setup(): Input {
   const version = core.getInput("version", { required: true });
+  const liveRun = core.getBooleanInput("live-run", { required: true });
   const registry = core.getInput("registry", { required: true });
   const releaseBranch = core.getInput("release-branch", { required: true });
   const repo = core.getInput("repo", { required: true });
@@ -28,6 +30,7 @@ export function setup(): Input {
 
   return {
     version,
+    liveRun,
     registry,
     releaseBranch,
     repo,
@@ -59,6 +62,17 @@ export async function main(input: Input) {
           check: false,
         });
       }
+
+    sh(`git push --force ${remote} ${input.releaseBranch}`, { cwd: repo });
+
+    if (input.liveRun) {
+      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+    }
+
+    sh("git log -10", { cwd: repo });
+    sh("git show-ref --tags", { cwd: repo });
+
 
     await cleanup(input);
   } catch (error) {

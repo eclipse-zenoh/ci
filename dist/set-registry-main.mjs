@@ -19822,7 +19822,7 @@ var require_core = __commonJS({
       return inputs.map((input) => input.trim());
     }
     exports2.getMultilineInput = getMultilineInput;
-    function getBooleanInput(name, options) {
+    function getBooleanInput2(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
       const val = getInput2(name, options);
@@ -19833,7 +19833,7 @@ var require_core = __commonJS({
       throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
-    exports2.getBooleanInput = getBooleanInput;
+    exports2.getBooleanInput = getBooleanInput2;
     function setOutput(name, value) {
       const filePath = process.env["GITHUB_OUTPUT"] || "";
       if (filePath) {
@@ -63549,6 +63549,7 @@ async function installBinaryCached(name) {
 // src/set-registry.ts
 function setup() {
   const version2 = core3.getInput("version", { required: true });
+  const liveRun = core3.getBooleanInput("live-run", { required: true });
   const registry = core3.getInput("registry", { required: true });
   const releaseBranch = core3.getInput("release-branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
@@ -63557,6 +63558,7 @@ function setup() {
   const depsPattern = core3.getInput("deps-pattern");
   return {
     version: version2,
+    liveRun,
     registry,
     releaseBranch,
     repo,
@@ -63584,6 +63586,13 @@ async function main(input) {
         check: false
       });
     }
+    sh(`git push --force ${remote} ${input.releaseBranch}`, { cwd: repo });
+    if (input.liveRun) {
+      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+    }
+    sh("git log -10", { cwd: repo });
+    sh("git show-ref --tags", { cwd: repo });
     await cleanup(input);
   } catch (error) {
     await cleanup(input);
