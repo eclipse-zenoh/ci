@@ -69,23 +69,22 @@ export async function main(input: Input) {
       sh(`cargo check`, { cwd: repo });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
-          cwd: repo,
-          env: gitEnv,
-          check: false,
-        });
-      }
+        cwd: repo,
+        env: gitEnv,
+        check: false,
+      });
+    }
 
     sh(`git push --force ${remote} ${input.releaseBranch}`, { cwd: repo });
 
     if (input.liveRun) {
-      const tag = input.tag === "" ? input.version : input.tag
+      const tag = input.tag === "" ? input.version : input.tag;
       sh(`git tag --force ${tag} --message v${tag}`, { cwd: repo, env: gitEnv });
       sh(`git push --force ${remote} ${tag}`, { cwd: repo });
     }
 
     sh("git log -10", { cwd: repo });
     sh("git show-ref --tags", { cwd: repo });
-
 
     await cleanup(input);
   } catch (error) {
