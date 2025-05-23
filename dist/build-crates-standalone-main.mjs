@@ -102593,18 +102593,29 @@ async function fromDirectory(output, dir2, pattern) {
 init_esm_shims();
 function cloneFromGitHub(repo, options) {
   const remote = options.token == void 0 ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
-  const command = ["git", "clone", "--recursive"];
-  if (options.branch != void 0) {
-    command.push("--branch", options.branch);
+  const clone2 = ["git", "clone", "--recursive"];
+  let reset;
+  if (options.branchOrHash != void 0) {
+    if (isCommitHash(options.branchOrHash)) {
+      reset = ["git", "reset", "--hard", options.branchOrHash];
+    } else {
+      clone2.push("--branch", options.branchOrHash);
+    }
   }
-  command.push(remote);
+  clone2.push(remote);
   if (options.path != void 0) {
-    command.push(options.path);
+    clone2.push(options.path);
   }
-  sh(command.join(" "));
+  sh(clone2.join(" "));
+  if (reset != void 0) {
+    sh(reset.join(" "), { cwd: repo || options.path });
+  }
 }
 function describe(path2 = process.cwd()) {
   return sh("git describe", { cwd: path2 }).trim();
+}
+function isCommitHash(str) {
+  return /^[0-9a-f]{7,40}$/.test(str);
 }
 
 // src/build-crates-standalone.ts
@@ -102634,7 +102645,7 @@ async function main(input) {
     }
     const repoPath = process.env["GITHUB_ACTIONS"] != void 0 ? process.cwd() : repoName;
     cloneFromGitHub(input.repo, {
-      branch: input.branch,
+      branchOrHash: input.branch,
       token: input.githubToken,
       path: repoPath
     });

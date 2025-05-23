@@ -51,7 +51,7 @@ export async function main(input: Input) {
     const repoPath = process.env["GITHUB_ACTIONS"] != undefined ? process.cwd() : repoName;
 
     git.cloneFromGitHub(input.repo, {
-      branch: input.branch,
+      branchOrHash: input.branch,
       token: input.githubToken,
       path: repoPath,
     });

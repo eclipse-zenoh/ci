@@ -19987,15 +19987,26 @@ ${returns.stderr}`);
 init_esm_shims();
 function cloneFromGitHub(repo, options) {
   const remote = options.token == void 0 ? `https://github.com/${repo}.git` : `https://${options.token}@github.com/${repo}.git`;
-  const command = ["git", "clone", "--recursive"];
-  if (options.branch != void 0) {
-    command.push("--branch", options.branch);
+  const clone = ["git", "clone", "--recursive"];
+  let reset;
+  if (options.branchOrHash != void 0) {
+    if (isCommitHash(options.branchOrHash)) {
+      reset = ["git", "reset", "--hard", options.branchOrHash];
+    } else {
+      clone.push("--branch", options.branchOrHash);
+    }
   }
-  command.push(remote);
+  clone.push(remote);
   if (options.path != void 0) {
-    command.push(options.path);
+    clone.push(options.path);
   }
-  sh(command.join(" "));
+  sh(clone.join(" "));
+  if (reset != void 0) {
+    sh(reset.join(" "), { cwd: repo || options.path });
+  }
+}
+function isCommitHash(str) {
+  return /^[0-9a-f]{7,40}$/.test(str);
 }
 
 // src/create-release-branch.ts
@@ -20006,14 +20017,14 @@ function setup() {
   const liveRun = core2.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core2.getInput("dry-run-history-size", { required: false });
   const repo = core2.getInput("repo", { required: true });
-  const branch = core2.getInput("branch", { required: false });
+  const branchOrHash = core2.getInput("branch-or-hash", { required: false });
   const githubToken = core2.getInput("github-token", { required: true });
   return {
     version: version === "" ? void 0 : version,
     branchSuffix: branchSuffix === "" ? void 0 : branchSuffix,
     liveRun,
     repo,
-    branch: branch === "" ? void 0 : branch,
+    branchOrHash: branchOrHash === "" ? void 0 : branchOrHash,
     githubToken,
     dryRunHistorySize: dryRunHistorySize == "" ? DEFAULT_DRY_RUN_HISTORY_SIZE : Number(dryRunHistorySize)
   };
@@ -20022,7 +20033,7 @@ async function main(input) {
   try {
     const repo = input.repo.split("/")[1];
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
-    cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
+    cloneFromGitHub(input.repo, { token: input.githubToken, branchOrHash: input.branchOrHash });
     const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
     core2.setOutput("version", version);
     let branch;
