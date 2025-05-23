@@ -20002,6 +20002,7 @@ function cloneFromGitHub(repo, options) {
 var DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 function setup() {
   const version = core2.getInput("version");
+  const branchSuffix = core2.getInput("branch-suffix");
   const liveRun = core2.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core2.getInput("dry-run-history-size", { required: false });
   const repo = core2.getInput("repo", { required: true });
@@ -20009,6 +20010,7 @@ function setup() {
   const githubToken = core2.getInput("github-token", { required: true });
   return {
     version: version === "" ? void 0 : version,
+    branchSuffix: branchSuffix === "" ? void 0 : branchSuffix,
     liveRun,
     repo,
     branch: branch === "" ? void 0 : branch,
@@ -20025,10 +20027,10 @@ async function main(input) {
     core2.setOutput("version", version);
     let branch;
     if (input.liveRun) {
-      branch = `release/${version}`;
+      branch = input.branchSuffix != void 0 ? `release/${version}${input.branchSuffix}` : `release/${version}`;
       core2.setOutput("branch", branch);
     } else {
-      branch = `release/dry-run/${version}`;
+      branch = input.branchSuffix != void 0 ? `release/dry-run/${version}${input.branchSuffix}` : `release/dry-run/${version}`;
       core2.setOutput("branch", branch);
       const branchPattern = "refs/remotes/origin/release/dry-run";
       const branchesRaw = sh(`git for-each-ref --format='%(refname:strip=3)' --sort=authordate ${branchPattern}`, {
