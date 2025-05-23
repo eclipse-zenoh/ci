@@ -3,6 +3,8 @@ name: Create release branch
 inputs:
   version:
     required: false
+  branch-suffix:
+    required: false
   live-run:
     required: true
   dry-run-history-size:
@@ -13,7 +15,6 @@ inputs:
     required: false
   github-token:
     required: true
-
 
 outputs:
   version:

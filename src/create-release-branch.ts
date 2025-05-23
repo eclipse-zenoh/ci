@@ -9,8 +9,9 @@ const DEFAULT_DRY_RUN_HISTORY_SIZE = 5;
 
 export type Input = {
   version?: string;
+  branchSuffix?: string;
   liveRun: boolean;
-  dryRunHistorySize?: number;
+  dryRunHistorySize: number;
   repo: string;
   branch?: string;
   githubToken: string;
@@ -18,6 +19,7 @@ export type Input = {
 
 export function setup(): Input {
   const version = core.getInput("version");
+  const branchSuffix = core.getInput("branch-suffix");
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core.getInput("dry-run-history-size", { required: false });
   const repo = core.getInput("repo", { required: true });
@@ -26,6 +28,7 @@ export function setup(): Input {
 
   return {
     version: version === "" ? undefined : version,
+    branchSuffix: branchSuffix === "" ? undefined : branchSuffix,
     liveRun,
     repo,
     branch: branch === "" ? undefined : branch,
@@ -46,10 +49,13 @@ export async function main(input: Input) {
 
     let branch: string;
     if (input.liveRun) {
-      branch = `release/${version}`;
+      branch = input.branchSuffix != undefined ? `release/${version}${input.branchSuffix}` : `release/${version}`;
       core.setOutput("branch", branch);
     } else {
-      branch = `release/dry-run/${version}`;
+      branch =
+        input.branchSuffix != undefined
+          ? `release/dry-run/${version}${input.branchSuffix}`
+          : `release/dry-run/${version}`;
       core.setOutput("branch", branch);
 
       const branchPattern = "refs/remotes/origin/release/dry-run";
