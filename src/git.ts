@@ -36,5 +36,5 @@ export function describe(path: string = process.cwd()): string {
 }
 
 export function isCommitHash(str: string): boolean {
-  return /^[0-9a-f]{7,40}$/.test(str);
+  return /^[0-9a-f]{7,40}$/i.test(str);
 }

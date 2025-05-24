@@ -10,6 +10,9 @@ describe("git", () => {
     // short format
     const shortHash = longHash.substring(0, 7);
     expect(git.isCommitHash(shortHash)).toBeTruthy();
+    //  upper case format
+    const upperCase = longHash.substring(0, 7).toUpperCase();
+    expect(git.isCommitHash(upperCase)).toBeTruthy();
     // invalid format
     expect(git.isCommitHash("foobar")).toBeFalsy();
   });

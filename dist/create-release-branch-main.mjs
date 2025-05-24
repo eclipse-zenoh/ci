@@ -20006,7 +20006,7 @@ function cloneFromGitHub(repo, options) {
   }
 }
 function isCommitHash(str) {
-  return /^[0-9a-f]{7,40}$/.test(str);
+  return /^[0-9a-f]{7,40}$/i.test(str);
 }
 
 // src/create-release-branch.ts

@@ -102615,7 +102615,7 @@ function describe(path2 = process.cwd()) {
   return sh("git describe", { cwd: path2 }).trim();
 }
 function isCommitHash(str) {
-  return /^[0-9a-f]{7,40}$/.test(str);
+  return /^[0-9a-f]{7,40}$/i.test(str);
 }
 
 // src/build-crates-standalone.ts
