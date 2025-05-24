@@ -11,7 +11,7 @@ inputs:
     required: false
   repo:
     required: true
-  branch:
+  branch-or-hash:
     required: false
   github-token:
     required: true

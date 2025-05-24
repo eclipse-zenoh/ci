@@ -13,7 +13,7 @@ export type Input = {
   liveRun: boolean;
   dryRunHistorySize: number;
   repo: string;
-  branch?: string;
+  branchOrHash?: string;
   githubToken: string;
 };
 
@@ -23,7 +23,7 @@ export function setup(): Input {
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core.getInput("dry-run-history-size", { required: false });
   const repo = core.getInput("repo", { required: true });
-  const branch = core.getInput("branch", { required: false });
+  const branchOrHash = core.getInput("branch-or-hash", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
 
   return {
@@ -31,7 +31,7 @@ export function setup(): Input {
     branchSuffix: branchSuffix === "" ? undefined : branchSuffix,
     liveRun,
     repo,
-    branch: branch === "" ? undefined : branch,
+    branchOrHash: branchOrHash === "" ? undefined : branchOrHash,
     githubToken,
     dryRunHistorySize: dryRunHistorySize == "" ? DEFAULT_DRY_RUN_HISTORY_SIZE : Number(dryRunHistorySize),
   };
@@ -42,7 +42,7 @@ export async function main(input: Input) {
     const repo = input.repo.split("/")[1];
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
 
-    git.cloneFromGitHub(input.repo, { token: input.githubToken, branch: input.branch });
+    git.cloneFromGitHub(input.repo, { token: input.githubToken, branchOrHash: input.branchOrHash });
 
     const version = input.version ?? sh("git describe", { cwd: repo }).trimEnd();
     core.setOutput("version", version);
