@@ -23,7 +23,8 @@ export function setup(): Input {
   const liveRun = core.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core.getInput("dry-run-history-size", { required: false });
   const repo = core.getInput("repo", { required: true });
-  const branchOrHash = core.getInput("branch-or-hash", { required: false });
+  // To avoid breaking existing workflows, keep branch parameter as is.
+  const branchOrHash = core.getInput("branch", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
 
   return {

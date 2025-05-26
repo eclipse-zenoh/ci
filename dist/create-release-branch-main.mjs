@@ -20017,7 +20017,7 @@ function setup() {
   const liveRun = core2.getBooleanInput("live-run", { required: true });
   const dryRunHistorySize = core2.getInput("dry-run-history-size", { required: false });
   const repo = core2.getInput("repo", { required: true });
-  const branchOrHash = core2.getInput("branch-or-hash", { required: false });
+  const branchOrHash = core2.getInput("branch", { required: false });
   const githubToken = core2.getInput("github-token", { required: true });
   return {
     version: version === "" ? void 0 : version,
