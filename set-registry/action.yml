@@ -1,0 +1,26 @@
+name: Set git branch
+
+inputs:
+  version:
+    required: true
+  tag:
+    required: false
+  live-run:
+    required: true
+  registry:
+    required: true
+  registry-index:
+    required: true
+  release-branch:
+    required: true
+  repo:
+    required: true
+  path:
+    required: false
+  github-token:
+    required: true
+  deps-pattern:
+    required: true
+runs:
+  using: node20
+  main: ../dist/set-registry-main.mjs
