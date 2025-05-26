@@ -20002,7 +20002,7 @@ function cloneFromGitHub(repo, options) {
   }
   sh(clone.join(" "));
   if (reset != void 0) {
-    sh(reset.join(" "), { cwd: repo || options.path });
+    sh(reset.join(" "), { cwd: repo.split("/")[1] || options.path });
   }
 }
 function isCommitHash(str) {

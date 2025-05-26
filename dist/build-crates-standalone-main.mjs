@@ -102608,7 +102608,7 @@ function cloneFromGitHub(repo, options) {
   }
   sh(clone2.join(" "));
   if (reset != void 0) {
-    sh(reset.join(" "), { cwd: repo || options.path });
+    sh(reset.join(" "), { cwd: repo.split("/")[1] || options.path });
   }
 }
 function describe(path2 = process.cwd()) {
