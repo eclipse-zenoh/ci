@@ -27,7 +27,8 @@ export function cloneFromGitHub(repo: string, options: CloneFromGitHubOptions) {
   sh(clone.join(" "));
 
   if (reset != undefined) {
-    sh(reset.join(" "), { cwd: repo || options.path });
+    // repo is org/repo
+    sh(reset.join(" "), { cwd: repo.split("/")[1] || options.path });
   }
 }
 
