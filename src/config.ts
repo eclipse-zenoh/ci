@@ -24,8 +24,8 @@ export const config: Config = _config;
 
 // Allow override of ci.config.json default values from env vars.
 export const gitEnv: NodeJS.ProcessEnv = {
-  GIT_AUTHOR_NAME: process.env.GITHUB_AUTHOR_NAME || config.git.user.name,
-  GIT_AUTHOR_EMAIL: process.env.GITHUB_AUTHOR_EMAIL || config.git.user.email,
-  GIT_COMMITTER_NAME: process.env.GITHUB_AUTHOR_NAME || config.git.user.name,
-  GIT_COMMITTER_EMAIL: process.env.GITHUB_AUTHOR_EMAIL || config.git.user.email,
+  GIT_AUTHOR_NAME: process.env.GIT_AUTHOR_NAME || config.git.user.name,
+  GIT_AUTHOR_EMAIL: process.env.GIT_AUTHOR_EMAIL || config.git.user.email,
+  GIT_COMMITTER_NAME: process.env.GIT_AUTHOR_NAME || config.git.user.name,
+  GIT_COMMITTER_EMAIL: process.env.GIT_AUTHOR_EMAIL || config.git.user.email,
 };

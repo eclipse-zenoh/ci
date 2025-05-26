@@ -20,8 +20,8 @@ describe("overriden config", () => {
   beforeEach(() => {
     jest.resetModules();
     // Set environment variables for testing
-    process.env.GITHUB_AUTHOR_NAME = "foobar";
-    process.env.GITHUB_AUTHOR_EMAIL = "foobar@example.com";
+    process.env.GIT_AUTHOR_NAME = "foobar";
+    process.env.GIT_AUTHOR_EMAIL = "foobar@example.com";
     return import("../src/config").then(module => {
       overridenConfig = module;
     });
