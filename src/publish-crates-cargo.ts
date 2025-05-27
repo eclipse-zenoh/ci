@@ -57,7 +57,17 @@ export async function main(input: Input) {
       const options = {
         cwd: path,
         check: true,
+        env: {},
       };
+
+      if (input.artifactoryToken) {
+        options.env = {
+          CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+          CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
+          CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+          CARGO_REGISTRY_DEFAULT: "artifactory",
+        };
+      }
 
       for (const package_ of cargo.packagesOrdered(path)) {
         const command = ["cargo", "check", "-p", package_.name, "--manifest-path", package_.manifestPath];
