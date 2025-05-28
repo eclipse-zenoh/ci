@@ -15,7 +15,7 @@ export type Input = {
   path?: string;
   githubToken: string;
   bumpDepsRegExp?: RegExp;
-  bumpDepsVersion?: string;
+  bumpDepsVersion: string;
   bumpDepsBranch?: string;
 };
 
