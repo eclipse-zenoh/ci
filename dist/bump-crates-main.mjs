@@ -63658,7 +63658,7 @@ async function main(input) {
         env: gitEnv,
         check: false
       });
-      sh("cargo check", { cwd: repo });
+      sh("cargo +1.75.0 check", { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,

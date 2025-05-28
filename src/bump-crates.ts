@@ -65,7 +65,8 @@ export async function main(input: Input) {
         check: false,
       });
 
-      sh("cargo check", { cwd: repo });
+      // use 1.75 to avoid update the Cargo.lock file version.
+      sh("cargo +1.75.0 check", { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,
