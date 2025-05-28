@@ -405,6 +405,9 @@ export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: st
  * @param name Name of the cargo binary on crates.io
  */
 export async function installBinaryCached(name: string) {
+  // Force cargo to use crates.io registry
+  const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
+
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
     const version = config.lock.cratesio[name];
@@ -414,14 +417,13 @@ export async function installBinaryCached(name: string) {
     // toolchain file in the current directory, as the caller can use this
     // function with an arbitrary Rust toolchain, often resulting in build
     // failure
-
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      sh(`cargo +stable install ${name} --force`);
+      sh(`cargo +stable install ${name} --force`, { env: env });
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`);
+    sh(`cargo +stable install ${name}`, { env: env });
   }
 }
 
