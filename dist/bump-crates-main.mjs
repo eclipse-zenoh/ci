@@ -63581,17 +63581,18 @@ async function bumpDependencies(path, pattern, version2, _branch) {
   core2.endGroup();
 }
 async function installBinaryCached(name) {
+  const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];
     const version2 = config.lock.cratesio[name];
     const key = `${os2.platform()}-${os2.release()}-${os2.arch()}-${name}-${version2}`;
     const hit = await cache.restoreCache(paths, key);
     if (hit == void 0) {
-      sh(`cargo +stable install ${name} --force`);
+      sh(`cargo +stable install ${name} --force`, { env });
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`);
+    sh(`cargo +stable install ${name}`, { env });
   }
 }
 function toDebianVersion(version2, revision) {
