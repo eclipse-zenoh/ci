@@ -11,6 +11,8 @@ inputs:
     required: true
   path:
     required: false
+  toolchain:
+    required: false
   github-token:
     required: true
   bump-deps-pattern:
