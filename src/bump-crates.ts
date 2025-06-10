@@ -13,6 +13,7 @@ export type Input = {
   branch: string;
   repo: string;
   path?: string;
+  toolchain?: string;
   githubToken: string;
   bumpDepsRegExp?: RegExp;
   bumpDepsVersion: string;
@@ -25,6 +26,7 @@ export function setup(): Input {
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
+  const toolchain = core.getInput("toolchain");
   const githubToken = core.getInput("github-token", { required: true });
   const bumpDepsPattern = core.getInput("bump-deps-pattern");
   const bumpDepsVersion = core.getInput("bump-deps-version");
@@ -36,6 +38,7 @@ export function setup(): Input {
     branch,
     repo,
     path: path === "" ? undefined : path,
+    toolchain: toolchain === "" ? "1.75.0" : toolchain, // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
     bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
     bumpDepsVersion: bumpDepsVersion === "" ? version : bumpDepsVersion,
@@ -65,8 +68,7 @@ export async function main(input: Input) {
         check: false,
       });
 
-      // use 1.75 to avoid update the Cargo.lock file version.
-      sh("cargo +1.75.0 check", { cwd: repo });
+      sh("cargo +${input.toolchain} check", { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,
