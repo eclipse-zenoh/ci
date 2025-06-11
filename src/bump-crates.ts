@@ -68,7 +68,7 @@ export async function main(input: Input) {
         check: false,
       });
 
-      sh("cargo +${input.toolchain} check", { cwd: repo });
+      sh(`cargo +${input.toolchain} check`, { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,
