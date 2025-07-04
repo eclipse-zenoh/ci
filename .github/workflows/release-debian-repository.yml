@@ -1,0 +1,54 @@
+name: Release Debian repository
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: Release Debian repository
+    runs-on: ubuntu-latest
+    steps:
+        - name: Install dependencies
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y dpkg-dev apt-utils gpg sshfs
+
+        - name: Add ssh key to agent
+          run: |
+            ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+            echo 'echo $SSH_PASSPHRASE' > ~/.ssh_askpass && chmod +x ~/.ssh_askpass
+            echo "$SSH_PRIVATE_KEY" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
+          env:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            SSH_PASSPHRASE: ${{ secrets.SSH_PASSPHRASE }}
+            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+
+        - name: Mount debian-repo 
+          run: |
+            mkdir -p debian-repo
+            sshfs -o StrictHostKeyChecking=no ${input.sshHost}:${input.sshHostPath} debian-repo
+
+        - name: Import GPG key
+          uses: crazy-max/ghaction-import-gpg@v6
+          with:
+            gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
+            passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
+            fingerprint: ${{ secrets.ORG_GPG_SUBKEY_ID }}
+
+        - name: Release
+          run: |
+            apt-ftparchive packages debian-repo > debian-repo/Packages
+            apt-ftparchive release debian-repo > debian-repo/Release
+            echo ${GPG_PASSPHRASE} | gpg --batch --yes --passphrase-fd 0 --armor --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
+            
+            if [[ ! -f "debian-repo/zenoh-public-key"]; then
+              gpg --armor --export ${GPG_KEY_ID} --output debian-repo/zenoh-public-key
+            fi
+          env: 
+            GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
+
+
