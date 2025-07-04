@@ -102608,8 +102608,6 @@ function setup() {
   const sshHostPath = core4.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core4.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core4.getInput("ssh-passphrase", { required: true });
-  const gpgPrivateKey = core4.getInput("gpg-private-key", { required: true });
-  const gpgPassphrase = core4.getInput("gpg-passphrase", { required: true });
   const gpgKeyId = core4.getInput("gpg-key-id", { required: true });
   const gpgSubkeyId = core4.getInput("gpg-subkey-id", { required: true });
   const installationTest = core4.getBooleanInput("installation-test", { required: true });
@@ -102621,8 +102619,6 @@ function setup() {
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
-    gpgPrivateKey,
-    gpgPassphrase,
     gpgKeyId,
     gpgSubkeyId,
     installationTest,
@@ -102661,7 +102657,7 @@ async function main(input) {
       await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
-      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgKeyId} Release.gpg Release`);
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
       sh("ls -R");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
       await fs4.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
