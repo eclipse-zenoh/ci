@@ -114,7 +114,7 @@ export async function main(input: Input) {
 
       const debs: Set<string> = new Set();
       for await (const dirent of await fs.opendir(input.version)) {
-        const debPath = path.join(dirent.path, dirent.name);
+        const debPath = path.join(dirent.parentPath, dirent.name);
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
       }
