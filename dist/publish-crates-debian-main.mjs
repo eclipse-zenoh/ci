@@ -102667,7 +102667,7 @@ async function main(input) {
       sh("sudo apt-get update");
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
-        const debPath = path.join(dirent.path, dirent.name);
+        const debPath = path.join(dirent.parentPath, dirent.name);
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
       }
