@@ -13,6 +13,14 @@ inputs:
     required: true
   ssh-passphrase:
     required: true
+  gpg-key-id:
+    required: true
+  gpg-private-key:
+    required: true
+  gpg-passphrase:
+    required: true
+  gpg-subkey-id:
+    required: true
   installation-test:
     required: true
   repo:
