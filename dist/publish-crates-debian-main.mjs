@@ -60948,7 +60948,7 @@ var require_readdir_glob = __commonJS({
     var { EventEmitter: EventEmitter3 } = __require("events");
     var { Minimatch } = require_minimatch();
     var { resolve } = __require("path");
-    function readdir(dir2, strict) {
+    function readdir2(dir2, strict) {
       return new Promise((resolve2, reject2) => {
         fs5.readdir(dir2, { withFileTypes: true }, (err, files) => {
           if (err) {
@@ -61005,7 +61005,7 @@ var require_readdir_glob = __commonJS({
       });
     }
     async function* exploreWalkAsync(dir2, path2, followSymlinks, useStat, shouldSkip, strict) {
-      let files = await readdir(path2 + dir2, strict);
+      let files = await readdir2(path2 + dir2, strict);
       for (const file of files) {
         let name = file.name;
         if (name === void 0) {
@@ -63587,9 +63587,9 @@ var require_graceful_fs = __commonJS({
         }
       }
       var fs$readdir = fs6.readdir;
-      fs6.readdir = readdir;
+      fs6.readdir = readdir2;
       var noReaddirOptionVersions = /^v[0-5]\./;
-      function readdir(path2, options, cb) {
+      function readdir2(path2, options, cb) {
         if (typeof options === "function")
           cb = options, options = null;
         var go$readdir = noReaddirOptionVersions.test(process.version) ? function go$readdir2(path3, options2, cb2, startTime) {
@@ -102608,6 +102608,8 @@ function setup() {
   const sshHostPath = core4.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core4.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core4.getInput("ssh-passphrase", { required: true });
+  const gpgKeyId = core4.getInput("gpg-key-id", { required: true });
+  const gpgSubkeyId = core4.getInput("gpg-subkey-id", { required: true });
   const installationTest = core4.getBooleanInput("installation-test", { required: true });
   const repo = core4.getInput("repo", { required: true });
   return {
@@ -102617,6 +102619,8 @@ function setup() {
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
+    gpgKeyId,
+    gpgSubkeyId,
     installationTest,
     repo
   };
@@ -102627,33 +102631,43 @@ async function main(input) {
     for (const result of results.artifacts) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact2.downloadArtifact(result.id);
+        if (downloadPath == void 0) {
+          throw new Error(`Failed to download artifact: ${result.name}`);
+        }
         const archive = path.join(downloadPath, result.name);
         sh(`unzip ${archive} -d ${input.version}`);
       }
     }
-    const gitRepo = input.repo.split("/")[1];
-    const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
-    const packagesPath = `.Packages-${gitRepo}-${input.version}`;
-    const allPackagesPath = "Packages";
-    const allPackagesGzippedPath = "Packages.gz";
-    await withIdentity(input.sshPrivateKey, input.sshPassphrase, (env) => {
-      sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
+    sh("sudo apt-get update");
+    sh("sudo apt-get install -y dpkg-dev apt-utils gpg");
+    const dirents = await fs4.readdir(`${input.version}`, { withFileTypes: true });
+    const files = dirents.filter((d) => d.name.endsWith(".deb"));
+    files.forEach((file) => {
+      const filePath = path.join(`${input.version}`, file.name);
+      sh(`dpkg-sig --sign builder -k ${input.gpgKeyId} ${filePath}`);
     });
-    sh("sudo apt-get update");
-    sh("sudo apt-get install -y dpkg-dev");
-    await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
-    sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
-    sh(`gzip -k -9 ${allPackagesPath}`, { quiet: true });
-    sh("ls -R");
-    core4.info(`Adding a local Debian repository at ${process.cwd()}`);
-    await fs4.writeFile(sourcesListName, `deb [trusted=yes] file:${process.cwd()} /`);
-    sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
-    sh(`cat ${sourcesListDir}/${sourcesListName}`);
-    sh("sudo apt-get update");
+    const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
+    const gitRepo = input.repo.split("/")[1];
+    const packagesPath = `.Packages-${gitRepo}-${input.version}`;
     if (input.installationTest) {
+      const allPackagesPath = "Packages";
+      await withIdentity(input.sshPrivateKey, input.sshPassphrase, (env) => {
+        sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
+      });
+      await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
+      sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
+      sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
+      sh("ls -R");
+      core4.info(`Adding a local Debian repository at ${process.cwd()}`);
+      await fs4.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
+      sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
+      sh(`cat ${sourcesListDir}/${sourcesListName}`);
+      sh(`gpg --armor --export ${input.gpgKeyId} | sudo tee /etc/apt/trusted.gpg.d/${input.gpgSubkeyId}.gpg`);
+      sh("sudo apt-get update");
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
-        const debPath = path.join(dirent.path, dirent.name);
+        const debPath = path.join(dirent.parentPath, dirent.name);
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
       }
@@ -102666,9 +102680,9 @@ async function main(input) {
     }
     if (input.liveRun) {
       await withIdentity(input.sshPrivateKey, input.sshPassphrase, (env) => {
-        const files = [allPackagesGzippedPath, packagesPath, input.version].join(" ");
+        const files2 = [packagesPath, input.version].join(" ");
         sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${input.sshHostPath}`, { env });
-        sh(`scp -v -o StrictHostKeyChecking=no -r ${files} ${debianRepo}`, { env });
+        sh(`scp -v -o StrictHostKeyChecking=no -r ${files2} ${debianRepo}`, { env });
       });
     }
     cleanup();

@@ -61,7 +61,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: eclipse-zenoh/ci/publish-crates-debian@main
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
+          fingerprint: ${{ secrets.ORG_GPG_SUBKEY_ID }}
+
+      - uses: ZettaScaleLabs/ci/publish-crates-debian@sign-debian-packages
         with:
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
@@ -70,4 +77,6 @@ jobs:
           ssh-host-path: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          gpg-key-id: ${{ secrets.GPG_KEY_ID }}
+          gpg-subkey-id: ${{ secrets.GPG_SUBKEY_ID }}
           repo: ${{ inputs.repo }}

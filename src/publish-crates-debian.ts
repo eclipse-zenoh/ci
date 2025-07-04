@@ -21,6 +21,8 @@ export type Input = {
   sshHostPath: string;
   sshPrivateKey: string;
   sshPassphrase: string;
+  gpgKeyId: string;
+  gpgSubkeyId: string;
   installationTest: boolean;
   repo: string;
 };
@@ -32,6 +34,8 @@ export function setup(): Input {
   const sshHostPath = core.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
+  const gpgKeyId = core.getInput("gpg-key-id", { required: true });
+  const gpgSubkeyId = core.getInput("gpg-subkey-id", { required: true });
   const installationTest = core.getBooleanInput("installation-test", { required: true });
   const repo = core.getInput("repo", { required: true });
 
@@ -42,6 +46,8 @@ export function setup(): Input {
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
+    gpgKeyId,
+    gpgSubkeyId,
     installationTest,
     repo,
   };
@@ -53,44 +59,62 @@ export async function main(input: Input) {
     for (const result of results.artifacts) {
       if (artifactRegExp.test(result.name)) {
         const { downloadPath } = await artifact.downloadArtifact(result.id);
+        if (downloadPath == undefined) {
+          throw new Error(`Failed to download artifact: ${result.name}`);
+        }
         const archive = path.join(downloadPath, result.name);
         sh(`unzip ${archive} -d ${input.version}`);
       }
     }
 
-    // repo is actually owner/repo so we have to split it here to get only the git repo name
-    const gitRepo = input.repo.split("/")[1];
-    const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
-    const packagesPath = `.Packages-${gitRepo}-${input.version}`;
-    const allPackagesPath = "Packages";
-    const allPackagesGzippedPath = "Packages.gz";
+    sh("sudo apt-get update");
+    sh("sudo apt-get install -y dpkg-dev apt-utils gpg");
 
-    await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
-      sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
+    // Sign the .deb files
+    const dirents = await fs.readdir(`${input.version}`, { withFileTypes: true });
+    const files = dirents.filter(d => d.name.endsWith(".deb"));
+    files.forEach(file => {
+      const filePath = path.join(`${input.version}`, file.name);
+      sh(`dpkg-sig --sign builder -k ${input.gpgKeyId} ${filePath}`);
     });
 
-    sh("sudo apt-get update");
-    sh("sudo apt-get install -y dpkg-dev");
-
-    await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
-    // NOTE: An unzipped package index is necessary for apt-get to recognize the
-    // local repository created below
-    sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
-    sh(`gzip -k -9 ${allPackagesPath}`, { quiet: true });
-
-    sh("ls -R");
-    core.info(`Adding a local Debian repository at ${process.cwd()}`);
-    await fs.writeFile(sourcesListName, `deb [trusted=yes] file:${process.cwd()} /`);
-    // NOTE: We cannot write zenoh.list directly into /etc/apt/sources.list.d as
-    // that requires sudo
-    sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
-    sh(`cat ${sourcesListDir}/${sourcesListName}`);
-    sh("sudo apt-get update");
-
+    const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
+    // repo is actually owner/repo so we have to split it here to get only the git repo name
+    const gitRepo = input.repo.split("/")[1];
+    const packagesPath = `.Packages-${gitRepo}-${input.version}`;
     if (input.installationTest) {
+      const allPackagesPath = "Packages";
+
+      await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
+        sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
+      });
+
+      await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
+      // NOTE: An unzipped package index is necessary for apt-get to recognize the
+      // local repository created below
+      sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
+
+      // Create Release file
+      sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
+
+      // Sign the Release file
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
+
+      sh("ls -R");
+      core.info(`Adding a local Debian repository at ${process.cwd()}`);
+      await fs.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
+      // NOTE: We cannot write zenoh.list directly into /etc/apt/sources.list.d as
+      // that requires sudo
+      sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
+      sh(`cat ${sourcesListDir}/${sourcesListName}`);
+      // Import the GPG key for the local repository
+      sh(`gpg --armor --export ${input.gpgKeyId} | sudo tee /etc/apt/trusted.gpg.d/${input.gpgSubkeyId}.gpg`);
+
+      sh("sudo apt-get update");
+
       const debs: Set<string> = new Set();
       for await (const dirent of await fs.opendir(input.version)) {
-        const debPath = path.join(dirent.path, dirent.name);
+        const debPath = path.join(dirent.parentPath, dirent.name);
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
       }
@@ -104,9 +128,11 @@ export async function main(input: Input) {
       });
     }
 
+    // On live runs we only upload the packages and the .Packages files to the eclipse-foundation server.
+    // Releases, Releases.gpg and Packages.gz files will be generated by a separate workflow after all the packages are released.
     if (input.liveRun) {
       await ssh.withIdentity(input.sshPrivateKey, input.sshPassphrase, env => {
-        const files = [allPackagesGzippedPath, packagesPath, input.version].join(" ");
+        const files = [packagesPath, input.version].join(" ");
         sh(`ssh -v -o StrictHostKeyChecking=no ${input.sshHost} mkdir -p ${input.sshHostPath}`, { env });
         sh(`scp -v -o StrictHostKeyChecking=no -r ${files} ${debianRepo}`, { env });
       });
