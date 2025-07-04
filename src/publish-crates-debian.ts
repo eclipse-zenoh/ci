@@ -21,8 +21,6 @@ export type Input = {
   sshHostPath: string;
   sshPrivateKey: string;
   sshPassphrase: string;
-  gpgPrivateKey: string;
-  gpgPassphrase: string;
   gpgKeyId: string;
   gpgSubkeyId: string;
   installationTest: boolean;
@@ -36,8 +34,6 @@ export function setup(): Input {
   const sshHostPath = core.getInput("ssh-host-path", { required: true });
   const sshPrivateKey = core.getInput("ssh-private-key", { required: true });
   const sshPassphrase = core.getInput("ssh-passphrase", { required: true });
-  const gpgPrivateKey = core.getInput("gpg-private-key", { required: true });
-  const gpgPassphrase = core.getInput("gpg-passphrase", { required: true });
   const gpgKeyId = core.getInput("gpg-key-id", { required: true });
   const gpgSubkeyId = core.getInput("gpg-subkey-id", { required: true });
   const installationTest = core.getBooleanInput("installation-test", { required: true });
@@ -50,8 +46,6 @@ export function setup(): Input {
     sshHostPath,
     sshPrivateKey,
     sshPassphrase,
-    gpgPrivateKey,
-    gpgPassphrase,
     gpgKeyId,
     gpgSubkeyId,
     installationTest,
@@ -104,7 +98,7 @@ export async function main(input: Input) {
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
 
       // Sign the Release file
-      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgKeyId} Release.gpg Release`)
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`)
 
       sh("ls -R");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
