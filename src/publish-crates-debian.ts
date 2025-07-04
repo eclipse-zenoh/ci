@@ -72,11 +72,11 @@ export async function main(input: Input) {
 
     // Sign the .deb files
     const dirents = await fs.readdir(`${input.version}`, { withFileTypes: true });
-    const files = dirents.filter(d => d.name.endsWith(".deb"))
+    const files = dirents.filter(d => d.name.endsWith(".deb"));
     files.forEach(file => {
       const filePath = path.join(`${input.version}`, file.name);
       sh(`dpkg-sig --sign builder -k ${input.gpgKeyId} ${filePath}`);
-    })
+    });
 
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     // repo is actually owner/repo so we have to split it here to get only the git repo name
@@ -98,7 +98,7 @@ export async function main(input: Input) {
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
 
       // Sign the Release file
-      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`)
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
 
       sh("ls -R");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
