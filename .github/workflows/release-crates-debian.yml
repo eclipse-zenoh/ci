@@ -66,7 +66,7 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
-          fingerprint: ${{ secrets.ORG_GPG_SUBKEY_ID }}
+          fingerprint: C09537EDCF795D136EA8CB50829768EDD9BD8B8F
 
       - uses: eclipse-zenoh/ci/publish-crates-debian@sign-debian-packages
         with:
