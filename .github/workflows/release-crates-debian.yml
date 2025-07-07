@@ -68,7 +68,7 @@ jobs:
           passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
           fingerprint: ${{ secrets.ORG_GPG_SUBKEY_ID }}
 
-      - uses: ZettaScaleLabs/ci/publish-crates-debian@sign-debian-packages
+      - uses: eclipse-zenoh/ci/publish-crates-debian@sign-debian-packages
         with:
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
