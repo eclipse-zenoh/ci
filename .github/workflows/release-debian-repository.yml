@@ -33,7 +33,7 @@ jobs:
             sshfs -o StrictHostKeyChecking=no ${input.sshHost}:${input.sshHostPath} debian-repo
 
         - name: Import GPG key
-          uses: crazy-max/ghaction-import-gpg@v6
+          uses: crazy-max/ghaction-import-gpg@v6.3.0
           with:
             gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
             passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
