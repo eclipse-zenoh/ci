@@ -17,6 +17,7 @@ jobs:
           gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
           fingerprint: "C09537EDCF795D136EA8CB50829768EDD9BD8B8F"
+          trust_level: 5
 
       - name: Check import
         if: always()
