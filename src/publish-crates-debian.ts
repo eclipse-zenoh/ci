@@ -110,7 +110,7 @@ export async function main(input: Input) {
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       // Import the GPG key for the local repository
       sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
-      sh(`gpg --export ${input.gpgKeyId} | sudo tee /etc/apt/keyrings/${input.gpgKeyId}.gpg`);
+      sh(`gpg --export ${input.gpgSubkeyId} | sudo tee /etc/apt/keyrings/${input.gpgSubkeyId}.gpg`);
 
       sh("sudo apt-get update");
 
