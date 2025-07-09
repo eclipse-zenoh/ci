@@ -44,7 +44,7 @@ jobs:
           run: |
             apt-ftparchive packages debian-repo > debian-repo/Packages
             apt-ftparchive release debian-repo > debian-repo/Release
-            echo ${GPG_PASSPHRASE} | gpg --batch --yes --passphrase-fd 0 --armor --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
+            gpg --batch --armor --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
             
             if [[ ! -f "debian-repo/zenoh-public-key"]; then
               gpg --armor --export ${GPG_KEY_ID} --output debian-repo/zenoh-public-key
