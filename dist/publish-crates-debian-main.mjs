@@ -102660,7 +102660,7 @@ async function main(input) {
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
       sh("ls -R");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
-      await fs4.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg file:${process.cwd()} /`);
+      await fs4.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg] file:${process.cwd()} /`);
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
