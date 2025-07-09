@@ -98,7 +98,7 @@ export async function main(input: Input) {
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
 
       // Sign the Release file
-      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
 
       sh("ls -R");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
