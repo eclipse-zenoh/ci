@@ -19,6 +19,7 @@ jobs:
           fingerprint: 0ABC5913672BBE50921B3B9395D19EA1F7DF9E8E
 
       - name: Check import
+        if: always()
         run: |
           gpg --with-keygrip --list-keys --with-subkey-fingerprint
           gpg --with-keygrip --list-secret-keys --with-subkey-fingerprint
