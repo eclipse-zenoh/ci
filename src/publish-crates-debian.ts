@@ -102,13 +102,15 @@ export async function main(input: Input) {
 
       sh("ls -R");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
-      await fs.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
+      await fs.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg file:${process.cwd()} /`);
+
       // NOTE: We cannot write zenoh.list directly into /etc/apt/sources.list.d as
       // that requires sudo
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       // Import the GPG key for the local repository
-      sh(`gpg --armor --export ${input.gpgKeyId} | sudo tee /etc/apt/trusted.gpg.d/${input.gpgSubkeyId}.gpg`);
+      sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
+      sh(`gpg --export ${input.gpgKeyId} | sudo tee /etc/apt/keyrings/${input.gpgKeyId}.gpg`);
 
       sh("sudo apt-get update");
 

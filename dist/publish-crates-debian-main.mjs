@@ -102660,10 +102660,11 @@ async function main(input) {
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
       sh("ls -R");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
-      await fs4.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
+      await fs4.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg file:${process.cwd()} /`);
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
-      sh(`gpg --armor --export ${input.gpgKeyId} | sudo tee /etc/apt/trusted.gpg.d/${input.gpgSubkeyId}.gpg`);
+      sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
+      sh(`gpg --export ${input.gpgKeyId} | sudo tee /etc/apt/keyrings/${input.gpgKeyId}.gpg`);
       sh("sudo apt-get update");
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
