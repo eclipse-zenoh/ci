@@ -102657,7 +102657,7 @@ async function main(input) {
       await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
-      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} Release.gpg Release`);
+      sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
       sh("ls -R");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
       await fs4.writeFile(sourcesListName, `deb file:${process.cwd()} /`);
