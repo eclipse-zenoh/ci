@@ -1,0 +1,25 @@
+name: Test GPG setup
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  import-gpg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6.3.0
+        with:
+          gpg_private_key: ${{ secrets.ORG_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.ORG_GPG_PASSPHRASE }}
+          fingerprint: 0ABC5913672BBE50921B3B9395D19EA1F7DF9E8E
+
+      - name: Check import
+        if: always()
+        run: |
+          gpg --with-keygrip --list-keys --with-subkey-fingerprint
+          gpg --with-keygrip --list-secret-keys --with-subkey-fingerprint
