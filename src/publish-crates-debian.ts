@@ -68,14 +68,14 @@ export async function main(input: Input) {
     }
 
     sh("sudo apt-get update");
-    sh("sudo apt-get install -y dpkg-dev apt-utils gpg");
+    sh("sudo apt-get install -y dpkg-dev apt-utils gpg devscripts debsigs");
 
     // Sign the .deb files
     const dirents = await fs.readdir(`${input.version}`, { withFileTypes: true });
     const files = dirents.filter(d => d.name.endsWith(".deb"));
     files.forEach(file => {
       const filePath = path.join(`${input.version}`, file.name);
-      sh(`dpkg-sig --sign builder -k ${input.gpgKeyId} ${filePath}`);
+      sh(`debsigs --sign=origin -k ${input.gpgKeyId} ${filePath}`);
     });
 
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
