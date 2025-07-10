@@ -102639,7 +102639,7 @@ async function main(input) {
       }
     }
     sh("sudo apt-get update");
-    sh("sudo apt-get install -y dpkg-dev apt-utils gpg devscripts debsigs");
+    sh("sudo apt-get install -y dpkg-dev apt-utils gpg debsigs");
     const dirents = await fs4.readdir(`${input.version}`, { withFileTypes: true });
     const files = dirents.filter((d) => d.name.endsWith(".deb"));
     files.forEach((file) => {

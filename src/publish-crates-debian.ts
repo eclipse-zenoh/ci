@@ -68,7 +68,7 @@ export async function main(input: Input) {
     }
 
     sh("sudo apt-get update");
-    sh("sudo apt-get install -y dpkg-dev apt-utils gpg devscripts debsigs");
+    sh("sudo apt-get install -y dpkg-dev apt-utils gpg debsigs");
 
     // Sign the .deb files
     const dirents = await fs.readdir(`${input.version}`, { withFileTypes: true });
