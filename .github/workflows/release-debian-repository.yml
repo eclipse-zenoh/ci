@@ -43,7 +43,7 @@ jobs:
 
         - name: Copy repository contents from eclipse.org
           run: |
-            rsync -avzP ${SSH_HOST}:${SSH_HOST_PATH} debian-repo
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' ${SSH_HOST}:${SSH_HOST_PATH} debian-repo
           env:
             SSH_HOST: genie.zenoh@projects-storage.eclipse.org
             SSH_HOST_PATH: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
@@ -56,21 +56,21 @@ jobs:
               echo "Packages file contents:"
               cat debian-repo/Packages
             fi
-            rsync -avzP debian-repo/Packages "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Packages "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages
             gzip -c9 debian-repo/Packages > debian-repo/Packages.gz
-            rsync -avzP debian-repo/Packages.gz "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages.gz
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Packages.gz "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages.gz
             apt-ftparchive release debian-repo > debian-repo/Release
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Release file contents:"
               cat debian-repo/Release
             fi
-            rsync -avzP debian-repo/Release "${SSH_HOST}":"${SSH_HOST_PATH}"/Release
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Release "${SSH_HOST}":"${SSH_HOST_PATH}"/Release
             gpg --batch --armor --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Release.gpg file contents:"
               cat debian-repo/Release.gpg
             fi
-            rsync -avzP debian-repo/Release.gpg "${SSH_HOST}":"${SSH_HOST_PATH}"/Release.gpg
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Release.gpg "${SSH_HOST}":"${SSH_HOST_PATH}"/Release.gpg
             if [ ! -f "debian-repo/zenoh-public-key" ]; then
               gpg --armor --export "${GPG_KEY_ID}" --output debian-repo/zenoh-public-key
             fi
@@ -78,7 +78,7 @@ jobs:
               echo "Public key contents"
               cat debian-repo/zenoh-public-key
             fi
-            rsync -avzP debian-repo/zenoh-public-key "${SSH_HOST}":"${SSH_HOST_PATH}"/zenoh-public-key
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/zenoh-public-key "${SSH_HOST}":"${SSH_HOST_PATH}"/zenoh-public-key
           env:
             GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
             SSH_HOST: genie.zenoh@projects-storage.eclipse.org
