@@ -102669,7 +102669,7 @@ async function main(input) {
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
-      sh(`gpg --export ${input.gpgSubkeyId} | sudo tee /etc/apt/keyrings/${input.gpgSubkeyId}.gpg`);
+      sh(`gpg --export ${input.gpgSubkeyId} | sudo tee /etc/apt/keyrings/${input.gpgSubkeyId}.gpg`, { quiet: true });
       sh("sudo apt-get update");
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
