@@ -95,7 +95,7 @@ export async function main(input: Input) {
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
 
       // Create Release file
-      sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
+      sh(`apt-ftparchive release . > Release`, { quiet: true });
 
       // Sign the Release file
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
