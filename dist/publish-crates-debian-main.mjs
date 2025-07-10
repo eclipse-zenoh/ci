@@ -102644,7 +102644,7 @@ async function main(input) {
     const files = dirents.filter((d) => d.name.endsWith(".deb"));
     files.forEach((file) => {
       const filePath = path.join(`${input.version}`, file.name);
-      sh(`debsigs --sign=origin -k ${input.gpgKeyId} ${filePath}`);
+      sh(`debsigs --sign=origin -k ${input.gpgSubkeyId} ${filePath}`);
     });
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     const gitRepo = input.repo.split("/")[1];
@@ -102669,7 +102669,7 @@ async function main(input) {
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
-      sh(`gpg --export ${input.gpgSubkeyId} | sudo tee /etc/apt/keyrings/${input.gpgSubkeyId}.gpg`);
+      sh(`gpg --export ${input.gpgSubkeyId} | sudo tee /etc/apt/keyrings/${input.gpgSubkeyId}.gpg`, { quiet: true });
       sh("sudo apt-get update");
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
