@@ -102658,7 +102658,12 @@ async function main(input) {
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
       sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
-      sh("ls -R");
+      core4.info(`Contents of ${input.version} directory:`);
+      sh("ls -alhR");
+      core4.info(`Contents of Release file:`);
+      sh("cat Release");
+      core4.info(`Contents of Release.gpg file:`);
+      sh("cat Release.gpg");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
       await fs4.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg] file:${process.cwd()} /`);
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);

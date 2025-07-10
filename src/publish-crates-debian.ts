@@ -100,7 +100,13 @@ export async function main(input: Input) {
       // Sign the Release file
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
 
-      sh("ls -R");
+      core.info(`Contents of ${input.version} directory:`);
+      sh("ls -alhR");
+      // debug
+      core.info(`Contents of Release file:`);
+      sh("cat Release");
+      core.info(`Contents of Release.gpg file:`);
+      sh("cat Release.gpg");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
       await fs.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgKeyId}.gpg] file:${process.cwd()} /`);
 
