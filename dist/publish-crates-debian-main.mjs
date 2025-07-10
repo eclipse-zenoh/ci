@@ -102644,7 +102644,7 @@ async function main(input) {
     const files = dirents.filter((d) => d.name.endsWith(".deb"));
     files.forEach((file) => {
       const filePath = path.join(`${input.version}`, file.name);
-      sh(`debsigs --sign=origin -k ${input.gpgKeyId} ${filePath}`);
+      sh(`debsigs --sign=origin -k ${input.gpgSubkeyId} ${filePath}`);
     });
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     const gitRepo = input.repo.split("/")[1];
