@@ -36,7 +36,7 @@ jobs:
         - name: Mount debian-repo
           run: |
             mkdir -p debian-repo
-            sshfs -d -v -o StrictHostKeyChecking=no ${SSH_HOST}:${SSH_HOST_PATH} debian-repo
+            sshfs -o StrictHostKeyChecking=no ${SSH_HOST}:${SSH_HOST_PATH} debian-repo
           env:
             SSH_HOST: genie.zenoh@projects-storage.eclipse.org
             SSH_HOST_PATH: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
