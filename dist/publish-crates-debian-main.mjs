@@ -102656,7 +102656,7 @@ async function main(input) {
       });
       await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
-      sh(`apt-ftparchive release ${input.version} > Release`, { quiet: true });
+      sh(`apt-ftparchive release . > Release`, { quiet: true });
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
       core4.info(`Contents of ${input.version} directory:`);
       sh("ls -alhR");
