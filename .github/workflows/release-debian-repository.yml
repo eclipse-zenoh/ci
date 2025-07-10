@@ -30,6 +30,8 @@ jobs:
 
         - name: Print ssh identities
           run: ssh-add -l
+          env:
+            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
         - name: Mount debian-repo
           run: |
@@ -38,6 +40,7 @@ jobs:
           env:
             SSH_HOST: genie.zenoh@projects-storage.eclipse.org
             SSH_HOST_PATH: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
+            SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
         - name: Import GPG key
           uses: crazy-max/ghaction-import-gpg@v6.3.0
