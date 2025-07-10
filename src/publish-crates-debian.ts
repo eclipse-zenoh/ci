@@ -108,7 +108,10 @@ export async function main(input: Input) {
       core.info(`Contents of Release.gpg file:`);
       sh("cat Release.gpg");
       core.info(`Adding a local Debian repository at ${process.cwd()}`);
-      await fs.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgSubkeyId}.gpg] file:${process.cwd()} /`);
+      await fs.writeFile(
+        sourcesListName,
+        `deb [signed-by=/etc/apt/keyrings/${input.gpgSubkeyId}.gpg] file:${process.cwd()} /`,
+      );
 
       // NOTE: We cannot write zenoh.list directly into /etc/apt/sources.list.d as
       // that requires sudo

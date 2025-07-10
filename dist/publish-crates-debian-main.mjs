@@ -102665,7 +102665,10 @@ async function main(input) {
       core4.info(`Contents of Release.gpg file:`);
       sh("cat Release.gpg");
       core4.info(`Adding a local Debian repository at ${process.cwd()}`);
-      await fs4.writeFile(sourcesListName, `deb [signed-by=/etc/apt/keyrings/${input.gpgSubkeyId}.gpg] file:${process.cwd()} /`);
+      await fs4.writeFile(
+        sourcesListName,
+        `deb [signed-by=/etc/apt/keyrings/${input.gpgSubkeyId}.gpg] file:${process.cwd()} /`
+      );
       sh(`sudo cp ${sourcesListName} ${sourcesListDir}`);
       sh(`cat ${sourcesListDir}/${sourcesListName}`);
       sh(`sudo mkdir -m 0755 -p /etc/apt/keyrings/`);
