@@ -71,16 +71,14 @@ jobs:
               cat debian-repo/Release.gpg
             fi
             rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Release.gpg "${SSH_HOST}":"${SSH_HOST_PATH}"/Release.gpg
-            if [ ! -f "debian-repo/zenoh-public-key" ]; then
-              gpg --armor --export "${GPG_KEY_ID}" > debian-repo/zenoh-public-key
-            fi
+            gpg --armor --export "${GPG_SUBKEY_ID}" > debian-repo/zenoh-public-key
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Public key contents"
               cat debian-repo/zenoh-public-key
             fi
             rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/zenoh-public-key "${SSH_HOST}":"${SSH_HOST_PATH}"/zenoh-public-key
           env:
-            GPG_KEY_ID: ${{ secrets.ORG_GPG_KEY_ID }}
+            GPG_KEY_ID: ${{ secrets.ORG_GPG_SUBKEY_ID }}
             SSH_HOST: genie.zenoh@projects-storage.eclipse.org
             SSH_HOST_PATH: /home/data/httpd/download.eclipse.org/zenoh/debian-repo
             SSH_AUTH_SOCK: /tmp/ssh_agent.sock
