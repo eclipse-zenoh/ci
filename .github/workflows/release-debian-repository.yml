@@ -72,7 +72,7 @@ jobs:
             fi
             rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Release.gpg "${SSH_HOST}":"${SSH_HOST_PATH}"/Release.gpg
             if [ ! -f "debian-repo/zenoh-public-key" ]; then
-              gpg --armor --export "${GPG_KEY_ID}" --output debian-repo/zenoh-public-key
+              gpg --armor --export "${GPG_KEY_ID}" > debian-repo/zenoh-public-key
             fi
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Public key contents"
