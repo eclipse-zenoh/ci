@@ -68,7 +68,7 @@ jobs:
               cat debian-repo/Release
             fi
             rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Release "${SSH_HOST}":"${SSH_HOST_PATH}"/Release
-            gpg --batch --armor --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
+            gpg --batch --armor --yes --sign --detach-sign --output debian-repo/Release.gpg debian-repo/Release
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Release.gpg file contents:"
               cat debian-repo/Release.gpg
