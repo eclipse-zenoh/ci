@@ -52,14 +52,16 @@ jobs:
 
         - name: Generate Packages and Release files
           run: |
-            apt-ftparchive packages debian-repo > debian-repo/Packages
+            cd debian-repo
+            apt-ftparchive packages . > Packages
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Packages file contents:"
-              cat debian-repo/Packages
+              cat Packages
             fi
-            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Packages "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages
-            gzip -c9 debian-repo/Packages > debian-repo/Packages.gz
-            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' debian-repo/Packages.gz "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages.gz
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' Packages "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages
+            gzip -c9 Packages > Packages.gz
+            rsync -avzP -e 'ssh -o StrictHostKeyChecking=no' Packages.gz "${SSH_HOST}":"${SSH_HOST_PATH}"/Packages.gz
+            cd ..
             apt-ftparchive release debian-repo > debian-repo/Release
             if [ "${ACTION_STEP_DEBUG}" == "true" ]; then
               echo "Release file contents:"
