@@ -407,10 +407,10 @@ export function installBinaryFromGit(name: string, gitUrl: string, gitBranch: st
 export async function installBinaryCached(name: string) {
   // Force cargo to use crates.io registry
   const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
+  const version = config.lock.cratesio[name];
 
   if (process.env["GITHUB_ACTIONS"] != undefined) {
     const paths = [join(os.homedir(), ".cargo", "bin")];
-    const version = config.lock.cratesio[name];
     const key = `${os.platform()}-${os.release()}-${os.arch()}-${name}-${version}`;
 
     // NOTE: We specify the Stable toolchain to override the current Rust
@@ -419,11 +419,11 @@ export async function installBinaryCached(name: string) {
     // failure
     const hit = await cache.restoreCache(paths, key);
     if (hit == undefined) {
-      sh(`cargo +stable install ${name} --force`, { env: env });
+      sh(`cargo +stable install ${name}@${version} --force`, { env: env });
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`, { env: env });
+    sh(`cargo +stable install ${name}@${version}`, { env: env });
   }
 }
 

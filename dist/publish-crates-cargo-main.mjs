@@ -63550,17 +63550,17 @@ function* packagesOrdered(path, options) {
 }
 async function installBinaryCached(name) {
   const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
+  const version2 = config.lock.cratesio[name];
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];
-    const version2 = config.lock.cratesio[name];
     const key = `${os2.platform()}-${os2.release()}-${os2.arch()}-${name}-${version2}`;
     const hit = await cache.restoreCache(paths, key);
     if (hit == void 0) {
-      sh(`cargo +stable install ${name} --force`, { env });
+      sh(`cargo +stable install ${name}@${version2} --force`, { env });
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}`, { env });
+    sh(`cargo +stable install ${name}@${version2}`, { env });
   }
 }
 function isPublished(pkg, options) {
