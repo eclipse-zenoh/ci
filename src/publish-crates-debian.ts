@@ -82,6 +82,7 @@ export async function main(input: Input) {
     // repo is actually owner/repo so we have to split it here to get only the git repo name
     const gitRepo = input.repo.split("/")[1];
     const packagesPath = `.Packages-${gitRepo}-${input.version}`;
+    await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     if (input.installationTest) {
       const allPackagesPath = "Packages";
 
@@ -89,7 +90,6 @@ export async function main(input: Input) {
         sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
       });
 
-      await fs.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
       // NOTE: An unzipped package index is necessary for apt-get to recognize the
       // local repository created below
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });

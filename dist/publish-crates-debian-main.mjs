@@ -102649,12 +102649,12 @@ async function main(input) {
     const debianRepo = `${input.sshHost}:${input.sshHostPath}`;
     const gitRepo = input.repo.split("/")[1];
     const packagesPath = `.Packages-${gitRepo}-${input.version}`;
+    await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
     if (input.installationTest) {
       const allPackagesPath = "Packages";
       await withIdentity(input.sshPrivateKey, input.sshPassphrase, (env) => {
         sh(`scp -v -o StrictHostKeyChecking=no -r ${debianRepo}/.Packages-* ./`, { check: false, env });
       });
-      await fs4.writeFile(packagesPath, sh(`dpkg-scanpackages --multiversion ${input.version}`));
       sh(`cat .Packages-* > ${allPackagesPath}`, { quiet: true });
       sh(`apt-ftparchive release . > Release`, { quiet: true });
       sh(`gpg --armor --sign --detach-sign --default-key ${input.gpgSubkeyId} --output Release.gpg Release`);
