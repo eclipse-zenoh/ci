@@ -65,22 +65,27 @@ export async function main(input: Input) {
       .split("\n")
       .filter(r => r);
 
-    for (const path of cargoPaths) {
+    const pathsToCheck: string[] = [];
+    let path: string;
+    for (path of cargoPaths) {
       await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
       if (sh("git diff", { cwd: repo, check: false })) {
         sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
         sh(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: gitEnv });
-
         if (path.endsWith("Cargo.toml")) {
-          sh(`cargo check --manifest-path ${path}`);
-          sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
-          sh("git commit --message 'chore: Update Cargo lockfile'", {
-            cwd: repo,
-            env: gitEnv,
-            check: false,
-          });
+          pathsToCheck.push(path);
         }
       }
+    }
+
+    for (path of pathsToCheck) {
+      sh(`cargo check --manifest-path ${path}`);
+      sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
+      sh("git commit --message 'chore: Update Cargo lockfile'", {
+        cwd: repo,
+        env: gitEnv,
+        check: false,
+      });
     }
     // Avoid Cargo.lock conflicts by merging the main branch into the post-release branch keeping our changes.
     sh("git fetch origin main && git merge -Xours FETCH_HEAD --no-edit", { cwd: repo, env: gitEnv });
