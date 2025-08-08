@@ -63485,7 +63485,7 @@ var ci_config_default = {
   },
   lock: {
     cratesio: {
-      "cargo-deb": "2.1.0",
+      "cargo-deb": "3.4.1",
       estuary: "0.1.1",
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
