@@ -44,7 +44,7 @@ export function setup(): Input {
     (bumpDepsPatternsRaw.length === 0 && bumpDepsVersionsRaw.length > 0)
   ) {
     throw new Error(
-      "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty)."
+      "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty).",
     );
   }
   if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {

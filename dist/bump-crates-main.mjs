@@ -63633,6 +63633,11 @@ function setup() {
   const bumpDepsVersionsRaw = core3.getMultilineInput("bump-deps-versions");
   let bumpDepsPatterns = void 0;
   let bumpDepsVersions = void 0;
+  if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length === 0 || bumpDepsPatternsRaw.length === 0 && bumpDepsVersionsRaw.length > 0) {
+    throw new Error(
+      "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty)."
+    );
+  }
   if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {
     if (bumpDepsPatternsRaw.length !== bumpDepsVersionsRaw.length) {
       throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
@@ -63666,7 +63671,7 @@ async function main(input) {
     await bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
-    if (input.bumpDepsPatterns && input.bumpDepsVersions) {
+    if (input.bumpDepsPatterns && input.bumpDepsVersions && input.bumpDepsPatterns.length === input.bumpDepsVersions.length) {
       for (let i = 0; i < input.bumpDepsPatterns.length; i++) {
         await bumpDependencies(
           workspace,
@@ -63676,7 +63681,7 @@ async function main(input) {
         );
         sh("git add .", { cwd: repo });
         sh(
-          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i]} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
+          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i].source} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
           { cwd: repo, env: gitEnv, check: false }
         );
       }
