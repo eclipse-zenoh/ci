@@ -39,6 +39,14 @@ export function setup(): Input {
   let bumpDepsPatterns: RegExp[] | undefined = undefined;
   let bumpDepsVersions: string[] | undefined = undefined;
 
+  if (
+    (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length === 0) ||
+    (bumpDepsPatternsRaw.length === 0 && bumpDepsVersionsRaw.length > 0)
+  ) {
+    throw new Error(
+      "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty)."
+    );
+  }
   if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {
     if (bumpDepsPatternsRaw.length !== bumpDepsVersionsRaw.length) {
       throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
