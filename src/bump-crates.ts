@@ -76,7 +76,11 @@ export async function main(input: Input) {
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
 
-    if (input.bumpDepsPatterns && input.bumpDepsVersions) {
+    if (
+      input.bumpDepsPatterns &&
+      input.bumpDepsVersions &&
+      input.bumpDepsPatterns.length === input.bumpDepsVersions.length
+    ) {
       for (let i = 0; i < input.bumpDepsPatterns.length; i++) {
         await cargo.bumpDependencies(
           workspace,
