@@ -19814,14 +19814,14 @@ var require_core = __commonJS({
       return val.trim();
     }
     exports2.getInput = getInput2;
-    function getMultilineInput(name, options) {
+    function getMultilineInput2(name, options) {
       const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
       return inputs.map((input) => input.trim());
     }
-    exports2.getMultilineInput = getMultilineInput;
+    exports2.getMultilineInput = getMultilineInput2;
     function getBooleanInput2(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
@@ -63629,6 +63629,17 @@ function setup() {
   const bumpDepsPattern = core3.getInput("bump-deps-pattern");
   const bumpDepsVersion = core3.getInput("bump-deps-version");
   const bumpDepsBranch = core3.getInput("bump-deps-branch");
+  const bumpDepsPatternsRaw = core3.getMultilineInput("bump-deps-patterns");
+  const bumpDepsVersionsRaw = core3.getMultilineInput("bump-deps-versions");
+  let bumpDepsPatterns = void 0;
+  let bumpDepsVersions = void 0;
+  if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {
+    if (bumpDepsPatternsRaw.length !== bumpDepsVersionsRaw.length) {
+      throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
+    }
+    bumpDepsPatterns = bumpDepsPatternsRaw.map((pat) => new RegExp(pat));
+    bumpDepsVersions = bumpDepsVersionsRaw;
+  }
   return {
     version: version2,
     liveRun,
@@ -63640,7 +63651,9 @@ function setup() {
     githubToken,
     bumpDepsRegExp: bumpDepsPattern === "" ? void 0 : new RegExp(bumpDepsPattern),
     bumpDepsVersion: bumpDepsVersion === "" ? version2 : bumpDepsVersion,
-    bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch
+    bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch,
+    bumpDepsPatterns,
+    bumpDepsVersions
   };
 }
 async function main(input) {
@@ -63653,7 +63666,21 @@ async function main(input) {
     await bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
-    if (input.bumpDepsRegExp != void 0) {
+    if (input.bumpDepsPatterns && input.bumpDepsVersions) {
+      for (let i = 0; i < input.bumpDepsPatterns.length; i++) {
+        await bumpDependencies(
+          workspace,
+          input.bumpDepsPatterns[i],
+          input.bumpDepsVersions[i],
+          input.bumpDepsBranch
+        );
+        sh("git add .", { cwd: repo });
+        sh(
+          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i]} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
+          { cwd: repo, env: gitEnv, check: false }
+        );
+      }
+    } else if (input.bumpDepsRegExp != void 0) {
       await bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
       sh("git add .", { cwd: repo });
       sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
@@ -63661,13 +63688,13 @@ async function main(input) {
         env: gitEnv,
         check: false
       });
-      sh(`cargo +${input.toolchain} check`, { cwd: repo });
-      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-        cwd: repo,
-        env: gitEnv,
-        check: false
-      });
     }
+    sh(`cargo +${input.toolchain} check`, { cwd: repo });
+    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+      cwd: repo,
+      env: gitEnv,
+      check: false
+    });
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
     if (input.liveRun) {
       sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });

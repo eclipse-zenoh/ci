@@ -15,6 +15,8 @@ export type Input = {
   path?: string;
   toolchain?: string;
   githubToken: string;
+  bumpDepsPatterns?: RegExp[];
+  bumpDepsVersions?: string[];
   bumpDepsRegExp?: RegExp;
   bumpDepsVersion: string;
   bumpDepsBranch?: string;
@@ -31,6 +33,19 @@ export function setup(): Input {
   const bumpDepsPattern = core.getInput("bump-deps-pattern");
   const bumpDepsVersion = core.getInput("bump-deps-version");
   const bumpDepsBranch = core.getInput("bump-deps-branch");
+  const bumpDepsPatternsRaw = core.getMultilineInput("bump-deps-patterns");
+  const bumpDepsVersionsRaw = core.getMultilineInput("bump-deps-versions");
+  // Parse multiline inputs if provided
+  let bumpDepsPatterns: RegExp[] | undefined = undefined;
+  let bumpDepsVersions: string[] | undefined = undefined;
+
+  if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {
+    if (bumpDepsPatternsRaw.length !== bumpDepsVersionsRaw.length) {
+      throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
+    }
+    bumpDepsPatterns = bumpDepsPatternsRaw.map(pat => new RegExp(pat));
+    bumpDepsVersions = bumpDepsVersionsRaw;
+  }
 
   return {
     version,
@@ -43,6 +58,8 @@ export function setup(): Input {
     bumpDepsRegExp: bumpDepsPattern === "" ? undefined : new RegExp(bumpDepsPattern),
     bumpDepsVersion: bumpDepsVersion === "" ? version : bumpDepsVersion,
     bumpDepsBranch: bumpDepsBranch === "" ? undefined : bumpDepsBranch,
+    bumpDepsPatterns,
+    bumpDepsVersions,
   };
 }
 
@@ -59,7 +76,22 @@ export async function main(input: Input) {
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
 
-    if (input.bumpDepsRegExp != undefined) {
+    if (input.bumpDepsPatterns && input.bumpDepsVersions) {
+      for (let i = 0; i < input.bumpDepsPatterns.length; i++) {
+        await cargo.bumpDependencies(
+          workspace,
+          input.bumpDepsPatterns[i],
+          input.bumpDepsVersions[i],
+          input.bumpDepsBranch,
+        );
+        sh("git add .", { cwd: repo });
+        sh(
+          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i]} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
+          { cwd: repo, env: gitEnv, check: false },
+        );
+      }
+    } else if (input.bumpDepsRegExp != undefined) {
+      // keep current behavior for backwards compatibility
       await cargo.bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
       sh("git add .", { cwd: repo });
       sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
@@ -67,14 +99,14 @@ export async function main(input: Input) {
         env: gitEnv,
         check: false,
       });
-
-      sh(`cargo +${input.toolchain} check`, { cwd: repo });
-      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-        cwd: repo,
-        env: gitEnv,
-        check: false,
-      });
     }
+
+    sh(`cargo +${input.toolchain} check`, { cwd: repo });
+    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+      cwd: repo,
+      env: gitEnv,
+      check: false,
+    });
 
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
 

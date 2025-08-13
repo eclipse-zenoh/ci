@@ -21,6 +21,12 @@ inputs:
     required: false
   bump-deps-branch:
     required: false
+  bump-deps-patterns:
+    description: "Multiline list of regular expressions for dependencies to bump (one per line)"
+    required: false
+  bump-deps-versions:
+    description: "Multiline list of versions, matching bump-deps-patterns (one per line)"
+    required: false
 
 runs:
   using: node20
