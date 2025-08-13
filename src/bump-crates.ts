@@ -86,7 +86,7 @@ export async function main(input: Input) {
         );
         sh("git add .", { cwd: repo });
         sh(
-          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i]} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
+          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i].source} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
           { cwd: repo, env: gitEnv, check: false },
         );
       }
