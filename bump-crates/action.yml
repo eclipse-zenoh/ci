@@ -16,16 +16,12 @@ inputs:
   github-token:
     required: true
   bump-deps-pattern:
-    required: false
-  bump-deps-version:
-    required: false
-  bump-deps-branch:
-    required: false
-  bump-deps-patterns:
     description: "Multiline list of regular expressions for dependencies to bump (one per line)"
     required: false
-  bump-deps-versions:
+  bump-deps-version:
     description: "Multiline list of versions, matching bump-deps-patterns (one per line)"
+    required: false
+  bump-deps-branch:
     required: false
 
 runs:

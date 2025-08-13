@@ -63626,24 +63626,22 @@ function setup() {
   const path = core3.getInput("path");
   const toolchain = core3.getInput("toolchain");
   const githubToken = core3.getInput("github-token", { required: true });
-  const bumpDepsPattern = core3.getInput("bump-deps-pattern");
-  const bumpDepsVersion = core3.getInput("bump-deps-version");
   const bumpDepsBranch = core3.getInput("bump-deps-branch");
-  const bumpDepsPatternsRaw = core3.getMultilineInput("bump-deps-patterns");
-  const bumpDepsVersionsRaw = core3.getMultilineInput("bump-deps-versions");
-  let bumpDepsPatterns = void 0;
-  let bumpDepsVersions = void 0;
-  if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length === 0 || bumpDepsPatternsRaw.length === 0 && bumpDepsVersionsRaw.length > 0) {
+  const bumpDepsPatternRaw = core3.getMultilineInput("bump-deps-pattern");
+  const bumpDepsVersionRaw = core3.getMultilineInput("bump-deps-version");
+  let bumpDepsPattern = void 0;
+  let bumpDepsVersion = void 0;
+  if (bumpDepsPatternRaw.length > 0 && bumpDepsVersionRaw.length === 0 || bumpDepsPatternRaw.length === 0 && bumpDepsVersionRaw.length > 0) {
     throw new Error(
       "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty)."
     );
   }
-  if (bumpDepsPatternsRaw.length > 0 && bumpDepsVersionsRaw.length > 0) {
-    if (bumpDepsPatternsRaw.length !== bumpDepsVersionsRaw.length) {
+  if (bumpDepsPatternRaw.length > 0 && bumpDepsVersionRaw.length > 0) {
+    if (bumpDepsPatternRaw.length !== bumpDepsVersionRaw.length) {
       throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
     }
-    bumpDepsPatterns = bumpDepsPatternsRaw.map((pat) => new RegExp(pat));
-    bumpDepsVersions = bumpDepsVersionsRaw;
+    bumpDepsPattern = bumpDepsPatternRaw.map((pat) => new RegExp(pat));
+    bumpDepsVersion = bumpDepsVersionRaw;
   }
   return {
     version: version2,
@@ -63654,11 +63652,9 @@ function setup() {
     toolchain: toolchain === "" ? "1.75.0" : toolchain,
     // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
-    bumpDepsRegExp: bumpDepsPattern === "" ? void 0 : new RegExp(bumpDepsPattern),
-    bumpDepsVersion: bumpDepsVersion === "" ? version2 : bumpDepsVersion,
-    bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch,
-    bumpDepsPatterns,
-    bumpDepsVersions
+    bumpDepsPattern,
+    bumpDepsVersion,
+    bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch
   };
 }
 async function main(input) {
@@ -63671,35 +63667,27 @@ async function main(input) {
     await bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
-    if (input.bumpDepsPatterns && input.bumpDepsVersions && input.bumpDepsPatterns.length === input.bumpDepsVersions.length) {
-      for (let i = 0; i < input.bumpDepsPatterns.length; i++) {
+    if (input.bumpDepsPattern && input.bumpDepsVersion && input.bumpDepsPattern.length === input.bumpDepsVersion.length) {
+      for (let i = 0; i < input.bumpDepsPattern.length; i++) {
         await bumpDependencies(
           workspace,
-          input.bumpDepsPatterns[i],
-          input.bumpDepsVersions[i],
+          input.bumpDepsPattern[i],
+          input.bumpDepsVersion[i],
           input.bumpDepsBranch
         );
         sh("git add .", { cwd: repo });
         sh(
-          `git commit --message 'chore: Bump ${input.bumpDepsPatterns[i].source} dependencies to \`${input.bumpDepsVersions[i]}\`'`,
+          `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
           { cwd: repo, env: gitEnv, check: false }
         );
       }
-    } else if (input.bumpDepsRegExp != void 0) {
-      await bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-      sh("git add .", { cwd: repo });
-      sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
+      sh(`cargo +${input.toolchain} check`, { cwd: repo });
+      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
         env: gitEnv,
         check: false
       });
     }
-    sh(`cargo +${input.toolchain} check`, { cwd: repo });
-    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-      cwd: repo,
-      env: gitEnv,
-      check: false
-    });
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
     if (input.liveRun) {
       sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
