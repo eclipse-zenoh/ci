@@ -19814,14 +19814,14 @@ var require_core = __commonJS({
       return val.trim();
     }
     exports2.getInput = getInput2;
-    function getMultilineInput(name, options) {
+    function getMultilineInput2(name, options) {
       const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
       return inputs.map((input) => input.trim());
     }
-    exports2.getMultilineInput = getMultilineInput;
+    exports2.getMultilineInput = getMultilineInput2;
     function getBooleanInput2(name, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
@@ -63626,9 +63626,23 @@ function setup() {
   const path = core3.getInput("path");
   const toolchain = core3.getInput("toolchain");
   const githubToken = core3.getInput("github-token", { required: true });
-  const bumpDepsPattern = core3.getInput("bump-deps-pattern");
-  const bumpDepsVersion = core3.getInput("bump-deps-version");
   const bumpDepsBranch = core3.getInput("bump-deps-branch");
+  const bumpDepsPatternRaw = core3.getMultilineInput("bump-deps-pattern");
+  const bumpDepsVersionRaw = core3.getMultilineInput("bump-deps-version");
+  let bumpDepsPattern = void 0;
+  let bumpDepsVersion = void 0;
+  if (bumpDepsPatternRaw.length > 0 && bumpDepsVersionRaw.length === 0 || bumpDepsPatternRaw.length === 0 && bumpDepsVersionRaw.length > 0) {
+    throw new Error(
+      "Both bump-deps-pattern and bump-deps-version must be provided together (either both empty or both non-empty)."
+    );
+  }
+  if (bumpDepsPatternRaw.length > 0 && bumpDepsVersionRaw.length > 0) {
+    if (bumpDepsPatternRaw.length !== bumpDepsVersionRaw.length) {
+      throw new Error(`bump-deps-pattern and bump-deps-version must have the same number of lines`);
+    }
+    bumpDepsPattern = bumpDepsPatternRaw.map((pat) => new RegExp(pat));
+    bumpDepsVersion = bumpDepsVersionRaw;
+  }
   return {
     version: version2,
     liveRun,
@@ -63638,8 +63652,8 @@ function setup() {
     toolchain: toolchain === "" ? "1.75.0" : toolchain,
     // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
-    bumpDepsRegExp: bumpDepsPattern === "" ? void 0 : new RegExp(bumpDepsPattern),
-    bumpDepsVersion: bumpDepsVersion === "" ? version2 : bumpDepsVersion,
+    bumpDepsPattern,
+    bumpDepsVersion,
     bumpDepsBranch: bumpDepsBranch === "" ? void 0 : bumpDepsBranch
   };
 }
@@ -63653,14 +63667,20 @@ async function main(input) {
     await bump(workspace, input.version);
     sh("git add .", { cwd: repo });
     sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
-    if (input.bumpDepsRegExp != void 0) {
-      await bumpDependencies(workspace, input.bumpDepsRegExp, input.bumpDepsVersion, input.bumpDepsBranch);
-      sh("git add .", { cwd: repo });
-      sh(`git commit --message 'chore: Bump ${input.bumpDepsRegExp} dependencies to \`${input.bumpDepsVersion}\`'`, {
-        cwd: repo,
-        env: gitEnv,
-        check: false
-      });
+    if (input.bumpDepsPattern && input.bumpDepsVersion && input.bumpDepsPattern.length === input.bumpDepsVersion.length) {
+      for (let i = 0; i < input.bumpDepsPattern.length; i++) {
+        await bumpDependencies(
+          workspace,
+          input.bumpDepsPattern[i],
+          input.bumpDepsVersion[i],
+          input.bumpDepsBranch
+        );
+        sh("git add .", { cwd: repo });
+        sh(
+          `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
+          { cwd: repo, env: gitEnv, check: false }
+        );
+      }
       sh(`cargo +${input.toolchain} check`, { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
