@@ -40,12 +40,12 @@ export function setup(): Input {
     (bumpDepsPatternRaw.length === 0 && bumpDepsVersionRaw.length > 0)
   ) {
     throw new Error(
-      "Both bump-deps-patterns and bump-deps-versions must be provided together (either both empty or both non-empty).",
+      "Both bump-deps-pattern and bump-deps-version must be provided together (either both empty or both non-empty).",
     );
   }
   if (bumpDepsPatternRaw.length > 0 && bumpDepsVersionRaw.length > 0) {
     if (bumpDepsPatternRaw.length !== bumpDepsVersionRaw.length) {
-      throw new Error(`bump-deps-patterns and bump-deps-versions must have the same number of lines`);
+      throw new Error(`bump-deps-pattern and bump-deps-version must have the same number of lines`);
     }
     bumpDepsPattern = bumpDepsPatternRaw.map(pat => new RegExp(pat));
     bumpDepsVersion = bumpDepsVersionRaw;
