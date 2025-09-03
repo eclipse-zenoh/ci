@@ -128,7 +128,20 @@ export async function main(input: Input) {
         const debPath = path.join(dirent.parentPath, dirent.name);
         // filter out packages that can't be installed on this arch
         const arch = sh(`dpkg-deb --field ${debPath} Architecture`).trim();
-        if (arch !== process.arch && arch !== "all") {
+        const archMapping: { [key: string]: string } = {
+          x64: "amd64",
+          arm64: "arm64",
+          arm: "armhf",
+          ia32: "i386",
+          mips: "mips",
+          mipsel: "mipsel",
+          ppc64: "ppc64el",
+          riscv64: "riscv64",
+          s390x: "s390x",
+        };
+
+        const debianArch = archMapping[process.arch] || process.arch;
+        if (arch !== debianArch && arch !== "all") {
           core.info(
             `Skipping package ${debPath} as it is not compatible with the current architecture (${process.arch})`,
           );
