@@ -102678,7 +102678,19 @@ async function main(input) {
       for await (const dirent of await fs4.opendir(input.version)) {
         const debPath = path.join(dirent.parentPath, dirent.name);
         const arch3 = sh(`dpkg-deb --field ${debPath} Architecture`).trim();
-        if (arch3 !== process.arch && arch3 !== "all") {
+        const archMapping = {
+          x64: "amd64",
+          arm64: "arm64",
+          arm: "armhf",
+          ia32: "i386",
+          mips: "mips",
+          mipsel: "mipsel",
+          ppc64: "ppc64el",
+          riscv64: "riscv64",
+          s390x: "s390x"
+        };
+        const debianArch = archMapping[process.arch] || process.arch;
+        if (arch3 !== debianArch && arch3 !== "all") {
           core4.info(
             `Skipping package ${debPath} as it is not compatible with the current architecture (${process.arch})`
           );
