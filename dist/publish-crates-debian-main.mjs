@@ -102677,15 +102677,15 @@ async function main(input) {
       const debs = /* @__PURE__ */ new Set();
       for await (const dirent of await fs4.opendir(input.version)) {
         const debPath = path.join(dirent.parentPath, dirent.name);
+        const arch3 = sh(`dpkg-deb --field ${debPath} Architecture`).trim();
+        if (arch3 !== process.arch && arch3 !== "all") {
+          core4.info(
+            `Skipping package ${debPath} as it is not compatible with the current architecture (${process.arch})`
+          );
+          continue;
+        }
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
-      }
-      for (const deb of debs) {
-        const arch3 = sh(`dpkg-deb --field ${path.join(input.version, deb)} Architecture`).trim();
-        if (arch3 !== process.arch && arch3 !== "all") {
-          core4.info(`Skipping package ${deb} as it is not compatible with the current architecture (${process.arch})`);
-          debs.delete(deb);
-        }
       }
       debs.forEach((deb) => {
         sh(`sudo apt-get install -y ${deb}`);
