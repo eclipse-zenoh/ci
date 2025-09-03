@@ -129,6 +129,14 @@ export async function main(input: Input) {
         const package_ = sh(`dpkg-deb --field ${debPath} Package`).trim();
         debs.add(package_);
       }
+      // filter out packages that can't be installed on this arch
+      for (const deb of debs) {
+        const arch = sh(`dpkg-deb --field ${path.join(input.version, deb)} Architecture`).trim();
+        if (arch !== process.arch && arch !== "all") {
+          core.info(`Skipping package ${deb} as it is not compatible with the current architecture (${process.arch})`);
+          debs.delete(deb);
+        }
+      }
 
       debs.forEach(deb => {
         sh(`sudo apt-get install -y ${deb}`);
