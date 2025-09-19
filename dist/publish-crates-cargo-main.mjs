@@ -63522,7 +63522,7 @@ function packages(path, options) {
       name: elem.name,
       version: elem.version,
       manifestPath: elem.manifest_path,
-      publish: elem.publish == null ? void 0 : false,
+      publish: shouldPublish(elem.publish),
       workspaceDependencies: elem.dependencies.filter((dep) => "path" in dep).map(
         (dep) => ({
           name: dep.name,
@@ -63533,6 +63533,15 @@ function packages(path, options) {
     });
   }
   return result;
+}
+function shouldPublish(publish2) {
+  if (publish2 === null) {
+    return false;
+  } else if (typeof publish2 === "boolean") {
+    return publish2;
+  } else {
+    return publish2.length > 0;
+  }
 }
 function* packagesOrdered(path, options) {
   const allPackages = packages(path, options);
