@@ -15,7 +15,7 @@ export type Package = {
   name: string;
   version: string;
   manifestPath: string;
-  publish?: false;
+  publish?: boolean | undefined;
   workspaceDependencies: WorkspaceDependency[];
 };
 
@@ -37,7 +37,7 @@ type CargoMetadataPackage = {
   version: string;
   manifest_path: string;
   dependencies: CargoMetadataDependency[];
-  publish: string[] | null;
+  publish: string[] | null | boolean;
   [key: string]: unknown;
 };
 
@@ -63,7 +63,7 @@ export function packages(path: string, options?: CommandOptions): Package[] {
       name: elem.name,
       version: elem.version,
       manifestPath: elem.manifest_path,
-      publish: elem.publish == null ? undefined : false,
+      publish: shouldPublish(elem.publish),
       workspaceDependencies: elem.dependencies
         .filter(dep => "path" in dep)
         .map(
@@ -78,6 +78,22 @@ export function packages(path: string, options?: CommandOptions): Package[] {
   }
 
   return result;
+}
+
+/**
+ *  Return a boolean indicating whether the package should be published according
+ *  to its publish field.
+ *
+ * See https://doc.rust-lang.org/cargo/reference/manifest.html#the-publish-field
+ */
+function shouldPublish(publish: string[] | null | boolean): boolean {
+  if (publish === null) {
+    return false;
+  } else if (typeof publish === "boolean") {
+    return publish;
+  } else {
+    return publish.length > 0;
+  }
 }
 
 /**

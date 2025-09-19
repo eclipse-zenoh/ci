@@ -102558,7 +102558,7 @@ function packages(path2, options) {
       name: elem.name,
       version: elem.version,
       manifestPath: elem.manifest_path,
-      publish: elem.publish == null ? void 0 : false,
+      publish: shouldPublish(elem.publish),
       workspaceDependencies: elem.dependencies.filter((dep) => "path" in dep).map(
         (dep) => ({
           name: dep.name,
@@ -102569,6 +102569,15 @@ function packages(path2, options) {
     });
   }
   return result;
+}
+function shouldPublish(publish) {
+  if (publish === null) {
+    return false;
+  } else if (typeof publish === "boolean") {
+    return publish;
+  } else {
+    return publish.length > 0;
+  }
 }
 function packagesDebian(path2) {
   const result = [];

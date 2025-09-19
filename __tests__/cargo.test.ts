@@ -60,7 +60,7 @@ describe("cargo", () => {
           name: "zenoh-bridge-ros2dds",
           version: "0.11.0-dev",
           manifestPath: `${tmp}/zenoh-bridge-ros2dds/Cargo.toml`,
-          publish: undefined,
+          publish: false,
           workspaceDependencies: [
             {
               name: "zenoh-plugin-ros2dds",
@@ -73,7 +73,7 @@ describe("cargo", () => {
           name: "zenoh-plugin-ros2dds",
           version: "0.11.0-dev",
           manifestPath: `${tmp}/zenoh-plugin-ros2dds/Cargo.toml`,
-          publish: undefined,
+          publish: false,
           workspaceDependencies: [],
         },
       ];
@@ -93,7 +93,7 @@ describe("cargo", () => {
         name: "zenoh-backend-s3",
         version: "0.11.0-dev",
         manifestPath: `${tmp}/Cargo.toml`,
-        publish: undefined,
+        publish: false,
         workspaceDependencies: [],
       },
     ];
