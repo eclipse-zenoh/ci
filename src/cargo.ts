@@ -86,9 +86,9 @@ export function packages(path: string, options?: CommandOptions): Package[] {
  *
  * See https://doc.rust-lang.org/cargo/reference/manifest.html#the-publish-field
  */
-function shouldPublish(publish: string[] | null | boolean): boolean {
+function shouldPublish(publish: string[] | null | boolean): boolean | undefined {
   if (publish === null) {
-    return false;
+    return undefined;
   } else if (typeof publish === "boolean") {
     return publish;
   } else {

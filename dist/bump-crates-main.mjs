@@ -63535,7 +63535,7 @@ function packages(path, options) {
 }
 function shouldPublish(publish) {
   if (publish === null) {
-    return false;
+    return void 0;
   } else if (typeof publish === "boolean") {
     return publish;
   } else {
