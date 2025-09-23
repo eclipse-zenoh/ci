@@ -14,6 +14,7 @@ export type Input = {
   repo: string;
   path?: string;
   toolchain?: string;
+  tag?: string;
   githubToken: string;
   bumpDepsPattern?: RegExp[];
   bumpDepsVersion?: string[];
@@ -27,6 +28,7 @@ export function setup(): Input {
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
   const toolchain = core.getInput("toolchain");
+  const tag = core.getInput("tag", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
   const bumpDepsBranch = core.getInput("bump-deps-branch");
   const bumpDepsPatternRaw = core.getMultilineInput("bump-deps-pattern");
@@ -58,6 +60,7 @@ export function setup(): Input {
     repo,
     path: path === "" ? undefined : path,
     toolchain: toolchain === "" ? "1.75.0" : toolchain, // Default to 1.75.0 to avoid updating Cargo.lock file version.
+    tag,
     githubToken,
     bumpDepsPattern,
     bumpDepsVersion,
@@ -108,7 +111,8 @@ export async function main(input: Input) {
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
 
     if (input.liveRun) {
-      sh(`git tag --force ${input.version} --message v${input.version}`, { cwd: repo, env: gitEnv });
+      const tag = input.tag === "" ? input.version : input.tag;
+      sh(`git tag --force ${tag} --message v${tag}`, { cwd: repo, env: gitEnv });
       sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
     }
 

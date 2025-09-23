@@ -13,6 +13,8 @@ inputs:
     required: false
   toolchain:
     required: false
+  tag:
+    required: false
   github-token:
     required: true
   bump-deps-pattern:
