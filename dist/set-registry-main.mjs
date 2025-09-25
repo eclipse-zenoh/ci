@@ -63561,6 +63561,7 @@ function setup() {
   const releaseBranch = core3.getInput("release-branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
   const path = core3.getInput("path");
+  const toolchain = core3.getInput("toolchain");
   const githubToken = core3.getInput("github-token", { required: true });
   const depsPattern = core3.getInput("deps-pattern");
   return {
@@ -63572,6 +63573,8 @@ function setup() {
     releaseBranch,
     repo,
     path: path === "" ? void 0 : path,
+    toolchain: toolchain === "" ? "1.75.0" : toolchain,
+    // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
     depsRegExp: depsPattern === "" ? new RegExp("$^") : new RegExp(depsPattern)
   };
@@ -63592,7 +63595,7 @@ async function main(input) {
     if (sh("git diff", { cwd: repo, check: false })) {
       sh("find . -name 'Cargo.toml*' | xargs git add", { cwd: repo });
       sh(`git commit --message 'chore: Update Cargo.toml to use ${input.registry}'`, { cwd: repo, env: gitEnv });
-      sh(`cargo check`, { cwd: repo });
+      sh(`cargo +${input.toolchain} check`, { cwd: repo });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
