@@ -328,6 +328,8 @@ export async function setGitBranch(
       ) {
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix.concat("dependencies", dep, "branch"), gitBranch);
+        // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
+        await toml.unset(manifestPath, prefix.concat("dependencies", dep, "registry"));
       }
     }
   }
@@ -343,6 +345,8 @@ export async function setGitBranch(
       ) {
         await toml.set(manifestPath, prefix.concat("build-dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix.concat("build-dependencies", dep, "branch"), gitBranch);
+        // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
+        await toml.unset(manifestPath, prefix.concat("dependencies", dep, "registry"));
       }
     }
   }
@@ -359,6 +363,8 @@ export async function setGitBranch(
         ) {
           await toml.set(manifestPath, prefix.concat("metadata", "bin", dep, "git"), gitUrl);
           await toml.set(manifestPath, prefix.concat("metadata", "bin", dep, "branch"), gitBranch);
+          // NOTE: Only one of `git` or `registry` is allowed, otherwise the specification is ambiguous
+          await toml.unset(manifestPath, prefix.concat("dependencies", dep, "registry"));
         }
       }
     }
