@@ -63526,6 +63526,7 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
       if (!(toml.get(manifestPath, prefix2.concat("dependencies", dep, "path")) || toml.get(manifestPath, prefix2.concat("dependencies", dep, "workspace")))) {
         await toml.set(manifestPath, prefix2.concat("dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix2.concat("dependencies", dep, "branch"), gitBranch);
+        await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
       }
     }
   }
@@ -63534,6 +63535,7 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
       if (!(toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "path")) || toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "workspace")))) {
         await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "branch"), gitBranch);
+        await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
       }
     }
   }
@@ -63543,6 +63545,7 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
         if (!(toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "path")) || toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "workspace")))) {
           await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "git"), gitUrl);
           await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "branch"), gitBranch);
+          await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
         }
       }
     }
