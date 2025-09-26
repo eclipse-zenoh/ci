@@ -63526,8 +63526,8 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
       if (!(toml.get(manifestPath, prefix2.concat("dependencies", dep, "path")) || toml.get(manifestPath, prefix2.concat("dependencies", dep, "workspace")))) {
         await toml.set(manifestPath, prefix2.concat("dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix2.concat("dependencies", dep, "branch"), gitBranch);
-        await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
       }
+      await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
     }
   }
   for (const dep in manifest["build-dependencies"]) {
@@ -63535,8 +63535,8 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
       if (!(toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "path")) || toml.get(manifestPath, prefix2.concat("build-dependencies", dep, "workspace")))) {
         await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "git"), gitUrl);
         await toml.set(manifestPath, prefix2.concat("build-dependencies", dep, "branch"), gitBranch);
-        await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
       }
+      await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
     }
   }
   if (manifest.metadata != void 0) {
@@ -63545,8 +63545,8 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
         if (!(toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "path")) || toml.get(manifestPath, prefix2.concat("metadata", "bin", dep, "workspace")))) {
           await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "git"), gitUrl);
           await toml.set(manifestPath, prefix2.concat("metadata", "bin", dep, "branch"), gitBranch);
-          await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
         }
+        await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "registry"));
       }
     }
   }
