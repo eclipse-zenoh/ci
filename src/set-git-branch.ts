@@ -13,6 +13,7 @@ export type Input = {
   repo: string;
   path?: string;
   githubToken: string;
+  githubUser?: string;
   depsRegExp: RegExp;
   depsGitUrl: string;
   depsBranch: string;
@@ -24,6 +25,7 @@ export function setup(): Input {
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
   const githubToken = core.getInput("github-token", { required: true });
+  const githubUser = core.getInput("github-user");
   const depsPattern = core.getInput("deps-pattern");
   const depsGitUrl = core.getInput("deps-git-url");
   const depsBranch = core.getInput("deps-branch");
@@ -34,6 +36,7 @@ export function setup(): Input {
     repo,
     path: path === "" ? undefined : path,
     githubToken,
+    githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
     depsGitUrl: depsGitUrl === "" ? undefined : depsGitUrl,
     depsBranch: depsBranch === "" ? undefined : depsBranch,
@@ -90,7 +93,7 @@ export async function main(input: Input) {
     // Avoid Cargo.lock conflicts by merging the main branch into the post-release branch keeping our changes.
     sh("git fetch origin main && git merge -Xours FETCH_HEAD --no-edit", { cwd: repo, env: gitEnv });
 
-    sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git push --force ${remote} ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
 
     await cleanup(input);
   } catch (error) {

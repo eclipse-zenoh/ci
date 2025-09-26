@@ -11,6 +11,9 @@ inputs:
     required: false
   github-token:
     required: true
+  github-user:
+    required: false
+    default: eclipse-zenoh-bot
   deps-pattern:
     required: true
   deps-git-url:

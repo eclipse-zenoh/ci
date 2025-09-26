@@ -63583,6 +63583,7 @@ function setup() {
   const repo = core3.getInput("repo", { required: true });
   const path = core3.getInput("path");
   const githubToken = core3.getInput("github-token", { required: true });
+  const githubUser = core3.getInput("github-user");
   const depsPattern = core3.getInput("deps-pattern");
   const depsGitUrl = core3.getInput("deps-git-url");
   const depsBranch = core3.getInput("deps-branch");
@@ -63592,6 +63593,7 @@ function setup() {
     repo,
     path: path === "" ? void 0 : path,
     githubToken,
+    githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern),
     depsGitUrl: depsGitUrl === "" ? void 0 : depsGitUrl,
     depsBranch: depsBranch === "" ? void 0 : depsBranch
@@ -63636,7 +63638,7 @@ async function main(input) {
       });
     }
     sh("git fetch origin main && git merge -Xours FETCH_HEAD --no-edit", { cwd: repo, env: gitEnv });
-    sh(`git push --force ${remote} eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git push --force ${remote} ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     await cleanup(input);
   } catch (error) {
     await cleanup(input);
