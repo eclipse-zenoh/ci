@@ -12,6 +12,7 @@ export type Input = {
   releaseBranch: string;
   repo: string;
   path?: string;
+  toolchain?: string;
   githubToken: string;
   githubUser?: string;
   depsRegExp: RegExp;
@@ -24,6 +25,7 @@ export function setup(): Input {
   const releaseBranch = core.getInput("release-branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
+  const toolchain = core.getInput("toolchain");
   const githubToken = core.getInput("github-token", { required: true });
   const githubUser = core.getInput("github-user");
   const depsPattern = core.getInput("deps-pattern");
@@ -35,6 +37,7 @@ export function setup(): Input {
     releaseBranch,
     repo,
     path: path === "" ? undefined : path,
+    toolchain: toolchain === "" ? "1.75.0" : toolchain, // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
@@ -50,7 +53,7 @@ export async function main(input: Input) {
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
 
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
-    sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
     // Correct Cargo.lock version to 1.75 toolchain compatible version
     const cargoLockPaths = sh(`find ${workspace} -name "Cargo.lock"`)
@@ -82,7 +85,10 @@ export async function main(input: Input) {
     }
 
     for (path of pathsToCheck) {
-      sh(`cargo check --manifest-path ${path}`);
+      gitEnv["CARGO_NET_GIT_FETCH_WITH_CLI"] = "true";
+      gitEnv["CARGO_HTTP_DEBUG"] = "true";
+      const p = path.replace(repo, "./");
+      sh(`cargo +${input.toolchain} check -vv --manifest-path ${p}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,

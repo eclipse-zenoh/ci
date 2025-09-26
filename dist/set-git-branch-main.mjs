@@ -63582,6 +63582,7 @@ function setup() {
   const releaseBranch = core3.getInput("release-branch", { required: true });
   const repo = core3.getInput("repo", { required: true });
   const path = core3.getInput("path");
+  const toolchain = core3.getInput("toolchain");
   const githubToken = core3.getInput("github-token", { required: true });
   const githubUser = core3.getInput("github-user");
   const depsPattern = core3.getInput("deps-pattern");
@@ -63592,6 +63593,8 @@ function setup() {
     releaseBranch,
     repo,
     path: path === "" ? void 0 : path,
+    toolchain: toolchain === "" ? "1.75.0" : toolchain,
+    // Default to 1.75.0 to avoid updating Cargo.lock file version.
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern),
@@ -63605,7 +63608,7 @@ async function main(input) {
     const workspace = input.path === void 0 ? repo : join2(repo, input.path);
     const remote = `https://${input.githubToken}@github.com/${input.repo}.git`;
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
-    sh(`git switch -c eclipse-zenoh-bot/post-release-${input.version}`, { cwd: repo });
+    sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
     const cargoLockPaths = sh(`find ${workspace} -name "Cargo.lock"`).split("\n").filter((r) => r);
     for (const path2 of cargoLockPaths) {
@@ -63629,7 +63632,10 @@ async function main(input) {
       }
     }
     for (path of pathsToCheck) {
-      sh(`cargo check --manifest-path ${path}`);
+      gitEnv["CARGO_NET_GIT_FETCH_WITH_CLI"] = "true";
+      gitEnv["CARGO_HTTP_DEBUG"] = "true";
+      const p = path.replace(repo, "./");
+      sh(`cargo +${input.toolchain} check -vv --manifest-path ${p}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
