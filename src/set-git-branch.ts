@@ -85,10 +85,9 @@ export async function main(input: Input) {
     }
 
     for (path of pathsToCheck) {
-      gitEnv["CARGO_NET_GIT_FETCH_WITH_CLI"] = "true";
-      gitEnv["CARGO_HTTP_DEBUG"] = "true";
-      const p = path.replace(repo, "./");
-      sh(`cargo +${input.toolchain} check -vv --manifest-path ${p}`, { cwd: repo, env: gitEnv });
+      // cargo check fails if not executed from the directory containing Cargo.toml even when using --manifest-path
+      // so we pass cwd as the repo root and use ../ in the manifest-path
+      sh(`cargo +${input.toolchain} check -vv --manifest-path ../${path}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,

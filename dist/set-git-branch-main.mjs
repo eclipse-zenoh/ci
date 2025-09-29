@@ -63632,10 +63632,7 @@ async function main(input) {
       }
     }
     for (path of pathsToCheck) {
-      gitEnv["CARGO_NET_GIT_FETCH_WITH_CLI"] = "true";
-      gitEnv["CARGO_HTTP_DEBUG"] = "true";
-      const p = path.replace(repo, "./");
-      sh(`cargo +${input.toolchain} check -vv --manifest-path ${p}`, { cwd: repo, env: gitEnv });
+      sh(`cargo +${input.toolchain} check -vv --manifest-path ../${path}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
