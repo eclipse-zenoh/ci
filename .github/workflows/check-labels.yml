@@ -22,7 +22,7 @@ jobs:
           import os
           import subprocess
 
-          required_labels = set(["breaking-change", "bug", "dependencies", "documentation", "enhancement", "new feature", "internal"])
+          required_labels = set(["api-sync", "breaking-change", "bug", "ci", "dependencies", "documentation", "enhancement", "new feature", "internal"])
 
           out = subprocess.check_output(["gh", "pr", "view", "${{ github.event.pull_request.number }}", "--json", "labels", "--repo", "${{ github.repository }}"])
           pr_labels = set([label["name"] for label in json.loads(out).get("labels")])
