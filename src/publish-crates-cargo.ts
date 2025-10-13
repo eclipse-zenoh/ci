@@ -4,6 +4,7 @@ import * as core from "@actions/core";
 
 import * as cargo from "./cargo";
 import { sh } from "./command";
+import * as kellnr from "./kellnr";
 
 export type Input = {
   liveRun: boolean;
@@ -92,6 +93,9 @@ export async function main(input: Input) {
       }
 
       publishFn(input, input.repo, input.branch);
+    } else {
+      const registry = await kellnr.spawn();
+      await publishToKellnr(input, input.repo, registry, input.branch);
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
@@ -134,6 +138,24 @@ function getPath(input: Input): string {
   }
   core.info(`Using path ${path}`);
   return path;
+}
+
+async function publishToKellnr(input: Input, repo: string, registry: kellnr.Kellnr, branch?: string) {
+  core.info("Publishing to Kellnr");
+  clone(input, repo, branch);
+  const path = getPath(input);
+
+  await cargo.configRegistry(path, registry.name, registry.index);
+  await cargo.setRegistry(path, input.unpublishedDepsRegExp, registry.name);
+
+  const env = {
+    CARGO_REGISTRIES_KELLNER_TOKEN: registry.token,
+    CARGO_REGISTRIES_KELLNER_INDEX: registry.index,
+    CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+    CARGO_REGISTRY_DEFAULT: "kellnr",
+  };
+
+  publish(path, env, true);
 }
 
 function publishToArtifactory(input: Input, repo: string, branch?: string) {

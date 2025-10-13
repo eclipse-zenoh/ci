@@ -18,8 +18,8 @@ var __commonJS = (cb, mod) => function __require2() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
+  for (var name2 in all)
+    __defProp(target, name2, { get: all[name2], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -119,8 +119,8 @@ var require_command = __commonJS({
       process.stdout.write(cmd.toString() + os3.EOL);
     }
     exports2.issueCommand = issueCommand;
-    function issue(name, message = "") {
-      issueCommand(name, {}, message);
+    function issue(name2, message = "") {
+      issueCommand(name2, {}, message);
     }
     exports2.issue = issue;
     var CMD_STRING = "::";
@@ -1583,14 +1583,14 @@ var require_getLimit = __commonJS({
   "node_modules/@fastify/busboy/lib/utils/getLimit.js"(exports2, module) {
     "use strict";
     init_esm_shims();
-    module.exports = function getLimit(limits, name, defaultLimit) {
-      if (!limits || limits[name] === void 0 || limits[name] === null) {
+    module.exports = function getLimit(limits, name2, defaultLimit) {
+      if (!limits || limits[name2] === void 0 || limits[name2] === null) {
         return defaultLimit;
       }
-      if (typeof limits[name] !== "number" || isNaN(limits[name])) {
-        throw new TypeError("Limit " + name + " is not a valid number");
+      if (typeof limits[name2] !== "number" || isNaN(limits[name2])) {
+        throw new TypeError("Limit " + name2 + " is not a valid number");
       }
-      return limits[name];
+      return limits[name2];
     };
   }
 });
@@ -3777,9 +3777,9 @@ var require_util2 = __commonJS({
       let policy = "";
       if (policyHeader.length > 0) {
         for (let i = policyHeader.length; i !== 0; i--) {
-          const token = policyHeader[i - 1].trim();
-          if (referrerPolicyTokens.has(token)) {
-            policy = token;
+          const token2 = policyHeader[i - 1].trim();
+          if (referrerPolicyTokens.has(token2)) {
+            policy = token2;
             break;
           }
         }
@@ -3989,9 +3989,9 @@ var require_util2 = __commonJS({
     function parseMetadata(metadata2) {
       const result = [];
       let empty = true;
-      for (const token of metadata2.split(" ")) {
+      for (const token2 of metadata2.split(" ")) {
         empty = false;
-        const parsedToken = parseHashWithOptions.exec(token);
+        const parsedToken = parseHashWithOptions.exec(token2);
         if (parsedToken === null || parsedToken.groups === void 0 || parsedToken.groups.algo === void 0) {
           continue;
         }
@@ -4103,7 +4103,7 @@ var require_util2 = __commonJS({
       return result;
     }
     var esIteratorPrototype = Object.getPrototypeOf(Object.getPrototypeOf([][Symbol.iterator]()));
-    function makeIterator(iterator, name, kind) {
+    function makeIterator(iterator, name2, kind) {
       const object = {
         index: 0,
         kind,
@@ -4113,22 +4113,22 @@ var require_util2 = __commonJS({
         next() {
           if (Object.getPrototypeOf(this) !== i) {
             throw new TypeError(
-              `'next' called on an object that does not implement interface ${name} Iterator.`
+              `'next' called on an object that does not implement interface ${name2} Iterator.`
             );
           }
-          const { index, kind: kind2, target } = object;
+          const { index: index2, kind: kind2, target } = object;
           const values = target();
           const len = values.length;
-          if (index >= len) {
+          if (index2 >= len) {
             return { value: void 0, done: true };
           }
-          const pair = values[index];
-          object.index = index + 1;
+          const pair = values[index2];
+          object.index = index2 + 1;
           return iteratorResult(pair, kind2);
         },
         // The class string of an iterator prototype object for a given interface is the
         // result of concatenating the identifier of the interface and the string " Iterator".
-        [Symbol.toStringTag]: `${name} Iterator`
+        [Symbol.toStringTag]: `${name2} Iterator`
       };
       Object.setPrototypeOf(i, esIteratorPrototype);
       return Object.setPrototypeOf({}, i);
@@ -4557,10 +4557,10 @@ var require_webidl = __commonJS({
     };
     webidl.converters.ByteString = function(V) {
       const x = webidl.converters.DOMString(V);
-      for (let index = 0; index < x.length; index++) {
-        if (x.charCodeAt(index) > 255) {
+      for (let index2 = 0; index2 < x.length; index2++) {
+        if (x.charCodeAt(index2) > 255) {
           throw new TypeError(
-            `Cannot convert argument to a ByteString because the character at index ${index} has a value of ${x.charCodeAt(index)} which is greater than 255.`
+            `Cannot convert argument to a ByteString because the character at index ${index2} has a value of ${x.charCodeAt(index2)} which is greater than 255.`
           );
         }
       }
@@ -4897,9 +4897,9 @@ var require_dataURL = __commonJS({
       assert2(mimeType !== "failure");
       const { parameters, essence } = mimeType;
       let serialization = essence;
-      for (let [name, value] of parameters.entries()) {
+      for (let [name2, value] of parameters.entries()) {
         serialization += ";";
-        serialization += name;
+        serialization += name2;
         serialization += "=";
         if (!HTTP_TOKEN_CODEPOINTS.test(value)) {
           value = value.replace(/(\\|")/g, "\\$1");
@@ -5160,7 +5160,7 @@ var require_formdata = __commonJS({
         }
         this[kState] = [];
       }
-      append(name, value, filename = void 0) {
+      append(name2, value, filename = void 0) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 2, { header: "FormData.append" });
         if (arguments.length === 3 && !isBlobLike(value)) {
@@ -5168,41 +5168,41 @@ var require_formdata = __commonJS({
             "Failed to execute 'append' on 'FormData': parameter 2 is not of type 'Blob'"
           );
         }
-        name = webidl.converters.USVString(name);
+        name2 = webidl.converters.USVString(name2);
         value = isBlobLike(value) ? webidl.converters.Blob(value, { strict: false }) : webidl.converters.USVString(value);
         filename = arguments.length === 3 ? webidl.converters.USVString(filename) : void 0;
-        const entry = makeEntry(name, value, filename);
+        const entry = makeEntry(name2, value, filename);
         this[kState].push(entry);
       }
-      delete(name) {
+      delete(name2) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 1, { header: "FormData.delete" });
-        name = webidl.converters.USVString(name);
-        this[kState] = this[kState].filter((entry) => entry.name !== name);
+        name2 = webidl.converters.USVString(name2);
+        this[kState] = this[kState].filter((entry) => entry.name !== name2);
       }
-      get(name) {
+      get(name2) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 1, { header: "FormData.get" });
-        name = webidl.converters.USVString(name);
-        const idx = this[kState].findIndex((entry) => entry.name === name);
+        name2 = webidl.converters.USVString(name2);
+        const idx = this[kState].findIndex((entry) => entry.name === name2);
         if (idx === -1) {
           return null;
         }
         return this[kState][idx].value;
       }
-      getAll(name) {
+      getAll(name2) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 1, { header: "FormData.getAll" });
-        name = webidl.converters.USVString(name);
-        return this[kState].filter((entry) => entry.name === name).map((entry) => entry.value);
+        name2 = webidl.converters.USVString(name2);
+        return this[kState].filter((entry) => entry.name === name2).map((entry) => entry.value);
       }
-      has(name) {
+      has(name2) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 1, { header: "FormData.has" });
-        name = webidl.converters.USVString(name);
-        return this[kState].findIndex((entry) => entry.name === name) !== -1;
+        name2 = webidl.converters.USVString(name2);
+        return this[kState].findIndex((entry) => entry.name === name2) !== -1;
       }
-      set(name, value, filename = void 0) {
+      set(name2, value, filename = void 0) {
         webidl.brandCheck(this, _FormData);
         webidl.argumentLengthCheck(arguments, 2, { header: "FormData.set" });
         if (arguments.length === 3 && !isBlobLike(value)) {
@@ -5210,16 +5210,16 @@ var require_formdata = __commonJS({
             "Failed to execute 'set' on 'FormData': parameter 2 is not of type 'Blob'"
           );
         }
-        name = webidl.converters.USVString(name);
+        name2 = webidl.converters.USVString(name2);
         value = isBlobLike(value) ? webidl.converters.Blob(value, { strict: false }) : webidl.converters.USVString(value);
         filename = arguments.length === 3 ? toUSVString(filename) : void 0;
-        const entry = makeEntry(name, value, filename);
-        const idx = this[kState].findIndex((entry2) => entry2.name === name);
+        const entry = makeEntry(name2, value, filename);
+        const idx = this[kState].findIndex((entry2) => entry2.name === name2);
         if (idx !== -1) {
           this[kState] = [
             ...this[kState].slice(0, idx),
             entry,
-            ...this[kState].slice(idx + 1).filter((entry2) => entry2.name !== name)
+            ...this[kState].slice(idx + 1).filter((entry2) => entry2.name !== name2)
           ];
         } else {
           this[kState].push(entry);
@@ -5273,8 +5273,8 @@ var require_formdata = __commonJS({
         configurable: true
       }
     });
-    function makeEntry(name, value, filename) {
-      name = Buffer.from(name).toString("utf8");
+    function makeEntry(name2, value, filename) {
+      name2 = Buffer.from(name2).toString("utf8");
       if (typeof value === "string") {
         value = Buffer.from(value).toString("utf8");
       } else {
@@ -5289,7 +5289,7 @@ var require_formdata = __commonJS({
           value = NativeFile && value instanceof NativeFile || value instanceof UndiciFile ? new File2([value], filename, options) : new FileLike(value, filename, options);
         }
       }
-      return { name, value };
+      return { name: name2, value };
     }
     module.exports = { FormData: FormData2 };
   }
@@ -5379,16 +5379,16 @@ Content-Disposition: form-data`;
         const rn = new Uint8Array([13, 10]);
         length = 0;
         let hasUnknownSizeValue = false;
-        for (const [name, value] of object) {
+        for (const [name2, value] of object) {
           if (typeof value === "string") {
-            const chunk2 = textEncoder.encode(prefix2 + `; name="${escape2(normalizeLinefeeds(name))}"\r
+            const chunk2 = textEncoder.encode(prefix2 + `; name="${escape2(normalizeLinefeeds(name2))}"\r
 \r
 ${normalizeLinefeeds(value)}\r
 `);
             blobParts.push(chunk2);
             length += chunk2.byteLength;
           } else {
-            const chunk2 = textEncoder.encode(`${prefix2}; name="${escape2(normalizeLinefeeds(name))}"` + (value.name ? `; filename="${escape2(value.name)}"` : "") + `\r
+            const chunk2 = textEncoder.encode(`${prefix2}; name="${escape2(normalizeLinefeeds(name2))}"` + (value.name ? `; filename="${escape2(value.name)}"` : "") + `\r
 Content-Type: ${value.type || "application/octet-stream"}\r
 \r
 `);
@@ -5549,10 +5549,10 @@ Content-Type: ${value.type || "application/octet-stream"}\r
             } catch (err) {
               throw new DOMException2(`${err}`, "AbortError");
             }
-            busboy.on("field", (name, value) => {
-              responseFormData.append(name, value);
+            busboy.on("field", (name2, value) => {
+              responseFormData.append(name2, value);
             });
-            busboy.on("file", (name, value, filename, encoding, mimeType) => {
+            busboy.on("file", (name2, value, filename, encoding, mimeType) => {
               const chunks = [];
               if (encoding === "base64" || encoding.toLowerCase() === "base64") {
                 let base64chunk = "";
@@ -5564,14 +5564,14 @@ Content-Type: ${value.type || "application/octet-stream"}\r
                 });
                 value.on("end", () => {
                   chunks.push(Buffer.from(base64chunk, "base64"));
-                  responseFormData.append(name, new File2(chunks, filename, { type: mimeType }));
+                  responseFormData.append(name2, new File2(chunks, filename, { type: mimeType }));
                 });
               } else {
                 value.on("data", (chunk) => {
                   chunks.push(chunk);
                 });
                 value.on("end", () => {
-                  responseFormData.append(name, new File2(chunks, filename, { type: mimeType }));
+                  responseFormData.append(name2, new File2(chunks, filename, { type: mimeType }));
                 });
               }
             });
@@ -5600,8 +5600,8 @@ Content-Type: ${value.type || "application/octet-stream"}\r
               throw Object.assign(new TypeError(), { cause: err });
             }
             const formData = new FormData2();
-            for (const [name, value] of entries) {
-              formData.append(name, value);
+            for (const [name2, value] of entries) {
+              formData.append(name2, value);
             }
             return formData;
           } else {
@@ -6853,8 +6853,8 @@ var require_RedirectHandler = __commonJS({
         return true;
       }
       if (unknownOrigin && (header.length === 13 || header.length === 6 || header.length === 19)) {
-        const name = util3.headerNameToString(header);
-        return name === "authorization" || name === "cookie" || name === "proxy-authorization";
+        const name2 = util3.headerNameToString(header);
+        return name2 === "authorization" || name2 === "cookie" || name2 === "proxy-authorization";
       }
       return false;
     }
@@ -10438,8 +10438,8 @@ var require_mock_utils = __commonJS({
     function buildHeadersFromArray(headers) {
       const clone2 = headers.slice();
       const entries = [];
-      for (let index = 0; index < clone2.length; index += 2) {
-        entries.push([clone2[index], clone2[index + 1]]);
+      for (let index2 = 0; index2 < clone2.length; index2 += 2) {
+        entries.push([clone2[index2], clone2[index2 + 1]]);
       }
       return Object.fromEntries(entries);
     }
@@ -10521,14 +10521,14 @@ var require_mock_utils = __commonJS({
       return newMockDispatch;
     }
     function deleteMockDispatch(mockDispatches, key) {
-      const index = mockDispatches.findIndex((dispatch) => {
+      const index2 = mockDispatches.findIndex((dispatch) => {
         if (!dispatch.consumed) {
           return false;
         }
         return matchKey(dispatch, key);
       });
-      if (index !== -1) {
-        mockDispatches.splice(index, 1);
+      if (index2 !== -1) {
+        mockDispatches.splice(index2, 1);
       }
     }
     function buildKey(opts) {
@@ -11685,12 +11685,12 @@ var require_headers = __commonJS({
         });
       }
     }
-    function appendHeader(headers, name, value) {
+    function appendHeader(headers, name2, value) {
       value = headerValueNormalize(value);
-      if (!isValidHeaderName(name)) {
+      if (!isValidHeaderName(name2)) {
         throw webidl.errors.invalidArgument({
           prefix: "Headers.append",
-          value: name,
+          value: name2,
           type: "header name"
         });
       } else if (!isValidHeaderValue(value)) {
@@ -11704,7 +11704,7 @@ var require_headers = __commonJS({
         throw new TypeError("immutable");
       } else if (headers[kGuard] === "request-no-cors") {
       }
-      return headers[kHeadersList].append(name, value);
+      return headers[kHeadersList].append(name2, value);
     }
     var HeadersList = class _HeadersList {
       /** @type {[string, string][]|null} */
@@ -11720,9 +11720,9 @@ var require_headers = __commonJS({
         }
       }
       // https://fetch.spec.whatwg.org/#header-list-contains
-      contains(name) {
-        name = name.toLowerCase();
-        return this[kHeadersMap].has(name);
+      contains(name2) {
+        name2 = name2.toLowerCase();
+        return this[kHeadersMap].has(name2);
       }
       clear() {
         this[kHeadersMap].clear();
@@ -11730,9 +11730,9 @@ var require_headers = __commonJS({
         this.cookies = null;
       }
       // https://fetch.spec.whatwg.org/#concept-header-list-append
-      append(name, value) {
+      append(name2, value) {
         this[kHeadersSortedMap] = null;
-        const lowercaseName = name.toLowerCase();
+        const lowercaseName = name2.toLowerCase();
         const exists = this[kHeadersMap].get(lowercaseName);
         if (exists) {
           const delimiter2 = lowercaseName === "cookie" ? "; " : ", ";
@@ -11741,7 +11741,7 @@ var require_headers = __commonJS({
             value: `${exists.value}${delimiter2}${value}`
           });
         } else {
-          this[kHeadersMap].set(lowercaseName, { name, value });
+          this[kHeadersMap].set(lowercaseName, { name: name2, value });
         }
         if (lowercaseName === "set-cookie") {
           this.cookies ??= [];
@@ -11749,38 +11749,38 @@ var require_headers = __commonJS({
         }
       }
       // https://fetch.spec.whatwg.org/#concept-header-list-set
-      set(name, value) {
+      set(name2, value) {
         this[kHeadersSortedMap] = null;
-        const lowercaseName = name.toLowerCase();
+        const lowercaseName = name2.toLowerCase();
         if (lowercaseName === "set-cookie") {
           this.cookies = [value];
         }
-        this[kHeadersMap].set(lowercaseName, { name, value });
+        this[kHeadersMap].set(lowercaseName, { name: name2, value });
       }
       // https://fetch.spec.whatwg.org/#concept-header-list-delete
-      delete(name) {
+      delete(name2) {
         this[kHeadersSortedMap] = null;
-        name = name.toLowerCase();
-        if (name === "set-cookie") {
+        name2 = name2.toLowerCase();
+        if (name2 === "set-cookie") {
           this.cookies = null;
         }
-        this[kHeadersMap].delete(name);
+        this[kHeadersMap].delete(name2);
       }
       // https://fetch.spec.whatwg.org/#concept-header-list-get
-      get(name) {
-        const value = this[kHeadersMap].get(name.toLowerCase());
+      get(name2) {
+        const value = this[kHeadersMap].get(name2.toLowerCase());
         return value === void 0 ? null : value.value;
       }
       *[Symbol.iterator]() {
-        for (const [name, { value }] of this[kHeadersMap]) {
-          yield [name, value];
+        for (const [name2, { value }] of this[kHeadersMap]) {
+          yield [name2, value];
         }
       }
       get entries() {
         const headers = {};
         if (this[kHeadersMap].size) {
-          for (const { name, value } of this[kHeadersMap].values()) {
-            headers[name] = value;
+          for (const { name: name2, value } of this[kHeadersMap].values()) {
+            headers[name2] = value;
           }
         }
         return headers;
@@ -11799,22 +11799,22 @@ var require_headers = __commonJS({
         }
       }
       // https://fetch.spec.whatwg.org/#dom-headers-append
-      append(name, value) {
+      append(name2, value) {
         webidl.brandCheck(this, _Headers);
         webidl.argumentLengthCheck(arguments, 2, { header: "Headers.append" });
-        name = webidl.converters.ByteString(name);
+        name2 = webidl.converters.ByteString(name2);
         value = webidl.converters.ByteString(value);
-        return appendHeader(this, name, value);
+        return appendHeader(this, name2, value);
       }
       // https://fetch.spec.whatwg.org/#dom-headers-delete
-      delete(name) {
+      delete(name2) {
         webidl.brandCheck(this, _Headers);
         webidl.argumentLengthCheck(arguments, 1, { header: "Headers.delete" });
-        name = webidl.converters.ByteString(name);
-        if (!isValidHeaderName(name)) {
+        name2 = webidl.converters.ByteString(name2);
+        if (!isValidHeaderName(name2)) {
           throw webidl.errors.invalidArgument({
             prefix: "Headers.delete",
-            value: name,
+            value: name2,
             type: "header name"
           });
         }
@@ -11822,50 +11822,50 @@ var require_headers = __commonJS({
           throw new TypeError("immutable");
         } else if (this[kGuard] === "request-no-cors") {
         }
-        if (!this[kHeadersList].contains(name)) {
+        if (!this[kHeadersList].contains(name2)) {
           return;
         }
-        this[kHeadersList].delete(name);
+        this[kHeadersList].delete(name2);
       }
       // https://fetch.spec.whatwg.org/#dom-headers-get
-      get(name) {
+      get(name2) {
         webidl.brandCheck(this, _Headers);
         webidl.argumentLengthCheck(arguments, 1, { header: "Headers.get" });
-        name = webidl.converters.ByteString(name);
-        if (!isValidHeaderName(name)) {
+        name2 = webidl.converters.ByteString(name2);
+        if (!isValidHeaderName(name2)) {
           throw webidl.errors.invalidArgument({
             prefix: "Headers.get",
-            value: name,
+            value: name2,
             type: "header name"
           });
         }
-        return this[kHeadersList].get(name);
+        return this[kHeadersList].get(name2);
       }
       // https://fetch.spec.whatwg.org/#dom-headers-has
-      has(name) {
+      has(name2) {
         webidl.brandCheck(this, _Headers);
         webidl.argumentLengthCheck(arguments, 1, { header: "Headers.has" });
-        name = webidl.converters.ByteString(name);
-        if (!isValidHeaderName(name)) {
+        name2 = webidl.converters.ByteString(name2);
+        if (!isValidHeaderName(name2)) {
           throw webidl.errors.invalidArgument({
             prefix: "Headers.has",
-            value: name,
+            value: name2,
             type: "header name"
           });
         }
-        return this[kHeadersList].contains(name);
+        return this[kHeadersList].contains(name2);
       }
       // https://fetch.spec.whatwg.org/#dom-headers-set
-      set(name, value) {
+      set(name2, value) {
         webidl.brandCheck(this, _Headers);
         webidl.argumentLengthCheck(arguments, 2, { header: "Headers.set" });
-        name = webidl.converters.ByteString(name);
+        name2 = webidl.converters.ByteString(name2);
         value = webidl.converters.ByteString(value);
         value = headerValueNormalize(value);
-        if (!isValidHeaderName(name)) {
+        if (!isValidHeaderName(name2)) {
           throw webidl.errors.invalidArgument({
             prefix: "Headers.set",
-            value: name,
+            value: name2,
             type: "header name"
           });
         } else if (!isValidHeaderValue(value)) {
@@ -11879,7 +11879,7 @@ var require_headers = __commonJS({
           throw new TypeError("immutable");
         } else if (this[kGuard] === "request-no-cors") {
         }
-        this[kHeadersList].set(name, value);
+        this[kHeadersList].set(name2, value);
       }
       // https://fetch.spec.whatwg.org/#dom-headers-getsetcookie
       getSetCookie() {
@@ -11899,14 +11899,14 @@ var require_headers = __commonJS({
         const names = [...this[kHeadersList]].sort((a, b) => a[0] < b[0] ? -1 : 1);
         const cookies = this[kHeadersList].cookies;
         for (let i = 0; i < names.length; ++i) {
-          const [name, value] = names[i];
-          if (name === "set-cookie") {
+          const [name2, value] = names[i];
+          if (name2 === "set-cookie") {
             for (let j = 0; j < cookies.length; ++j) {
-              headers.push([name, cookies[j]]);
+              headers.push([name2, cookies[j]]);
             }
           } else {
             assert2(value !== null);
-            headers.push([name, value]);
+            headers.push([name2, value]);
           }
         }
         this[kHeadersList][kHeadersSortedMap] = headers;
@@ -12462,12 +12462,12 @@ var require_request2 = __commonJS({
         };
         let request3 = null;
         let fallbackMode = null;
-        const baseUrl = this[kRealm].settingsObject.baseUrl;
+        const baseUrl2 = this[kRealm].settingsObject.baseUrl;
         let signal = null;
         if (typeof input === "string") {
           let parsedURL;
           try {
-            parsedURL = new URL(input, baseUrl);
+            parsedURL = new URL(input, baseUrl2);
           } catch (err) {
             throw new TypeError("Failed to parse URL from " + input, { cause: err });
           }
@@ -12557,7 +12557,7 @@ var require_request2 = __commonJS({
           } else {
             let parsedReferrer;
             try {
-              parsedReferrer = new URL(referrer, baseUrl);
+              parsedReferrer = new URL(referrer, baseUrl2);
             } catch (err) {
               throw new TypeError(`Referrer "${referrer}" is not a valid URL.`, { cause: err });
             }
@@ -15099,18 +15099,18 @@ var require_cache = __commonJS({
         const p = Promise.all(responsePromises);
         const responses = await p;
         const operations = [];
-        let index = 0;
+        let index2 = 0;
         for (const response of responses) {
           const operation = {
             type: "put",
             // 7.3.2
-            request: requestList[index],
+            request: requestList[index2],
             // 7.3.3
             response
             // 7.3.4
           };
           operations.push(operation);
-          index++;
+          index2++;
         }
         const cacheJobPromise = createDeferredPromise();
         let errorData = null;
@@ -15614,8 +15614,8 @@ var require_util6 = __commonJS({
         }
       }
     }
-    function validateCookieName(name) {
-      for (const char of name) {
+    function validateCookieName(name2) {
+      for (const char of name2) {
         const code = char.charCodeAt(0);
         if (code <= 32 || code > 127 || char === "(" || char === ")" || char === ">" || char === "<" || char === "@" || char === "," || char === ";" || char === ":" || char === "\\" || char === '"' || char === "/" || char === "[" || char === "]" || char === "?" || char === "=" || char === "{" || char === "}") {
           throw new Error("Invalid cookie name");
@@ -15759,7 +15759,7 @@ var require_parse = __commonJS({
       }
       let nameValuePair = "";
       let unparsedAttributes = "";
-      let name = "";
+      let name2 = "";
       let value = "";
       if (header.includes(";")) {
         const position = { position: 0 };
@@ -15772,20 +15772,20 @@ var require_parse = __commonJS({
         value = nameValuePair;
       } else {
         const position = { position: 0 };
-        name = collectASequenceOfCodePointsFast(
+        name2 = collectASequenceOfCodePointsFast(
           "=",
           nameValuePair,
           position
         );
         value = nameValuePair.slice(position.position + 1);
       }
-      name = name.trim();
+      name2 = name2.trim();
       value = value.trim();
-      if (name.length + value.length > maxNameValuePairSize) {
+      if (name2.length + value.length > maxNameValuePairSize) {
         return null;
       }
       return {
-        name,
+        name: name2,
         value,
         ...parseUnparsedAttributes(unparsedAttributes)
       };
@@ -15903,18 +15903,18 @@ var require_cookies = __commonJS({
         return out;
       }
       for (const piece of cookie.split(";")) {
-        const [name, ...value] = piece.split("=");
-        out[name.trim()] = value.join("=");
+        const [name2, ...value] = piece.split("=");
+        out[name2.trim()] = value.join("=");
       }
       return out;
     }
-    function deleteCookie(headers, name, attributes) {
+    function deleteCookie(headers, name2, attributes) {
       webidl.argumentLengthCheck(arguments, 2, { header: "deleteCookie" });
       webidl.brandCheck(headers, Headers, { strict: false });
-      name = webidl.converters.DOMString(name);
+      name2 = webidl.converters.DOMString(name2);
       attributes = webidl.converters.DeleteCookieAttributes(attributes);
       setCookie(headers, {
-        name,
+        name: name2,
         value: "",
         expires: /* @__PURE__ */ new Date(0),
         ...attributes
@@ -17700,12 +17700,12 @@ var require_lib = __commonJS({
             throw new Error("Client has already been disposed.");
           }
           const parsedUrl = new URL(requestUrl);
-          let info4 = this._prepareRequest(verb, parsedUrl, headers);
+          let info5 = this._prepareRequest(verb, parsedUrl, headers);
           const maxTries = this._allowRetries && RetryableHttpVerbs.includes(verb) ? this._maxRetries + 1 : 1;
           let numTries = 0;
           let response;
           do {
-            response = yield this.requestRaw(info4, data);
+            response = yield this.requestRaw(info5, data);
             if (response && response.message && response.message.statusCode === HttpCodes.Unauthorized) {
               let authenticationHandler;
               for (const handler of this.handlers) {
@@ -17715,7 +17715,7 @@ var require_lib = __commonJS({
                 }
               }
               if (authenticationHandler) {
-                return authenticationHandler.handleAuthentication(this, info4, data);
+                return authenticationHandler.handleAuthentication(this, info5, data);
               } else {
                 return response;
               }
@@ -17738,8 +17738,8 @@ var require_lib = __commonJS({
                   }
                 }
               }
-              info4 = this._prepareRequest(verb, parsedRedirectUrl, headers);
-              response = yield this.requestRaw(info4, data);
+              info5 = this._prepareRequest(verb, parsedRedirectUrl, headers);
+              response = yield this.requestRaw(info5, data);
               redirectsRemaining--;
             }
             if (!response.message.statusCode || !HttpResponseRetryCodes.includes(response.message.statusCode)) {
@@ -17768,7 +17768,7 @@ var require_lib = __commonJS({
        * @param info
        * @param data
        */
-      requestRaw(info4, data) {
+      requestRaw(info5, data) {
         return __awaiter6(this, void 0, void 0, function* () {
           return new Promise((resolve, reject) => {
             function callbackForResult(err, res) {
@@ -17780,7 +17780,7 @@ var require_lib = __commonJS({
                 resolve(res);
               }
             }
-            this.requestRawWithCallback(info4, data, callbackForResult);
+            this.requestRawWithCallback(info5, data, callbackForResult);
           });
         });
       }
@@ -17790,12 +17790,12 @@ var require_lib = __commonJS({
        * @param data
        * @param onResult
        */
-      requestRawWithCallback(info4, data, onResult) {
+      requestRawWithCallback(info5, data, onResult) {
         if (typeof data === "string") {
-          if (!info4.options.headers) {
-            info4.options.headers = {};
+          if (!info5.options.headers) {
+            info5.options.headers = {};
           }
-          info4.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
+          info5.options.headers["Content-Length"] = Buffer.byteLength(data, "utf8");
         }
         let callbackCalled = false;
         function handleResult(err, res) {
@@ -17804,7 +17804,7 @@ var require_lib = __commonJS({
             onResult(err, res);
           }
         }
-        const req = info4.httpModule.request(info4.options, (msg) => {
+        const req = info5.httpModule.request(info5.options, (msg) => {
           const res = new HttpClientResponse(msg);
           handleResult(void 0, res);
         });
@@ -17816,7 +17816,7 @@ var require_lib = __commonJS({
           if (socket) {
             socket.end();
           }
-          handleResult(new Error(`Request timeout: ${info4.options.path}`));
+          handleResult(new Error(`Request timeout: ${info5.options.path}`));
         });
         req.on("error", function(err) {
           handleResult(err);
@@ -17852,27 +17852,27 @@ var require_lib = __commonJS({
         return this._getProxyAgentDispatcher(parsedUrl, proxyUrl);
       }
       _prepareRequest(method, requestUrl, headers) {
-        const info4 = {};
-        info4.parsedUrl = requestUrl;
-        const usingSsl = info4.parsedUrl.protocol === "https:";
-        info4.httpModule = usingSsl ? https2 : http2;
+        const info5 = {};
+        info5.parsedUrl = requestUrl;
+        const usingSsl = info5.parsedUrl.protocol === "https:";
+        info5.httpModule = usingSsl ? https2 : http2;
         const defaultPort = usingSsl ? 443 : 80;
-        info4.options = {};
-        info4.options.host = info4.parsedUrl.hostname;
-        info4.options.port = info4.parsedUrl.port ? parseInt(info4.parsedUrl.port) : defaultPort;
-        info4.options.path = (info4.parsedUrl.pathname || "") + (info4.parsedUrl.search || "");
-        info4.options.method = method;
-        info4.options.headers = this._mergeHeaders(headers);
+        info5.options = {};
+        info5.options.host = info5.parsedUrl.hostname;
+        info5.options.port = info5.parsedUrl.port ? parseInt(info5.parsedUrl.port) : defaultPort;
+        info5.options.path = (info5.parsedUrl.pathname || "") + (info5.parsedUrl.search || "");
+        info5.options.method = method;
+        info5.options.headers = this._mergeHeaders(headers);
         if (this.userAgent != null) {
-          info4.options.headers["user-agent"] = this.userAgent;
+          info5.options.headers["user-agent"] = this.userAgent;
         }
-        info4.options.agent = this._getAgent(info4.parsedUrl);
+        info5.options.agent = this._getAgent(info5.parsedUrl);
         if (this.handlers) {
           for (const handler of this.handlers) {
-            handler.prepareRequest(info4.options);
+            handler.prepareRequest(info5.options);
           }
         }
-        return info4;
+        return info5;
       }
       _mergeHeaders(headers) {
         if (this.requestOptions && this.requestOptions.headers) {
@@ -18079,8 +18079,8 @@ var require_auth = __commonJS({
     };
     exports2.BasicCredentialHandler = BasicCredentialHandler;
     var BearerCredentialHandler = class {
-      constructor(token) {
-        this.token = token;
+      constructor(token2) {
+        this.token = token2;
       }
       // currently implements pre-authorization
       // TODO: support preAuth = false where it hooks on 401
@@ -18102,8 +18102,8 @@ var require_auth = __commonJS({
     };
     exports2.BearerCredentialHandler = BearerCredentialHandler;
     var PersonalAccessTokenCredentialHandler = class {
-      constructor(token) {
-        this.token = token;
+      constructor(token2) {
+        this.token = token2;
       }
       // currently implements pre-authorization
       // TODO: support preAuth = false where it hooks on 401
@@ -18173,11 +18173,11 @@ var require_oidc_utils = __commonJS({
         return new http_client_1.HttpClient("actions/oidc-client", [new auth_1.BearerCredentialHandler(_OidcClient.getRequestToken())], requestOptions);
       }
       static getRequestToken() {
-        const token = process.env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"];
-        if (!token) {
+        const token2 = process.env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"];
+        if (!token2) {
           throw new Error("Unable to get ACTIONS_ID_TOKEN_REQUEST_TOKEN env variable");
         }
-        return token;
+        return token2;
       }
       static getIDTokenUrl() {
         const runtimeUrl = process.env["ACTIONS_ID_TOKEN_REQUEST_URL"];
@@ -19657,11 +19657,11 @@ var require_platform = __commonJS({
       const { stdout: version2 } = yield exec2.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Version"', void 0, {
         silent: true
       });
-      const { stdout: name } = yield exec2.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
+      const { stdout: name2 } = yield exec2.getExecOutput('powershell -command "(Get-CimInstance -ClassName Win32_OperatingSystem).Caption"', void 0, {
         silent: true
       });
       return {
-        name: name.trim(),
+        name: name2.trim(),
         version: version2.trim()
       };
     });
@@ -19671,9 +19671,9 @@ var require_platform = __commonJS({
         silent: true
       });
       const version2 = (_b2 = (_a3 = stdout.match(/ProductVersion:\s*(.+)/)) === null || _a3 === void 0 ? void 0 : _a3[1]) !== null && _b2 !== void 0 ? _b2 : "";
-      const name = (_d2 = (_c2 = stdout.match(/ProductName:\s*(.+)/)) === null || _c2 === void 0 ? void 0 : _c2[1]) !== null && _d2 !== void 0 ? _d2 : "";
+      const name2 = (_d2 = (_c2 = stdout.match(/ProductName:\s*(.+)/)) === null || _c2 === void 0 ? void 0 : _c2[1]) !== null && _d2 !== void 0 ? _d2 : "";
       return {
-        name,
+        name: name2,
         version: version2
       };
     });
@@ -19681,9 +19681,9 @@ var require_platform = __commonJS({
       const { stdout } = yield exec2.getExecOutput("lsb_release", ["-i", "-r", "-s"], {
         silent: true
       });
-      const [name, version2] = stdout.trim().split("\n");
+      const [name2, version2] = stdout.trim().split("\n");
       return {
-        name,
+        name: name2,
         version: version2
       };
     });
@@ -19779,14 +19779,14 @@ var require_core = __commonJS({
       ExitCode2[ExitCode2["Success"] = 0] = "Success";
       ExitCode2[ExitCode2["Failure"] = 1] = "Failure";
     })(ExitCode || (exports2.ExitCode = ExitCode = {}));
-    function exportVariable(name, val) {
+    function exportVariable(name2, val) {
       const convertedVal = (0, utils_1.toCommandValue)(val);
-      process.env[name] = convertedVal;
+      process.env[name2] = convertedVal;
       const filePath = process.env["GITHUB_ENV"] || "";
       if (filePath) {
-        return (0, file_command_1.issueFileCommand)("ENV", (0, file_command_1.prepareKeyValueMessage)(name, val));
+        return (0, file_command_1.issueFileCommand)("ENV", (0, file_command_1.prepareKeyValueMessage)(name2, val));
       }
-      (0, command_1.issueCommand)("set-env", { name }, convertedVal);
+      (0, command_1.issueCommand)("set-env", { name: name2 }, convertedVal);
     }
     exports2.exportVariable = exportVariable;
     function setSecret(secret) {
@@ -19803,10 +19803,10 @@ var require_core = __commonJS({
       process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
     }
     exports2.addPath = addPath;
-    function getInput2(name, options) {
-      const val = process.env[`INPUT_${name.replace(/ /g, "_").toUpperCase()}`] || "";
+    function getInput2(name2, options) {
+      const val = process.env[`INPUT_${name2.replace(/ /g, "_").toUpperCase()}`] || "";
       if (options && options.required && !val) {
-        throw new Error(`Input required and not supplied: ${name}`);
+        throw new Error(`Input required and not supplied: ${name2}`);
       }
       if (options && options.trimWhitespace === false) {
         return val;
@@ -19814,33 +19814,33 @@ var require_core = __commonJS({
       return val.trim();
     }
     exports2.getInput = getInput2;
-    function getMultilineInput(name, options) {
-      const inputs = getInput2(name, options).split("\n").filter((x) => x !== "");
+    function getMultilineInput(name2, options) {
+      const inputs = getInput2(name2, options).split("\n").filter((x) => x !== "");
       if (options && options.trimWhitespace === false) {
         return inputs;
       }
       return inputs.map((input) => input.trim());
     }
     exports2.getMultilineInput = getMultilineInput;
-    function getBooleanInput2(name, options) {
+    function getBooleanInput2(name2, options) {
       const trueValue = ["true", "True", "TRUE"];
       const falseValue = ["false", "False", "FALSE"];
-      const val = getInput2(name, options);
+      const val = getInput2(name2, options);
       if (trueValue.includes(val))
         return true;
       if (falseValue.includes(val))
         return false;
-      throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name}
+      throw new TypeError(`Input does not meet YAML 1.2 "Core Schema" specification: ${name2}
 Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
     }
     exports2.getBooleanInput = getBooleanInput2;
-    function setOutput(name, value) {
+    function setOutput(name2, value) {
       const filePath = process.env["GITHUB_OUTPUT"] || "";
       if (filePath) {
-        return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name, value));
+        return (0, file_command_1.issueFileCommand)("OUTPUT", (0, file_command_1.prepareKeyValueMessage)(name2, value));
       }
       process.stdout.write(os3.EOL);
-      (0, command_1.issueCommand)("set-output", { name }, (0, utils_1.toCommandValue)(value));
+      (0, command_1.issueCommand)("set-output", { name: name2 }, (0, utils_1.toCommandValue)(value));
     }
     exports2.setOutput = setOutput;
     function setCommandEcho(enabled2) {
@@ -19872,21 +19872,21 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       (0, command_1.issueCommand)("notice", (0, utils_1.toCommandProperties)(properties), message instanceof Error ? message.toString() : message);
     }
     exports2.notice = notice;
-    function info4(message) {
+    function info5(message) {
       process.stdout.write(message + os3.EOL);
     }
-    exports2.info = info4;
-    function startGroup3(name) {
-      (0, command_1.issue)("group", name);
+    exports2.info = info5;
+    function startGroup3(name2) {
+      (0, command_1.issue)("group", name2);
     }
     exports2.startGroup = startGroup3;
     function endGroup3() {
       (0, command_1.issue)("endgroup");
     }
     exports2.endGroup = endGroup3;
-    function group(name, fn) {
+    function group(name2, fn) {
       return __awaiter6(this, void 0, void 0, function* () {
-        startGroup3(name);
+        startGroup3(name2);
         let result;
         try {
           result = yield fn();
@@ -19897,16 +19897,16 @@ Support boolean input list: \`true | True | TRUE | false | False | FALSE\``);
       });
     }
     exports2.group = group;
-    function saveState(name, value) {
+    function saveState(name2, value) {
       const filePath = process.env["GITHUB_STATE"] || "";
       if (filePath) {
-        return (0, file_command_1.issueFileCommand)("STATE", (0, file_command_1.prepareKeyValueMessage)(name, value));
+        return (0, file_command_1.issueFileCommand)("STATE", (0, file_command_1.prepareKeyValueMessage)(name2, value));
       }
-      (0, command_1.issueCommand)("save-state", { name }, (0, utils_1.toCommandValue)(value));
+      (0, command_1.issueCommand)("save-state", { name: name2 }, (0, utils_1.toCommandValue)(value));
     }
     exports2.saveState = saveState;
-    function getState(name) {
-      return process.env[`STATE_${name}`] || "";
+    function getState(name2) {
+      return process.env[`STATE_${name2}`] || "";
     }
     exports2.getState = getState;
     function getIDToken(aud) {
@@ -19967,7 +19967,7 @@ var require_internal_glob_options_helper = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getOptions = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     function getOptions(copy2) {
       const result = {
         followSymbolicLinks: true,
@@ -19977,15 +19977,15 @@ var require_internal_glob_options_helper = __commonJS({
       if (copy2) {
         if (typeof copy2.followSymbolicLinks === "boolean") {
           result.followSymbolicLinks = copy2.followSymbolicLinks;
-          core4.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
+          core5.debug(`followSymbolicLinks '${result.followSymbolicLinks}'`);
         }
         if (typeof copy2.implicitDescendants === "boolean") {
           result.implicitDescendants = copy2.implicitDescendants;
-          core4.debug(`implicitDescendants '${result.implicitDescendants}'`);
+          core5.debug(`implicitDescendants '${result.implicitDescendants}'`);
         }
         if (typeof copy2.omitBrokenSymbolicLinks === "boolean") {
           result.omitBrokenSymbolicLinks = copy2.omitBrokenSymbolicLinks;
-          core4.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
+          core5.debug(`omitBrokenSymbolicLinks '${result.omitBrokenSymbolicLinks}'`);
         }
       }
       return result;
@@ -21453,7 +21453,7 @@ var require_internal_globber = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DefaultGlobber = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var fs3 = __importStar(__require("fs"));
     var globOptionsHelper = __importStar(require_internal_glob_options_helper());
     var path = __importStar(__require("path"));
@@ -21504,7 +21504,7 @@ var require_internal_globber = __commonJS({
           }
           const stack = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
-            core4.debug(`Search path '${searchPath}'`);
+            core5.debug(`Search path '${searchPath}'`);
             try {
               yield __await2(fs3.promises.lstat(searchPath));
             } catch (err) {
@@ -21576,7 +21576,7 @@ var require_internal_globber = __commonJS({
             } catch (err) {
               if (err.code === "ENOENT") {
                 if (options.omitBrokenSymbolicLinks) {
-                  core4.debug(`Broken symlink '${item.path}'`);
+                  core5.debug(`Broken symlink '${item.path}'`);
                   return void 0;
                 }
                 throw new Error(`No information found for the path '${item.path}'. This may indicate a broken symbolic link.`);
@@ -21592,7 +21592,7 @@ var require_internal_globber = __commonJS({
               traversalChain.pop();
             }
             if (traversalChain.some((x) => x === realPath)) {
-              core4.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
+              core5.debug(`Symlink cycle detected for path '${item.path}' and realpath '${realPath}'`);
               return void 0;
             }
             traversalChain.push(realPath);
@@ -21687,9 +21687,9 @@ var require_semver = __commonJS({
     ];
     function makeSafeRe(value) {
       for (var i2 = 0; i2 < safeRegexReplacements.length; i2++) {
-        var token = safeRegexReplacements[i2][0];
+        var token2 = safeRegexReplacements[i2][0];
         var max = safeRegexReplacements[i2][1];
-        value = value.split(token + "*").join(token + "{0," + max + "}").split(token + "+").join(token + "{1," + max + "}");
+        value = value.split(token2 + "*").join(token2 + "{0," + max + "}").split(token2 + "+").join(token2 + "{1," + max + "}");
       }
       return value;
     }
@@ -22920,7 +22920,7 @@ var require_cacheUtils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getRuntimeToken = exports2.getCacheVersion = exports2.assertDefined = exports2.getGnuTarPathOnWindows = exports2.getCacheFileName = exports2.getCompressionMethod = exports2.unlinkFile = exports2.resolvePaths = exports2.getArchiveFileSizeInBytes = exports2.createTempDirectory = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var exec2 = __importStar(require_exec());
     var glob = __importStar(require_glob());
     var io = __importStar(require_io());
@@ -22973,7 +22973,7 @@ var require_cacheUtils = __commonJS({
             _e = false;
             const file = _c2;
             const relativeFile = path.relative(workspace, file).replace(new RegExp(`\\${path.sep}`, "g"), "/");
-            core4.debug(`Matched: ${relativeFile}`);
+            core5.debug(`Matched: ${relativeFile}`);
             if (relativeFile === "") {
               paths.push(".");
             } else {
@@ -23003,7 +23003,7 @@ var require_cacheUtils = __commonJS({
       return __awaiter6(this, void 0, void 0, function* () {
         let versionOutput = "";
         additionalArgs.push("--version");
-        core4.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
+        core5.debug(`Checking ${app} ${additionalArgs.join(" ")}`);
         try {
           yield exec2.exec(`${app}`, additionalArgs, {
             ignoreReturnCode: true,
@@ -23014,10 +23014,10 @@ var require_cacheUtils = __commonJS({
             }
           });
         } catch (err) {
-          core4.debug(err.message);
+          core5.debug(err.message);
         }
         versionOutput = versionOutput.trim();
-        core4.debug(versionOutput);
+        core5.debug(versionOutput);
         return versionOutput;
       });
     }
@@ -23025,7 +23025,7 @@ var require_cacheUtils = __commonJS({
       return __awaiter6(this, void 0, void 0, function* () {
         const versionOutput = yield getVersion("zstd", ["--quiet"]);
         const version2 = semver.clean(versionOutput);
-        core4.debug(`zstd version: ${version2}`);
+        core5.debug(`zstd version: ${version2}`);
         if (versionOutput === "") {
           return constants_1.CompressionMethod.Gzip;
         } else {
@@ -23048,9 +23048,9 @@ var require_cacheUtils = __commonJS({
       });
     }
     exports2.getGnuTarPathOnWindows = getGnuTarPathOnWindows;
-    function assertDefined(name, value) {
+    function assertDefined(name2, value) {
       if (value === void 0) {
-        throw Error(`Expected ${name} but value was undefiend`);
+        throw Error(`Expected ${name2} but value was undefiend`);
       }
       return value;
     }
@@ -23068,11 +23068,11 @@ var require_cacheUtils = __commonJS({
     }
     exports2.getCacheVersion = getCacheVersion;
     function getRuntimeToken() {
-      const token = process.env["ACTIONS_RUNTIME_TOKEN"];
-      if (!token) {
+      const token2 = process.env["ACTIONS_RUNTIME_TOKEN"];
+      if (!token2) {
         throw new Error("Unable to get the ACTIONS_RUNTIME_TOKEN env variable");
       }
-      return token;
+      return token2;
     }
     exports2.getRuntimeToken = getRuntimeToken;
   }
@@ -23147,9 +23147,9 @@ var init_pipeline = __esm({
       orderPolicies() {
         const result = [];
         const policyMap = /* @__PURE__ */ new Map();
-        function createPhase(name) {
+        function createPhase(name2) {
           return {
-            name,
+            name: name2,
             policies: /* @__PURE__ */ new Set(),
             hasRun: false,
             hasAfterPolicies: false
@@ -23338,9 +23338,9 @@ function createDebugger(namespace) {
   return newDebugger;
 }
 function destroy() {
-  const index = debuggers.indexOf(this);
-  if (index >= 0) {
-    debuggers.splice(index, 1);
+  const index2 = debuggers.indexOf(this);
+  if (index2 >= 0) {
+    debuggers.splice(index2, 1);
     return true;
   }
   return false;
@@ -23535,12 +23535,12 @@ var init_random = __esm({
 
 // node_modules/@azure/core-util/dist/esm/delay.js
 function delay(timeInMs, options) {
-  let token;
+  let token2;
   const { abortSignal: abortSignal2, abortErrorMsg } = options !== null && options !== void 0 ? options : {};
   return createAbortablePromise((resolve) => {
-    token = setTimeout(resolve, timeInMs);
+    token2 = setTimeout(resolve, timeInMs);
   }, {
-    cleanupBeforeAbort: () => clearTimeout(token),
+    cleanupBeforeAbort: () => clearTimeout(token2),
     abortSignal: abortSignal2,
     abortErrorMsg: abortErrorMsg !== null && abortErrorMsg !== void 0 ? abortErrorMsg : StandardAbortMessage
   });
@@ -23916,8 +23916,8 @@ var init_constants = __esm({
 function getUserAgentString(telemetryInfo) {
   const parts = [];
   for (const [key, value] of telemetryInfo) {
-    const token = value ? `${key}/${value}` : key;
-    parts.push(token);
+    const token2 = value ? `${key}/${value}` : key;
+    parts.push(token2);
   }
   return parts.join(" ");
 }
@@ -24591,8 +24591,8 @@ var init_defaultRetryPolicy = __esm({
 });
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/httpHeaders.js
-function normalizeName(name) {
-  return name.toLowerCase();
+function normalizeName(name2) {
+  return name2.toLowerCase();
 }
 function* headerIterator(map) {
   for (const entry of map.values()) {
@@ -24621,31 +24621,31 @@ var init_httpHeaders = __esm({
        * @param name - The name of the header to set. This value is case-insensitive.
        * @param value - The value of the header to set.
        */
-      set(name, value) {
-        this._headersMap.set(normalizeName(name), { name, value: String(value).trim() });
+      set(name2, value) {
+        this._headersMap.set(normalizeName(name2), { name: name2, value: String(value).trim() });
       }
       /**
        * Get the header value for the provided header name, or undefined if no header exists in this
        * collection with the provided name.
        * @param name - The name of the header. This value is case-insensitive.
        */
-      get(name) {
+      get(name2) {
         var _a3;
-        return (_a3 = this._headersMap.get(normalizeName(name))) === null || _a3 === void 0 ? void 0 : _a3.value;
+        return (_a3 = this._headersMap.get(normalizeName(name2))) === null || _a3 === void 0 ? void 0 : _a3.value;
       }
       /**
        * Get whether or not this header collection contains a header entry for the provided header name.
        * @param name - The name of the header to set. This value is case-insensitive.
        */
-      has(name) {
-        return this._headersMap.has(normalizeName(name));
+      has(name2) {
+        return this._headersMap.has(normalizeName(name2));
       }
       /**
        * Remove the header with the provided headerName.
        * @param name - The name of the header to remove.
        */
-      delete(name) {
-        this._headersMap.delete(normalizeName(name));
+      delete(name2) {
+        this._headersMap.delete(normalizeName(name2));
       }
       /**
        * Get the JSON object representation of this HTTP header collection.
@@ -24875,9 +24875,9 @@ var require_ms = __commonJS({
       }
       return ms + " ms";
     }
-    function plural(ms, msAbs, n, name) {
+    function plural(ms, msAbs, n, name2) {
       var isPlural = msAbs >= n * 1.5;
-      return Math.round(ms / n) + " " + name + (isPlural ? "s" : "");
+      return Math.round(ms / n) + " " + name2 + (isPlural ? "s" : "");
     }
   }
 });
@@ -24930,18 +24930,18 @@ var require_common = __commonJS({
           if (typeof args[0] !== "string") {
             args.unshift("%O");
           }
-          let index = 0;
+          let index2 = 0;
           args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
             if (match === "%%") {
               return "%";
             }
-            index++;
+            index2++;
             const formatter = createDebug.formatters[format];
             if (typeof formatter === "function") {
-              const val = args[index];
+              const val = args[index2];
               match = formatter.call(self2, val);
-              args.splice(index, 1);
-              index--;
+              args.splice(index2, 1);
+              index2--;
             }
             return match;
           });
@@ -25031,14 +25031,14 @@ var require_common = __commonJS({
         createDebug.enable("");
         return namespaces;
       }
-      function enabled2(name) {
+      function enabled2(name2) {
         for (const skip of createDebug.skips) {
-          if (matchesTemplate(name, skip)) {
+          if (matchesTemplate(name2, skip)) {
             return false;
           }
         }
         for (const ns of createDebug.names) {
-          if (matchesTemplate(name, ns)) {
+          if (matchesTemplate(name2, ns)) {
             return true;
           }
         }
@@ -25177,15 +25177,15 @@ var require_browser = __commonJS({
       }
       const c = "color: " + this.color;
       args.splice(1, 0, c, "color: inherit");
-      let index = 0;
+      let index2 = 0;
       let lastC = 0;
       args[0].replace(/%[a-zA-Z%]/g, (match) => {
         if (match === "%%") {
           return;
         }
-        index++;
+        index2++;
         if (match === "%c") {
-          lastC = index;
+          lastC = index2;
         }
       });
       args.splice(lastC, 0, c);
@@ -25473,15 +25473,15 @@ var require_node = __commonJS({
       return "colors" in exports2.inspectOpts ? Boolean(exports2.inspectOpts.colors) : tty.isatty(process.stderr.fd);
     }
     function formatArgs(args) {
-      const { namespace: name, useColors: useColors2 } = this;
+      const { namespace: name2, useColors: useColors2 } = this;
       if (useColors2) {
         const c = this.color;
         const colorCode = "\x1B[3" + (c < 8 ? c : "8;5;" + c);
-        const prefix2 = `  ${colorCode};1m${name} \x1B[0m`;
+        const prefix2 = `  ${colorCode};1m${name2} \x1B[0m`;
         args[0] = prefix2 + args[0].split("\n").join("\n" + prefix2);
         args.push(colorCode + "m+" + module.exports.humanize(this.diff) + "\x1B[0m");
       } else {
-        args[0] = getDate() + name + " " + args[0];
+        args[0] = getDate() + name2 + " " + args[0];
       }
     }
     function getDate() {
@@ -25676,29 +25676,29 @@ var require_dist = __commonJS({
       // accurate when `addRequest()` is next called. We achieve this by creating a
       // fake socket and adding it to `sockets[origin]` and incrementing
       // `totalSocketCount`.
-      incrementSockets(name) {
+      incrementSockets(name2) {
         if (this.maxSockets === Infinity && this.maxTotalSockets === Infinity) {
           return null;
         }
-        if (!this.sockets[name]) {
-          this.sockets[name] = [];
+        if (!this.sockets[name2]) {
+          this.sockets[name2] = [];
         }
         const fakeSocket = new net.Socket({ writable: false });
-        this.sockets[name].push(fakeSocket);
+        this.sockets[name2].push(fakeSocket);
         this.totalSocketCount++;
         return fakeSocket;
       }
-      decrementSockets(name, socket) {
-        if (!this.sockets[name] || socket === null) {
+      decrementSockets(name2, socket) {
+        if (!this.sockets[name2] || socket === null) {
           return;
         }
-        const sockets = this.sockets[name];
-        const index = sockets.indexOf(socket);
-        if (index !== -1) {
-          sockets.splice(index, 1);
+        const sockets = this.sockets[name2];
+        const index2 = sockets.indexOf(socket);
+        if (index2 !== -1) {
+          sockets.splice(index2, 1);
           this.totalSocketCount--;
           if (sockets.length === 0) {
-            delete this.sockets[name];
+            delete this.sockets[name2];
           }
         }
       }
@@ -25716,10 +25716,10 @@ var require_dist = __commonJS({
           ...options,
           secureEndpoint: this.isSecureEndpoint(options)
         };
-        const name = this.getName(connectOpts);
-        const fakeSocket = this.incrementSockets(name);
+        const name2 = this.getName(connectOpts);
+        const fakeSocket = this.incrementSockets(name2);
         Promise.resolve().then(() => this.connect(req, connectOpts)).then((socket) => {
-          this.decrementSockets(name, fakeSocket);
+          this.decrementSockets(name2, fakeSocket);
           if (socket instanceof http2.Agent) {
             try {
               return socket.addRequest(req, connectOpts);
@@ -25730,7 +25730,7 @@ var require_dist = __commonJS({
           this[INTERNAL].currentSocket = socket;
           super.createSocket(req, options, cb);
         }, (err) => {
-          this.decrementSockets(name, fakeSocket);
+          this.decrementSockets(name2, fakeSocket);
           cb(err);
         });
       }
@@ -25960,8 +25960,8 @@ var require_dist2 = __commonJS({
         if (!headers["Proxy-Connection"]) {
           headers["Proxy-Connection"] = this.keepAlive ? "Keep-Alive" : "close";
         }
-        for (const name of Object.keys(headers)) {
-          payload += `${name}: ${headers[name]}\r
+        for (const name2 of Object.keys(headers)) {
+          payload += `${name2}: ${headers[name2]}\r
 `;
         }
         const proxyResponsePromise = (0, parse_proxy_response_1.parseProxyResponse)(socket);
@@ -26092,10 +26092,10 @@ var require_dist3 = __commonJS({
         if (!headers["Proxy-Connection"]) {
           headers["Proxy-Connection"] = this.keepAlive ? "Keep-Alive" : "close";
         }
-        for (const name of Object.keys(headers)) {
-          const value = headers[name];
+        for (const name2 of Object.keys(headers)) {
+          const value = headers[name2];
           if (value) {
-            req.setHeader(name, value);
+            req.setHeader(name2, value);
           }
         }
       }
@@ -26143,11 +26143,11 @@ var require_dist3 = __commonJS({
 });
 
 // node_modules/@azure/core-rest-pipeline/dist/esm/policies/proxyPolicy.js
-function getEnvironmentValue(name) {
-  if (process.env[name]) {
-    return process.env[name];
-  } else if (process.env[name.toLowerCase()]) {
-    return process.env[name.toLowerCase()];
+function getEnvironmentValue(name2) {
+  if (process.env[name2]) {
+    return process.env[name2];
+  } else if (process.env[name2.toLowerCase()]) {
+    return process.env[name2.toLowerCase()];
   }
   return void 0;
 }
@@ -26465,9 +26465,9 @@ var init_instrumenter = __esm({
 // node_modules/@azure/core-tracing/dist/esm/tracingClient.js
 function createTracingClient(options) {
   const { namespace, packageName, packageVersion } = options;
-  function startSpan(name, operationOptions, spanOptions) {
+  function startSpan(name2, operationOptions, spanOptions) {
     var _a3;
-    const startSpanResult = getInstrumenter().startSpan(name, Object.assign(Object.assign({}, spanOptions), { packageName, packageVersion, tracingContext: (_a3 = operationOptions === null || operationOptions === void 0 ? void 0 : operationOptions.tracingOptions) === null || _a3 === void 0 ? void 0 : _a3.tracingContext }));
+    const startSpanResult = getInstrumenter().startSpan(name2, Object.assign(Object.assign({}, spanOptions), { packageName, packageVersion, tracingContext: (_a3 = operationOptions === null || operationOptions === void 0 ? void 0 : operationOptions.tracingOptions) === null || _a3 === void 0 ? void 0 : _a3.tracingContext }));
     let tracingContext = startSpanResult.tracingContext;
     const span = startSpanResult.span;
     if (!tracingContext.getValue(knownContextKeys.namespace)) {
@@ -26482,8 +26482,8 @@ function createTracingClient(options) {
       updatedOptions
     };
   }
-  async function withSpan(name, operationOptions, callback, spanOptions) {
-    const { span, updatedOptions } = startSpan(name, operationOptions, spanOptions);
+  async function withSpan(name2, operationOptions, callback, spanOptions) {
+    const { span, updatedOptions } = startSpan(name2, operationOptions, spanOptions);
     try {
       const result = await withContext(updatedOptions.tracingOptions.tracingContext, () => Promise.resolve(callback(updatedOptions, span)));
       span.setStatus({ status: "success" });
@@ -27148,16 +27148,16 @@ async function beginRefresh(getAccessToken, retryIntervalInMs, refreshTimeout) {
       return finalToken;
     }
   }
-  let token = await tryGetAccessToken();
-  while (token === null) {
+  let token2 = await tryGetAccessToken();
+  while (token2 === null) {
     await delay2(retryIntervalInMs);
-    token = await tryGetAccessToken();
+    token2 = await tryGetAccessToken();
   }
-  return token;
+  return token2;
 }
 function createTokenCycler(credential, tokenCyclerOptions) {
   let refreshWorker = null;
-  let token = null;
+  let token2 = null;
   let tenantId;
   const options = Object.assign(Object.assign({}, DEFAULT_CYCLER_OPTIONS), tokenCyclerOptions);
   const cycler = {
@@ -27176,17 +27176,17 @@ function createTokenCycler(credential, tokenCyclerOptions) {
       if (cycler.isRefreshing) {
         return false;
       }
-      if ((token === null || token === void 0 ? void 0 : token.refreshAfterTimestamp) && token.refreshAfterTimestamp < Date.now()) {
+      if ((token2 === null || token2 === void 0 ? void 0 : token2.refreshAfterTimestamp) && token2.refreshAfterTimestamp < Date.now()) {
         return true;
       }
-      return ((_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
+      return ((_a3 = token2 === null || token2 === void 0 ? void 0 : token2.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : 0) - options.refreshWindowInMs < Date.now();
     },
     /**
      * Produces true if the cycler MUST refresh (null or nearly-expired
      * token).
      */
     get mustRefresh() {
-      return token === null || token.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
+      return token2 === null || token2.expiresOnTimestamp - options.forcedRefreshWindowInMs < Date.now();
     }
   };
   function refresh(scopes, getTokenOptions) {
@@ -27197,15 +27197,15 @@ function createTokenCycler(credential, tokenCyclerOptions) {
         tryGetAccessToken,
         options.retryIntervalInMs,
         // If we don't have a token, then we should timeout immediately
-        (_a3 = token === null || token === void 0 ? void 0 : token.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
+        (_a3 = token2 === null || token2 === void 0 ? void 0 : token2.expiresOnTimestamp) !== null && _a3 !== void 0 ? _a3 : Date.now()
       ).then((_token) => {
         refreshWorker = null;
-        token = _token;
+        token2 = _token;
         tenantId = getTokenOptions.tenantId;
-        return token;
+        return token2;
       }).catch((reason) => {
         refreshWorker = null;
-        token = null;
+        token2 = null;
         tenantId = void 0;
         throw reason;
       });
@@ -27216,7 +27216,7 @@ function createTokenCycler(credential, tokenCyclerOptions) {
     const hasClaimChallenge = Boolean(tokenOptions.claims);
     const tenantIdChanged = tenantId !== tokenOptions.tenantId;
     if (hasClaimChallenge) {
-      token = null;
+      token2 = null;
     }
     const mustRefresh = tenantIdChanged || hasClaimChallenge || cycler.mustRefresh;
     if (mustRefresh) {
@@ -27225,7 +27225,7 @@ function createTokenCycler(credential, tokenCyclerOptions) {
     if (cycler.shouldRefresh) {
       refresh(scopes, tokenOptions);
     }
-    return token;
+    return token2;
   };
 }
 var DEFAULT_CYCLER_OPTIONS;
@@ -28116,8 +28116,8 @@ function getIndexDiscriminator(discriminators, discriminatorValue, typeName) {
     if (Object.prototype.hasOwnProperty.call(discriminators, indexDiscriminator)) {
       return discriminators[indexDiscriminator];
     } else {
-      for (const [name, mapper] of Object.entries(discriminators)) {
-        if (name.startsWith(currentName + ".") && mapper.type.uberParent === currentName && mapper.type.className) {
+      for (const [name2, mapper] of Object.entries(discriminators)) {
+        if (name2.startsWith(currentName + ".") && mapper.type.uberParent === currentName && mapper.type.className) {
           typeNamesToCheck.push(mapper.type.className);
         }
       }
@@ -28474,12 +28474,12 @@ function getOperationRequestInfo(request3) {
   if (hasOriginalRequest(request3)) {
     return getOperationRequestInfo(request3[originalRequestSymbol]);
   }
-  let info4 = state2.operationRequestMap.get(request3);
-  if (!info4) {
-    info4 = {};
-    state2.operationRequestMap.set(request3, info4);
+  let info5 = state2.operationRequestMap.get(request3);
+  if (!info5) {
+    info5 = {};
+    state2.operationRequestMap.set(request3, info5);
   }
-  return info4;
+  return info5;
 }
 var originalRequestSymbol;
 var init_operationHelpers = __esm({
@@ -29014,16 +29014,16 @@ function simpleParseQueryParams(queryString) {
   queryString = queryString.slice(1);
   const pairs = queryString.split("&");
   for (const pair of pairs) {
-    const [name, value] = pair.split("=", 2);
-    const existingValue = result.get(name);
+    const [name2, value] = pair.split("=", 2);
+    const existingValue = result.get(name2);
     if (existingValue) {
       if (Array.isArray(existingValue)) {
         existingValue.push(value);
       } else {
-        result.set(name, [existingValue, value]);
+        result.set(name2, [existingValue, value]);
       }
     } else {
-      result.set(name, value);
+      result.set(name2, value);
     }
   }
   return result;
@@ -29034,39 +29034,39 @@ function appendQueryParams(url2, queryParams, sequenceParams, noOverwrite = fals
   }
   const parsedUrl = new URL(url2);
   const combinedParams = simpleParseQueryParams(parsedUrl.search);
-  for (const [name, value] of queryParams) {
-    const existingValue = combinedParams.get(name);
+  for (const [name2, value] of queryParams) {
+    const existingValue = combinedParams.get(name2);
     if (Array.isArray(existingValue)) {
       if (Array.isArray(value)) {
         existingValue.push(...value);
         const valueSet = new Set(existingValue);
-        combinedParams.set(name, Array.from(valueSet));
+        combinedParams.set(name2, Array.from(valueSet));
       } else {
         existingValue.push(value);
       }
     } else if (existingValue) {
       if (Array.isArray(value)) {
         value.unshift(existingValue);
-      } else if (sequenceParams.has(name)) {
-        combinedParams.set(name, [existingValue, value]);
+      } else if (sequenceParams.has(name2)) {
+        combinedParams.set(name2, [existingValue, value]);
       }
       if (!noOverwrite) {
-        combinedParams.set(name, value);
+        combinedParams.set(name2, value);
       }
     } else {
-      combinedParams.set(name, value);
+      combinedParams.set(name2, value);
     }
   }
   const searchPieces = [];
-  for (const [name, value] of combinedParams) {
+  for (const [name2, value] of combinedParams) {
     if (typeof value === "string") {
-      searchPieces.push(`${name}=${value}`);
+      searchPieces.push(`${name2}=${value}`);
     } else if (Array.isArray(value)) {
       for (const subValue of value) {
-        searchPieces.push(`${name}=${subValue}`);
+        searchPieces.push(`${name2}=${subValue}`);
       }
     } else {
-      searchPieces.push(`${name}=${value}`);
+      searchPieces.push(`${name2}=${value}`);
     }
   }
   parsedUrl.search = searchPieces.length ? `?${searchPieces.join("&")}` : "";
@@ -29776,8 +29776,8 @@ function getAllMatches(string, regex) {
     const allmatches = [];
     allmatches.startIndex = regex.lastIndex - match[0].length;
     const len = match.length;
-    for (let index = 0; index < len; index++) {
-      allmatches.push(match[index]);
+    for (let index2 = 0; index2 < len; index2++) {
+      allmatches.push(match[index2]);
     }
     matches.push(allmatches);
     match = regex.exec(string);
@@ -30089,8 +30089,8 @@ function validateAttrName(attrName) {
 function validateTagName(tagname) {
   return isName(tagname);
 }
-function getLineNumberForPosition(xmlData, index) {
-  const lines = xmlData.substring(0, index).split(/\r?\n/);
+function getLineNumberForPosition(xmlData, index2) {
+  const lines = xmlData.substring(0, index2).split(/\r?\n/);
   return {
     line: lines.length,
     // column number is last line's length + 1, because column numbering starts at 1:
@@ -30286,11 +30286,11 @@ function isNotation(xmlData, i) {
   if (xmlData[i + 1] === "!" && xmlData[i + 2] === "N" && xmlData[i + 3] === "O" && xmlData[i + 4] === "T" && xmlData[i + 5] === "A" && xmlData[i + 6] === "T" && xmlData[i + 7] === "I" && xmlData[i + 8] === "O" && xmlData[i + 9] === "N") return true;
   return false;
 }
-function validateEntityName(name) {
-  if (isName(name))
-    return name;
+function validateEntityName(name2) {
+  if (isName(name2))
+    return name2;
   else
-    throw new Error(`Invalid entity name ${name}`);
+    throw new Error(`Invalid entity name ${name2}`);
 }
 var init_DocTypeReader = __esm({
   "node_modules/fast-xml-parser/src/xmlparser/DocTypeReader.js"() {
@@ -30550,24 +30550,24 @@ function isItStopNode(stopNodes, jPath, currentTagName) {
 function tagExpWithClosingIndex(xmlData, i, closingChar = ">") {
   let attrBoundary;
   let tagExp = "";
-  for (let index = i; index < xmlData.length; index++) {
-    let ch = xmlData[index];
+  for (let index2 = i; index2 < xmlData.length; index2++) {
+    let ch = xmlData[index2];
     if (attrBoundary) {
       if (ch === attrBoundary) attrBoundary = "";
     } else if (ch === '"' || ch === "'") {
       attrBoundary = ch;
     } else if (ch === closingChar[0]) {
       if (closingChar[1]) {
-        if (xmlData[index + 1] === closingChar[1]) {
+        if (xmlData[index2 + 1] === closingChar[1]) {
           return {
             data: tagExp,
-            index
+            index: index2
           };
         }
       } else {
         return {
           data: tagExp,
-          index
+          index: index2
         };
       }
     } else if (ch === "	") {
@@ -31159,8 +31159,8 @@ function attr_to_str(attrMap, options) {
 function isStopNode(jPath, options) {
   jPath = jPath.substr(0, jPath.length - options.textNodeName.length - 1);
   let tagName = jPath.substr(jPath.lastIndexOf(".") + 1);
-  for (let index in options.stopNodes) {
-    if (options.stopNodes[index] === jPath || options.stopNodes[index] === "*." + tagName) return true;
+  for (let index2 in options.stopNodes) {
+    if (options.stopNodes[index2] === jPath || options.stopNodes[index2] === "*." + tagName) return true;
   }
   return false;
 }
@@ -31217,9 +31217,9 @@ function processTextOrObjNode(object, key, level, ajPath) {
 function indentate(level) {
   return this.options.indentBy.repeat(level);
 }
-function isAttribute(name) {
-  if (name.startsWith(this.options.attributeNamePrefix) && name !== this.options.textNodeName) {
-    return name.substr(this.attrPrefixLen);
+function isAttribute(name2) {
+  if (name2.startsWith(this.options.attributeNamePrefix) && name2 !== this.options.textNodeName) {
+    return name2.substr(this.attrPrefixLen);
   } else {
     return false;
   }
@@ -31896,16 +31896,16 @@ function extractConnectionStringParts(connectionString) {
 function escape(text) {
   return encodeURIComponent(text).replace(/%2F/g, "/").replace(/'/g, "%27").replace(/\+/g, "%20").replace(/%25/g, "%");
 }
-function appendToURLPath(url2, name) {
+function appendToURLPath(url2, name2) {
   const urlParsed = new URL(url2);
   let path = urlParsed.pathname;
-  path = path ? path.endsWith("/") ? `${path}${name}` : `${path}/${name}` : name;
+  path = path ? path.endsWith("/") ? `${path}${name2}` : `${path}/${name2}` : name2;
   urlParsed.pathname = path;
   return urlParsed.toString();
 }
-function setURLParameter(url2, name, value) {
+function setURLParameter(url2, name2, value) {
   const urlParsed = new URL(url2);
-  const encodedName = encodeURIComponent(name);
+  const encodedName = encodeURIComponent(name2);
   const encodedValue = value ? encodeURIComponent(value) : void 0;
   const searchString = urlParsed.search === "" ? "?" : urlParsed.search;
   const searchPieces = [];
@@ -31923,10 +31923,10 @@ function setURLParameter(url2, name, value) {
   urlParsed.search = searchPieces.length ? `?${searchPieces.join("&")}` : "";
   return urlParsed.toString();
 }
-function getURLParameter(url2, name) {
+function getURLParameter(url2, name2) {
   var _a3;
   const urlParsed = new URL(url2);
-  return (_a3 = urlParsed.searchParams.get(name)) !== null && _a3 !== void 0 ? _a3 : void 0;
+  return (_a3 = urlParsed.searchParams.get(name2)) !== null && _a3 !== void 0 ? _a3 : void 0;
 }
 function setURLHost(url2, host) {
   const urlParsed = new URL(url2);
@@ -32191,11 +32191,11 @@ function parseObjectReplicationRecord(objectReplicationRecord) {
 function httpAuthorizationToString(httpAuthorization) {
   return httpAuthorization ? httpAuthorization.scheme + " " + httpAuthorization.value : void 0;
 }
-function BlobNameToString(name) {
-  if (name.encoded) {
-    return decodeURIComponent(name.content);
+function BlobNameToString(name2) {
+  if (name2.encoded) {
+    return decodeURIComponent(name2.content);
   } else {
-    return name.content;
+    return name2.content;
   }
 }
 function ConvertInternalResponseOfListBlobFlat(internalResponse) {
@@ -33018,8 +33018,8 @@ var init_StorageSharedKeyCredentialPolicy = __esm({
         headersArray.sort((a, b) => {
           return compareHeader(a.name.toLowerCase(), b.name.toLowerCase());
         });
-        headersArray = headersArray.filter((value, index, array) => {
-          if (index > 0 && value.name.toLowerCase() === array[index - 1].name.toLowerCase()) {
+        headersArray = headersArray.filter((value, index2, array) => {
+          if (index2 > 0 && value.name.toLowerCase() === array[index2 - 1].name.toLowerCase()) {
             return false;
           }
           return true;
@@ -33384,16 +33384,16 @@ function storageSharedKeyCredentialPolicy(options) {
   }
   function getCanonicalizedHeadersString(request3) {
     let headersArray = [];
-    for (const [name, value] of request3.headers) {
-      if (name.toLowerCase().startsWith(HeaderConstants.PREFIX_FOR_STORAGE)) {
-        headersArray.push({ name, value });
+    for (const [name2, value] of request3.headers) {
+      if (name2.toLowerCase().startsWith(HeaderConstants.PREFIX_FOR_STORAGE)) {
+        headersArray.push({ name: name2, value });
       }
     }
     headersArray.sort((a, b) => {
       return compareHeader(a.name.toLowerCase(), b.name.toLowerCase());
     });
-    headersArray = headersArray.filter((value, index, array) => {
-      if (index > 0 && value.name.toLowerCase() === array[index - 1].name.toLowerCase()) {
+    headersArray = headersArray.filter((value, index2, array) => {
+      if (index2 > 0 && value.name.toLowerCase() === array[index2 - 1].name.toLowerCase()) {
         return false;
       }
       return true;
@@ -49243,10 +49243,10 @@ var init_AvroParser = __esm({
       }
     };
     AvroRecordType = class extends AvroType {
-      constructor(fields, name) {
+      constructor(fields, name2) {
         super();
         this._fields = fields;
-        this._name = name;
+        this._name = name2;
       }
       // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types
       async read(stream, options = {}) {
@@ -49566,8 +49566,8 @@ var init_BlobQuickQueryStream = __esm({
                 if (typeof fatal !== "boolean") {
                   throw Error("Invalid fatal in avro error record.");
                 }
-                const name = obj.name;
-                if (typeof name !== "string") {
+                const name2 = obj.name;
+                if (typeof name2 !== "string") {
                   throw Error("Invalid name in avro error record.");
                 }
                 const description = obj.description;
@@ -49580,7 +49580,7 @@ var init_BlobQuickQueryStream = __esm({
                 }
                 this.onError({
                   position,
-                  name,
+                  name: name2,
                   isFatal: fatal,
                   description
                 });
@@ -53593,8 +53593,8 @@ var init_BatchResponseParser = __esm({
         const deserializedSubResponses = new Array(subResponseCount);
         let subResponsesSucceededCount = 0;
         let subResponsesFailedCount = 0;
-        for (let index = 0; index < subResponseCount; index++) {
-          const subResponse = subResponses[index];
+        for (let index2 = 0; index2 < subResponseCount; index2++) {
+          const subResponse = subResponses[index2];
           const deserializedSubResponse = {};
           deserializedSubResponse.headers = toHttpHeadersLike(createHttpHeaders());
           const responseLines = subResponse.split(`${HTTP_LINE_ENDING}`);
@@ -53642,7 +53642,7 @@ var init_BatchResponseParser = __esm({
             deserializedSubResponse._request = this.subRequests.get(contentId);
             deserializedSubResponses[contentId] = deserializedSubResponse;
           } else {
-            logger3.error(`subResponses[${index}] is dropped as the Content-ID is not found or invalid, Content-ID: ${contentId}`);
+            logger3.error(`subResponses[${index2}] is dropped as the Content-ID is not found or invalid, Content-ID: ${contentId}`);
           }
           if (subRespFailed) {
             subResponsesFailedCount++;
@@ -53743,9 +53743,9 @@ function batchHeaderFilterPolicy() {
     name: "batchHeaderFilterPolicy",
     async sendRequest(request3, next) {
       let xMsHeaderName = "";
-      for (const [name] of request3.headers) {
-        if (iEqual(name, HeaderConstants.X_MS_VERSION)) {
-          xMsHeaderName = name;
+      for (const [name2] of request3.headers) {
+        if (iEqual(name2, HeaderConstants.X_MS_VERSION)) {
+          xMsHeaderName = name2;
         }
       }
       if (xMsHeaderName !== "") {
@@ -53931,8 +53931,8 @@ var init_BlobBatch = __esm({
           `${request3.method.toString()} ${getURLPathAndQuery(request3.url)} ${HTTP_VERSION_1_1}${HTTP_LINE_ENDING}`
           // sub request start line with method
         ].join(HTTP_LINE_ENDING);
-        for (const [name, value] of request3.headers) {
-          this.body += `${name}: ${value}${HTTP_LINE_ENDING}`;
+        for (const [name2, value] of request3.headers) {
+          this.body += `${name2}: ${value}${HTTP_LINE_ENDING}`;
         }
         this.body += HTTP_LINE_ENDING;
       }
@@ -56577,7 +56577,7 @@ var require_uploadUtils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.uploadCacheArchiveSDK = exports2.UploadProgress = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var storage_blob_1 = (init_src4(), __toCommonJS(src_exports));
     var errors_1 = require_errors2();
     var UploadProgress = class {
@@ -56619,7 +56619,7 @@ var require_uploadUtils = __commonJS({
         const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
         const elapsedTime = Date.now() - this.startTime;
         const uploadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
-        core4.info(`Sent ${transferredBytes} of ${this.contentLength} (${percentage}%), ${uploadSpeed} MBs/sec`);
+        core5.info(`Sent ${transferredBytes} of ${this.contentLength} (${percentage}%), ${uploadSpeed} MBs/sec`);
         if (this.isDone()) {
           this.displayedComplete = true;
         }
@@ -56674,14 +56674,14 @@ var require_uploadUtils = __commonJS({
         };
         try {
           uploadProgress.startDisplayTimer();
-          core4.debug(`BlobClient: ${blobClient.name}:${blobClient.accountName}:${blobClient.containerName}`);
+          core5.debug(`BlobClient: ${blobClient.name}:${blobClient.accountName}:${blobClient.containerName}`);
           const response = yield blockBlobClient.uploadFile(archivePath, uploadOptions);
           if (response._response.status >= 400) {
             throw new errors_1.InvalidResponseError(`uploadCacheArchiveSDK: upload failed with status code ${response._response.status}`);
           }
           return response;
         } catch (error) {
-          core4.warning(`uploadCacheArchiveSDK: internal error uploading cache archive: ${error.message}`);
+          core5.warning(`uploadCacheArchiveSDK: internal error uploading cache archive: ${error.message}`);
           throw error;
         } finally {
           uploadProgress.stopDisplayTimer();
@@ -56753,7 +56753,7 @@ var require_requestUtils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.retryHttpClientResponse = exports2.retryTypedResponse = exports2.retry = exports2.isRetryableStatusCode = exports2.isServerErrorStatusCode = exports2.isSuccessStatusCode = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var constants_1 = require_constants6();
     function isSuccessStatusCode(statusCode) {
@@ -56787,7 +56787,7 @@ var require_requestUtils = __commonJS({
         return new Promise((resolve) => setTimeout(resolve, milliseconds));
       });
     }
-    function retry(name, method, getStatusCode, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay, onError = void 0) {
+    function retry(name2, method, getStatusCode, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay, onError = void 0) {
       return __awaiter6(this, void 0, void 0, function* () {
         let errorMessage = "";
         let attempt = 1;
@@ -56814,22 +56814,22 @@ var require_requestUtils = __commonJS({
             isRetryable = isRetryableStatusCode(statusCode);
             errorMessage = `Cache service responded with ${statusCode}`;
           }
-          core4.debug(`${name} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
+          core5.debug(`${name2} - Attempt ${attempt} of ${maxAttempts} failed with error: ${errorMessage}`);
           if (!isRetryable) {
-            core4.debug(`${name} - Error is not retryable`);
+            core5.debug(`${name2} - Error is not retryable`);
             break;
           }
           yield sleep(delay5);
           attempt++;
         }
-        throw Error(`${name} failed: ${errorMessage}`);
+        throw Error(`${name2} failed: ${errorMessage}`);
       });
     }
     exports2.retry = retry;
-    function retryTypedResponse(name, method, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay) {
+    function retryTypedResponse(name2, method, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay) {
       return __awaiter6(this, void 0, void 0, function* () {
         return yield retry(
-          name,
+          name2,
           method,
           (response) => response.statusCode,
           maxAttempts,
@@ -56852,9 +56852,9 @@ var require_requestUtils = __commonJS({
       });
     }
     exports2.retryTypedResponse = retryTypedResponse;
-    function retryHttpClientResponse(name, method, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay) {
+    function retryHttpClientResponse(name2, method, maxAttempts = constants_1.DefaultRetryAttempts, delay5 = constants_1.DefaultRetryDelay) {
       return __awaiter6(this, void 0, void 0, function* () {
-        return yield retry(name, method, (response) => response.message.statusCode, maxAttempts, delay5);
+        return yield retry(name2, method, (response) => response.message.statusCode, maxAttempts, delay5);
       });
     }
     exports2.retryHttpClientResponse = retryHttpClientResponse;
@@ -56932,9 +56932,9 @@ var init_AbortSignal = __esm({
           throw new TypeError("Expected `this` to be an instance of AbortSignal.");
         }
         const listeners = listenersMap.get(this);
-        const index = listeners.indexOf(listener);
-        if (index > -1) {
-          listeners.splice(index, 1);
+        const index2 = listeners.indexOf(listener);
+        if (index2 > -1) {
+          listeners.splice(index2, 1);
         }
       }
       /**
@@ -57087,7 +57087,7 @@ var require_downloadUtils = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.downloadCacheStorageSDK = exports2.downloadCacheHttpClientConcurrent = exports2.downloadCacheHttpClient = exports2.DownloadProgress = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var storage_blob_1 = (init_src4(), __toCommonJS(src_exports));
     var buffer2 = __importStar(__require("buffer"));
@@ -57125,7 +57125,7 @@ var require_downloadUtils = __commonJS({
         this.segmentIndex = this.segmentIndex + 1;
         this.segmentSize = segmentSize;
         this.receivedBytes = 0;
-        core4.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
+        core5.debug(`Downloading segment at offset ${this.segmentOffset} with length ${this.segmentSize}...`);
       }
       /**
        * Sets the number of bytes received for the current segment.
@@ -57159,7 +57159,7 @@ var require_downloadUtils = __commonJS({
         const percentage = (100 * (transferredBytes / this.contentLength)).toFixed(1);
         const elapsedTime = Date.now() - this.startTime;
         const downloadSpeed = (transferredBytes / (1024 * 1024) / (elapsedTime / 1e3)).toFixed(1);
-        core4.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
+        core5.info(`Received ${transferredBytes} of ${this.contentLength} (${percentage}%), ${downloadSpeed} MBs/sec`);
         if (this.isDone()) {
           this.displayedComplete = true;
         }
@@ -57209,7 +57209,7 @@ var require_downloadUtils = __commonJS({
         }));
         downloadResponse.message.socket.setTimeout(constants_1.SocketTimeout, () => {
           downloadResponse.message.destroy();
-          core4.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
+          core5.debug(`Aborting download, socket timed out after ${constants_1.SocketTimeout} ms`);
         });
         yield pipeResponseToStream(downloadResponse, writeStream);
         const contentLengthHeader = downloadResponse.message.headers["content-length"];
@@ -57220,7 +57220,7 @@ var require_downloadUtils = __commonJS({
             throw new Error(`Incomplete download. Expected file size: ${expectedLength}, actual file size: ${actualLength}`);
           }
         } else {
-          core4.debug("Unable to validate download, no Content-Length header");
+          core5.debug("Unable to validate download, no Content-Length header");
         }
       });
     }
@@ -57340,7 +57340,7 @@ var require_downloadUtils = __commonJS({
         const properties = yield client.getProperties();
         const contentLength2 = (_a3 = properties.contentLength) !== null && _a3 !== void 0 ? _a3 : -1;
         if (contentLength2 < 0) {
-          core4.debug("Unable to determine content length, downloading file with http-client...");
+          core5.debug("Unable to determine content length, downloading file with http-client...");
           yield downloadCacheHttpClient(archiveLocation, archivePath);
         } else {
           const maxSegmentSize = Math.min(134217728, buffer2.constants.MAX_LENGTH);
@@ -57421,7 +57421,7 @@ var require_options = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getDownloadOptions = exports2.getUploadOptions = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     function getUploadOptions(copy2) {
       const result = {
         useAzureSdk: false,
@@ -57441,9 +57441,9 @@ var require_options = __commonJS({
       }
       result.uploadConcurrency = !isNaN(Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) ? Math.min(32, Number(process.env["CACHE_UPLOAD_CONCURRENCY"])) : result.uploadConcurrency;
       result.uploadChunkSize = !isNaN(Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"])) ? Math.min(128 * 1024 * 1024, Number(process.env["CACHE_UPLOAD_CHUNK_SIZE"]) * 1024 * 1024) : result.uploadChunkSize;
-      core4.debug(`Use Azure SDK: ${result.useAzureSdk}`);
-      core4.debug(`Upload concurrency: ${result.uploadConcurrency}`);
-      core4.debug(`Upload chunk size: ${result.uploadChunkSize}`);
+      core5.debug(`Use Azure SDK: ${result.useAzureSdk}`);
+      core5.debug(`Upload concurrency: ${result.uploadConcurrency}`);
+      core5.debug(`Upload chunk size: ${result.uploadChunkSize}`);
       return result;
     }
     exports2.getUploadOptions = getUploadOptions;
@@ -57480,12 +57480,12 @@ var require_options = __commonJS({
       if (segmentDownloadTimeoutMins && !isNaN(Number(segmentDownloadTimeoutMins)) && isFinite(Number(segmentDownloadTimeoutMins))) {
         result.segmentTimeoutInMs = Number(segmentDownloadTimeoutMins) * 60 * 1e3;
       }
-      core4.debug(`Use Azure SDK: ${result.useAzureSdk}`);
-      core4.debug(`Download concurrency: ${result.downloadConcurrency}`);
-      core4.debug(`Request timeout (ms): ${result.timeoutInMs}`);
-      core4.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
-      core4.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
-      core4.debug(`Lookup only: ${result.lookupOnly}`);
+      core5.debug(`Use Azure SDK: ${result.useAzureSdk}`);
+      core5.debug(`Download concurrency: ${result.downloadConcurrency}`);
+      core5.debug(`Request timeout (ms): ${result.timeoutInMs}`);
+      core5.debug(`Cache segment download timeout mins env var: ${process.env["SEGMENT_DOWNLOAD_TIMEOUT_MINS"]}`);
+      core5.debug(`Segment download timeout (ms): ${result.segmentTimeoutInMs}`);
+      core5.debug(`Lookup only: ${result.lookupOnly}`);
       return result;
     }
     exports2.getDownloadOptions = getDownloadOptions;
@@ -57667,7 +57667,7 @@ var require_cacheHttpClient = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.saveCache = exports2.reserveCache = exports2.downloadCache = exports2.getCacheEntry = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var http_client_1 = require_lib();
     var auth_1 = require_auth();
     var fs3 = __importStar(__require("fs"));
@@ -57680,12 +57680,12 @@ var require_cacheHttpClient = __commonJS({
     var config_1 = require_config();
     var user_agent_1 = require_user_agent();
     function getCacheApiUrl(resource) {
-      const baseUrl = (0, config_1.getCacheServiceURL)();
-      if (!baseUrl) {
+      const baseUrl2 = (0, config_1.getCacheServiceURL)();
+      if (!baseUrl2) {
         throw new Error("Cache Service Url not found, unable to restore cache.");
       }
-      const url2 = `${baseUrl}_apis/artifactcache/${resource}`;
-      core4.debug(`Resource Url: ${url2}`);
+      const url2 = `${baseUrl2}_apis/artifactcache/${resource}`;
+      core5.debug(`Resource Url: ${url2}`);
       return url2;
     }
     function createAcceptHeader(type2, apiVersion) {
@@ -57700,8 +57700,8 @@ var require_cacheHttpClient = __commonJS({
       return requestOptions;
     }
     function createHttpClient() {
-      const token = process.env["ACTIONS_RUNTIME_TOKEN"] || "";
-      const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
+      const token2 = process.env["ACTIONS_RUNTIME_TOKEN"] || "";
+      const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token2);
       return new http_client_1.HttpClient((0, user_agent_1.getUserAgentString)(), [bearerCredentialHandler], getRequestOptions());
     }
     function getCacheEntry(keys, paths, options) {
@@ -57713,7 +57713,7 @@ var require_cacheHttpClient = __commonJS({
           return httpClient.getJson(getCacheApiUrl(resource));
         }));
         if (response.statusCode === 204) {
-          if (core4.isDebug()) {
+          if (core5.isDebug()) {
             yield printCachesListForDiagnostics(keys[0], httpClient, version2);
           }
           return null;
@@ -57726,9 +57726,9 @@ var require_cacheHttpClient = __commonJS({
         if (!cacheDownloadUrl) {
           throw new Error("Cache not found.");
         }
-        core4.setSecret(cacheDownloadUrl);
-        core4.debug(`Cache Result:`);
-        core4.debug(JSON.stringify(cacheResult));
+        core5.setSecret(cacheDownloadUrl);
+        core5.debug(`Cache Result:`);
+        core5.debug(JSON.stringify(cacheResult));
         return cacheResult;
       });
     }
@@ -57743,10 +57743,10 @@ var require_cacheHttpClient = __commonJS({
           const cacheListResult = response.result;
           const totalCount = cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.totalCount;
           if (totalCount && totalCount > 0) {
-            core4.debug(`No matching cache found for cache key '${key}', version '${version2} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
+            core5.debug(`No matching cache found for cache key '${key}', version '${version2} and scope ${process.env["GITHUB_REF"]}. There exist one or more cache(s) with similar key but they have different version or scope. See more info on cache matching here: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key 
 Other caches with similar key:`);
             for (const cacheEntry of (cacheListResult === null || cacheListResult === void 0 ? void 0 : cacheListResult.artifactCaches) || []) {
-              core4.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
+              core5.debug(`Cache Key: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheKey}, Cache Version: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cacheVersion}, Cache Scope: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.scope}, Cache Created: ${cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.creationTime}`);
             }
           }
         }
@@ -57791,7 +57791,7 @@ Other caches with similar key:`);
     }
     function uploadChunk(httpClient, resourceUrl, openStream, start, end) {
       return __awaiter6(this, void 0, void 0, function* () {
-        core4.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
+        core5.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         const additionalHeaders = {
           "Content-Type": "application/octet-stream",
           "Content-Range": getContentRange(start, end)
@@ -57813,7 +57813,7 @@ Other caches with similar key:`);
         const concurrency = utils.assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
         const maxChunkSize = utils.assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
         const parallelUploads = [...new Array(concurrency).keys()];
-        core4.debug("Awaiting all uploads");
+        core5.debug("Awaiting all uploads");
         let offset = 0;
         try {
           yield Promise.all(parallelUploads.map(() => __awaiter6(this, void 0, void 0, function* () {
@@ -57856,16 +57856,16 @@ Other caches with similar key:`);
           yield (0, uploadUtils_1.uploadCacheArchiveSDK)(signedUploadURL, archivePath, options);
         } else {
           const httpClient = createHttpClient();
-          core4.debug("Upload cache");
+          core5.debug("Upload cache");
           yield uploadFile(httpClient, cacheId, archivePath, options);
-          core4.debug("Commiting cache");
+          core5.debug("Commiting cache");
           const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core4.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
+          core5.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
           const commitCacheResponse = yield commitCache(httpClient, cacheId, cacheSize);
           if (!(0, requestUtils_1.isSuccessStatusCode)(commitCacheResponse.statusCode)) {
             throw new Error(`Cache service responded with ${commitCacheResponse.statusCode} during commit cache.`);
           }
-          core4.info("Cache saved successfully");
+          core5.info("Cache saved successfully");
         }
       });
     }
@@ -59079,9 +59079,9 @@ var init_reflection_type_check = __esm({
     init_reflection_info();
     init_oneof();
     ReflectionTypeCheck = class {
-      constructor(info4) {
+      constructor(info5) {
         var _a3;
-        this.fields = (_a3 = info4.fields) !== null && _a3 !== void 0 ? _a3 : [];
+        this.fields = (_a3 = info5.fields) !== null && _a3 !== void 0 ? _a3 : [];
       }
       prepare() {
         if (this.data)
@@ -59150,8 +59150,8 @@ var init_reflection_type_check = __esm({
         if (depth < 1) {
           return true;
         }
-        for (const name of data.oneofs) {
-          const group = message[name];
+        for (const name2 of data.oneofs) {
+          const group = message[name2];
           if (!isOneofGroup(group))
             return false;
           if (group.oneofKind === void 0)
@@ -59322,8 +59322,8 @@ var init_reflection_json_reader = __esm({
     init_assert();
     init_reflection_long_convert();
     ReflectionJsonReader = class {
-      constructor(info4) {
-        this.info = info4;
+      constructor(info5) {
+        this.info = info5;
       }
       prepare() {
         var _a3;
@@ -59617,9 +59617,9 @@ var init_reflection_json_writer = __esm({
     init_reflection_info();
     init_assert();
     ReflectionJsonWriter = class {
-      constructor(info4) {
+      constructor(info5) {
         var _a3;
-        this.fields = (_a3 = info4.fields) !== null && _a3 !== void 0 ? _a3 : [];
+        this.fields = (_a3 = info5.fields) !== null && _a3 !== void 0 ? _a3 : [];
       }
       /**
        * Converts the message to a JSON object, based on the field descriptors.
@@ -59867,8 +59867,8 @@ var init_reflection_binary_reader = __esm({
     init_reflection_long_convert();
     init_reflection_scalar_default();
     ReflectionBinaryReader = class {
-      constructor(info4) {
-        this.info = info4;
+      constructor(info5) {
+        this.info = info5;
       }
       prepare() {
         var _a3;
@@ -60039,8 +60039,8 @@ var init_reflection_binary_writer = __esm({
     init_assert();
     init_pb_long();
     ReflectionBinaryWriter = class {
-      constructor(info4) {
-        this.info = info4;
+      constructor(info5) {
+        this.info = info5;
       }
       prepare() {
         if (!this.fields) {
@@ -60250,23 +60250,23 @@ var init_reflection_binary_writer = __esm({
 function reflectionCreate(type2) {
   const msg = type2.messagePrototype ? Object.create(type2.messagePrototype) : Object.defineProperty({}, MESSAGE_TYPE, { value: type2 });
   for (let field of type2.fields) {
-    let name = field.localName;
+    let name2 = field.localName;
     if (field.opt)
       continue;
     if (field.oneof)
       msg[field.oneof] = { oneofKind: void 0 };
     else if (field.repeat)
-      msg[name] = [];
+      msg[name2] = [];
     else
       switch (field.kind) {
         case "scalar":
-          msg[name] = reflectionScalarDefault(field.T, field.L);
+          msg[name2] = reflectionScalarDefault(field.T, field.L);
           break;
         case "enum":
-          msg[name] = 0;
+          msg[name2] = 0;
           break;
         case "map":
-          msg[name] = {};
+          msg[name2] = {};
           break;
       }
   }
@@ -60281,60 +60281,60 @@ var init_reflection_create = __esm({
 });
 
 // node_modules/@protobuf-ts/runtime/build/es2015/reflection-merge-partial.js
-function reflectionMergePartial(info4, target, source) {
+function reflectionMergePartial(info5, target, source) {
   let fieldValue, input = source, output;
-  for (let field of info4.fields) {
-    let name = field.localName;
+  for (let field of info5.fields) {
+    let name2 = field.localName;
     if (field.oneof) {
       const group = input[field.oneof];
       if ((group === null || group === void 0 ? void 0 : group.oneofKind) == void 0) {
         continue;
       }
-      fieldValue = group[name];
+      fieldValue = group[name2];
       output = target[field.oneof];
       output.oneofKind = group.oneofKind;
       if (fieldValue == void 0) {
-        delete output[name];
+        delete output[name2];
         continue;
       }
     } else {
-      fieldValue = input[name];
+      fieldValue = input[name2];
       output = target;
       if (fieldValue == void 0) {
         continue;
       }
     }
     if (field.repeat)
-      output[name].length = fieldValue.length;
+      output[name2].length = fieldValue.length;
     switch (field.kind) {
       case "scalar":
       case "enum":
         if (field.repeat)
           for (let i = 0; i < fieldValue.length; i++)
-            output[name][i] = fieldValue[i];
+            output[name2][i] = fieldValue[i];
         else
-          output[name] = fieldValue;
+          output[name2] = fieldValue;
         break;
       case "message":
         let T = field.T();
         if (field.repeat)
           for (let i = 0; i < fieldValue.length; i++)
-            output[name][i] = T.create(fieldValue[i]);
-        else if (output[name] === void 0)
-          output[name] = T.create(fieldValue);
+            output[name2][i] = T.create(fieldValue[i]);
+        else if (output[name2] === void 0)
+          output[name2] = T.create(fieldValue);
         else
-          T.mergePartial(output[name], fieldValue);
+          T.mergePartial(output[name2], fieldValue);
         break;
       case "map":
         switch (field.V.kind) {
           case "scalar":
           case "enum":
-            Object.assign(output[name], fieldValue);
+            Object.assign(output[name2], fieldValue);
             break;
           case "message":
             let T2 = field.V.T();
             for (let k of Object.keys(fieldValue))
-              output[name][k] = T2.create(fieldValue[k]);
+              output[name2][k] = T2.create(fieldValue[k]);
             break;
         }
         break;
@@ -60348,12 +60348,12 @@ var init_reflection_merge_partial = __esm({
 });
 
 // node_modules/@protobuf-ts/runtime/build/es2015/reflection-equals.js
-function reflectionEquals(info4, a, b) {
+function reflectionEquals(info5, a, b) {
   if (a === b)
     return true;
   if (!a || !b)
     return false;
-  for (let field of info4.fields) {
+  for (let field of info5.fields) {
     let localName = field.localName;
     let val_a = field.oneof ? a[field.oneof][localName] : a[localName];
     let val_b = field.oneof ? b[field.oneof][localName] : b[localName];
@@ -60437,9 +60437,9 @@ var init_message_type = __esm({
     init_binary_reader();
     baseDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf({}));
     MessageType = class {
-      constructor(name, fields, options) {
+      constructor(name2, fields, options) {
         this.defaultCheckDepth = 16;
-        this.typeName = name;
+        this.typeName = name2;
         this.fields = fields.map(normalizeFieldInfo);
         this.options = options !== null && options !== void 0 ? options : {};
         this.messagePrototype = Object.create(null, Object.assign(Object.assign({}, baseDescriptors), { [MESSAGE_TYPE]: { value: this } }));
@@ -60634,16 +60634,16 @@ function listEnumValues(enumObject) {
   if (!isEnumObject(enumObject))
     throw new Error("not a typescript enum object");
   let values = [];
-  for (let [name, number] of Object.entries(enumObject))
+  for (let [name2, number] of Object.entries(enumObject))
     if (typeof number == "number")
-      values.push({ name, number });
+      values.push({ name: name2, number });
   return values;
 }
 function listEnumNames(enumObject) {
   return listEnumValues(enumObject).map((val) => val.name);
 }
 function listEnumNumbers(enumObject) {
-  return listEnumValues(enumObject).map((val) => val.number).filter((num, index, arr) => arr.indexOf(num) == index);
+  return listEnumValues(enumObject).map((val) => val.number).filter((num, index2, arr) => arr.indexOf(num) == index2);
 }
 var init_enum_object = __esm({
   "node_modules/@protobuf-ts/runtime/build/es2015/enum-object.js"() {
@@ -62586,7 +62586,7 @@ var require_cacheTwirpClient = __commonJS({
         this.maxAttempts = 5;
         this.baseRetryIntervalMilliseconds = 3e3;
         this.retryMultiplier = 1.5;
-        const token = (0, cacheUtils_1.getRuntimeToken)();
+        const token2 = (0, cacheUtils_1.getRuntimeToken)();
         this.baseUrl = (0, config_1.getCacheServiceURL)();
         if (maxAttempts) {
           this.maxAttempts = maxAttempts;
@@ -62598,7 +62598,7 @@ var require_cacheTwirpClient = __commonJS({
           this.retryMultiplier = retryMultiplier;
         }
         this.httpClient = new http_client_1.HttpClient(userAgent, [
-          new auth_1.BearerCredentialHandler(token)
+          new auth_1.BearerCredentialHandler(token2)
         ]);
       }
       // This function satisfies the Rpc interface. It is compatible with the JSON
@@ -63021,7 +63021,7 @@ var require_cache3 = __commonJS({
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.saveCache = exports2.restoreCache = exports2.isFeatureAvailable = exports2.ReserveCacheError = exports2.ValidationError = void 0;
-    var core4 = __importStar(require_core());
+    var core5 = __importStar(require_core());
     var path = __importStar(__require("path"));
     var utils = __importStar(require_cacheUtils());
     var cacheHttpClient = __importStar(require_cacheHttpClient());
@@ -63066,7 +63066,7 @@ var require_cache3 = __commonJS({
     function restoreCache2(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false) {
       return __awaiter6(this, void 0, void 0, function* () {
         const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
-        core4.debug(`Cache service version: ${cacheServiceVersion}`);
+        core5.debug(`Cache service version: ${cacheServiceVersion}`);
         checkPaths(paths);
         switch (cacheServiceVersion) {
           case "v2":
@@ -63082,8 +63082,8 @@ var require_cache3 = __commonJS({
       return __awaiter6(this, void 0, void 0, function* () {
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
-        core4.debug("Resolved Keys:");
-        core4.debug(JSON.stringify(keys));
+        core5.debug("Resolved Keys:");
+        core5.debug(JSON.stringify(keys));
         if (keys.length > 10) {
           throw new ValidationError(`Key Validation Error: Keys are limited to a maximum of 10.`);
         }
@@ -63101,32 +63101,32 @@ var require_cache3 = __commonJS({
             return void 0;
           }
           if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
-            core4.info("Lookup only - skipping download");
+            core5.info("Lookup only - skipping download");
             return cacheEntry.cacheKey;
           }
           archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-          core4.debug(`Archive Path: ${archivePath}`);
+          core5.debug(`Archive Path: ${archivePath}`);
           yield cacheHttpClient.downloadCache(cacheEntry.archiveLocation, archivePath, options);
-          if (core4.isDebug()) {
+          if (core5.isDebug()) {
             yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core4.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+          core5.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
           yield (0, tar_1.extractTar)(archivePath, compressionMethod);
-          core4.info("Cache restored successfully");
+          core5.info("Cache restored successfully");
           return cacheEntry.cacheKey;
         } catch (error) {
           const typedError = error;
           if (typedError.name === ValidationError.name) {
             throw error;
           } else {
-            core4.warning(`Failed to restore: ${error.message}`);
+            core5.warning(`Failed to restore: ${error.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error) {
-            core4.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return void 0;
@@ -63137,8 +63137,8 @@ var require_cache3 = __commonJS({
         options = Object.assign(Object.assign({}, options), { useAzureSdk: true });
         restoreKeys = restoreKeys || [];
         const keys = [primaryKey, ...restoreKeys];
-        core4.debug("Resolved Keys:");
-        core4.debug(JSON.stringify(keys));
+        core5.debug("Resolved Keys:");
+        core5.debug(JSON.stringify(keys));
         if (keys.length > 10) {
           throw new ValidationError(`Key Validation Error: Keys are limited to a maximum of 10.`);
         }
@@ -63156,32 +63156,32 @@ var require_cache3 = __commonJS({
           };
           const response = yield twirpClient.GetCacheEntryDownloadURL(request3);
           if (!response.ok) {
-            core4.debug(`Cache not found for version ${request3.version} of keys: ${keys.join(", ")}`);
+            core5.debug(`Cache not found for version ${request3.version} of keys: ${keys.join(", ")}`);
             return void 0;
           }
-          core4.info(`Cache hit for: ${request3.key}`);
+          core5.info(`Cache hit for: ${request3.key}`);
           if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
-            core4.info("Lookup only - skipping download");
+            core5.info("Lookup only - skipping download");
             return response.matchedKey;
           }
           archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
-          core4.debug(`Archive path: ${archivePath}`);
-          core4.debug(`Starting download of archive to: ${archivePath}`);
+          core5.debug(`Archive path: ${archivePath}`);
+          core5.debug(`Starting download of archive to: ${archivePath}`);
           yield cacheHttpClient.downloadCache(response.signedDownloadUrl, archivePath, options);
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core4.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
-          if (core4.isDebug()) {
+          core5.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+          if (core5.isDebug()) {
             yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           yield (0, tar_1.extractTar)(archivePath, compressionMethod);
-          core4.info("Cache restored successfully");
+          core5.info("Cache restored successfully");
           return response.matchedKey;
         } catch (error) {
           const typedError = error;
           if (typedError.name === ValidationError.name) {
             throw error;
           } else {
-            core4.warning(`Failed to restore: ${error.message}`);
+            core5.warning(`Failed to restore: ${error.message}`);
           }
         } finally {
           try {
@@ -63189,7 +63189,7 @@ var require_cache3 = __commonJS({
               yield utils.unlinkFile(archivePath);
             }
           } catch (error) {
-            core4.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return void 0;
@@ -63198,7 +63198,7 @@ var require_cache3 = __commonJS({
     function saveCache2(paths, key, options, enableCrossOsArchive = false) {
       return __awaiter6(this, void 0, void 0, function* () {
         const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
-        core4.debug(`Cache service version: ${cacheServiceVersion}`);
+        core5.debug(`Cache service version: ${cacheServiceVersion}`);
         checkPaths(paths);
         checkKey(key);
         switch (cacheServiceVersion) {
@@ -63217,26 +63217,26 @@ var require_cache3 = __commonJS({
         const compressionMethod = yield utils.getCompressionMethod();
         let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
-        core4.debug("Cache Paths:");
-        core4.debug(`${JSON.stringify(cachePaths)}`);
+        core5.debug("Cache Paths:");
+        core5.debug(`${JSON.stringify(cachePaths)}`);
         if (cachePaths.length === 0) {
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
         const archivePath = path.join(archiveFolder, utils.getCacheFileName(compressionMethod));
-        core4.debug(`Archive Path: ${archivePath}`);
+        core5.debug(`Archive Path: ${archivePath}`);
         try {
           yield (0, tar_1.createTar)(archiveFolder, cachePaths, compressionMethod);
-          if (core4.isDebug()) {
+          if (core5.isDebug()) {
             yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           const fileSizeLimit = 10 * 1024 * 1024 * 1024;
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core4.debug(`File Size: ${archiveFileSize}`);
+          core5.debug(`File Size: ${archiveFileSize}`);
           if (archiveFileSize > fileSizeLimit && !(0, config_1.isGhes)()) {
             throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
           }
-          core4.debug("Reserving Cache");
+          core5.debug("Reserving Cache");
           const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, paths, {
             compressionMethod,
             enableCrossOsArchive,
@@ -63249,22 +63249,22 @@ var require_cache3 = __commonJS({
           } else {
             throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache. More details: ${(_e = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _e === void 0 ? void 0 : _e.message}`);
           }
-          core4.debug(`Saving Cache (ID: ${cacheId})`);
+          core5.debug(`Saving Cache (ID: ${cacheId})`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, "", options);
         } catch (error) {
           const typedError = error;
           if (typedError.name === ValidationError.name) {
             throw error;
           } else if (typedError.name === ReserveCacheError.name) {
-            core4.info(`Failed to save: ${typedError.message}`);
+            core5.info(`Failed to save: ${typedError.message}`);
           } else {
-            core4.warning(`Failed to save: ${typedError.message}`);
+            core5.warning(`Failed to save: ${typedError.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error) {
-            core4.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return cacheId;
@@ -63277,26 +63277,26 @@ var require_cache3 = __commonJS({
         const twirpClient = cacheTwirpClient.internalCacheTwirpClient();
         let cacheId = -1;
         const cachePaths = yield utils.resolvePaths(paths);
-        core4.debug("Cache Paths:");
-        core4.debug(`${JSON.stringify(cachePaths)}`);
+        core5.debug("Cache Paths:");
+        core5.debug(`${JSON.stringify(cachePaths)}`);
         if (cachePaths.length === 0) {
           throw new Error(`Path Validation Error: Path(s) specified in the action for caching do(es) not exist, hence no cache is being saved.`);
         }
         const archiveFolder = yield utils.createTempDirectory();
         const archivePath = path.join(archiveFolder, utils.getCacheFileName(compressionMethod));
-        core4.debug(`Archive Path: ${archivePath}`);
+        core5.debug(`Archive Path: ${archivePath}`);
         try {
           yield (0, tar_1.createTar)(archiveFolder, cachePaths, compressionMethod);
-          if (core4.isDebug()) {
+          if (core5.isDebug()) {
             yield (0, tar_1.listTar)(archivePath, compressionMethod);
           }
           const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-          core4.debug(`File Size: ${archiveFileSize}`);
+          core5.debug(`File Size: ${archiveFileSize}`);
           if (archiveFileSize > constants_1.CacheFileSizeLimit && !(0, config_1.isGhes)()) {
             throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
           }
           options.archiveSizeBytes = archiveFileSize;
-          core4.debug("Reserving Cache");
+          core5.debug("Reserving Cache");
           const version2 = utils.getCacheVersion(paths, compressionMethod, enableCrossOsArchive);
           const request3 = {
             key,
@@ -63310,10 +63310,10 @@ var require_cache3 = __commonJS({
             }
             signedUploadUrl = response.signedUploadUrl;
           } catch (error) {
-            core4.debug(`Failed to reserve cache: ${error}`);
+            core5.debug(`Failed to reserve cache: ${error}`);
             throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache.`);
           }
-          core4.debug(`Attempting to upload cache located at: ${archivePath}`);
+          core5.debug(`Attempting to upload cache located at: ${archivePath}`);
           yield cacheHttpClient.saveCache(cacheId, archivePath, signedUploadUrl, options);
           const finalizeRequest = {
             key,
@@ -63321,7 +63321,7 @@ var require_cache3 = __commonJS({
             sizeBytes: `${archiveFileSize}`
           };
           const finalizeResponse = yield twirpClient.FinalizeCacheEntryUpload(finalizeRequest);
-          core4.debug(`FinalizeCacheEntryUploadResponse: ${finalizeResponse.ok}`);
+          core5.debug(`FinalizeCacheEntryUploadResponse: ${finalizeResponse.ok}`);
           if (!finalizeResponse.ok) {
             throw new Error(`Unable to finalize cache with key ${key}, another job may be finalizing this cache.`);
           }
@@ -63331,15 +63331,15 @@ var require_cache3 = __commonJS({
           if (typedError.name === ValidationError.name) {
             throw error;
           } else if (typedError.name === ReserveCacheError.name) {
-            core4.info(`Failed to save: ${typedError.message}`);
+            core5.info(`Failed to save: ${typedError.message}`);
           } else {
-            core4.warning(`Failed to save: ${typedError.message}`);
+            core5.warning(`Failed to save: ${typedError.message}`);
           }
         } finally {
           try {
             yield utils.unlinkFile(archivePath);
           } catch (error) {
-            core4.debug(`Failed to delete archive: ${error}`);
+            core5.debug(`Failed to delete archive: ${error}`);
           }
         }
         return cacheId;
@@ -63353,7 +63353,7 @@ init_esm_shims();
 
 // src/publish-crates-cargo.ts
 init_esm_shims();
-var core3 = __toESM(require_core(), 1);
+var core4 = __toESM(require_core(), 1);
 import { rm } from "fs/promises";
 
 // src/cargo.ts
@@ -63548,28 +63548,54 @@ function* packagesOrdered(path, options) {
   const seen = [];
   const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.includes(dep.name));
   while (allPackages.length != 0) {
-    for (const [index, package_] of allPackages.entries()) {
+    for (const [index2, package_] of allPackages.entries()) {
       if (isReady(package_)) {
         seen.push(package_.name);
-        allPackages.splice(index, 1);
+        allPackages.splice(index2, 1);
         yield package_;
       }
     }
   }
 }
-async function installBinaryCached(name) {
+async function setRegistry(path, pattern, registry) {
+  core2.startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
+  const manifestPath = `${path}/Cargo.toml`;
+  const manifestRaw = toml.get(manifestPath);
+  let manifest;
+  let prefix2;
+  if ("workspace" in manifestRaw) {
+    prefix2 = ["workspace"];
+    manifest = manifestRaw["workspace"];
+  } else {
+    prefix2 = [];
+    manifest = manifestRaw;
+  }
+  for (const dep in manifest.dependencies) {
+    if (pattern.test(dep)) {
+      await toml.set(manifestPath, prefix2.concat("dependencies", dep, "registry"), registry);
+      await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "git"));
+      await toml.unset(manifestPath, prefix2.concat("dependencies", dep, "branch"));
+    }
+  }
+  core2.endGroup();
+}
+async function configRegistry(path, name2, index2) {
+  const configPath = `${path}/.cargo/config.toml`;
+  await toml.set(configPath, ["registries", name2, "index"], index2);
+}
+async function installBinaryCached(name2) {
   const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
-  const version2 = config.lock.cratesio[name];
+  const version2 = config.lock.cratesio[name2];
   if (process.env["GITHUB_ACTIONS"] != void 0) {
     const paths = [join(os2.homedir(), ".cargo", "bin")];
-    const key = `${os2.platform()}-${os2.release()}-${os2.arch()}-${name}-${version2}`;
+    const key = `${os2.platform()}-${os2.release()}-${os2.arch()}-${name2}-${version2}`;
     const hit = await cache.restoreCache(paths, key);
     if (hit == void 0) {
-      sh(`cargo +stable install ${name}@${version2} --force`, { env });
+      sh(`cargo +stable install ${name2}@${version2} --force`, { env });
       await cache.saveCache(paths, key);
     }
   } else {
-    sh(`cargo +stable install ${name}@${version2}`, { env });
+    sh(`cargo +stable install ${name2}@${version2}`, { env });
   }
 }
 function isPublished(pkg, options) {
@@ -63586,19 +63612,53 @@ function isPublished(pkg, options) {
   return publishedVersion === pkg.version;
 }
 
+// src/kellnr.ts
+init_esm_shims();
+var core3 = __toESM(require_core(), 1);
+import * as child_process from "child_process";
+import { mkdtemp } from "fs/promises";
+import { tmpdir } from "os";
+import { join as join2 } from "path";
+var name = "kellnr";
+var baseUrl = "localhost";
+var index = `sparse+https://${baseUrl}:8000/api/v1/crates/`;
+var token = "Zy9HhJ02RJmg0GCrgLfaCVfU6IwDfhXD";
+var indexPath = "index";
+var cratePath = "crate";
+async function spawn2() {
+  const tmp = await mkdtemp(join2(tmpdir(), name));
+  const indexDir = join2(tmp, indexPath);
+  const crateDir = join2(tmp, cratePath);
+  const options = {
+    env: {
+      PATH: process.env.PATH,
+      RUST_LOG: "debug",
+      KELLNR_REGISTRY__DATA_DIR: crateDir
+    },
+    stdio: "inherit"
+  };
+  const proc = child_process.spawn(
+    "docker run --rm -it --name kellnr",
+    ["-p", "8000:8000", "-e", `KELLNR_ORIGIN__HOSTNAME=${baseUrl}`, "ghcr.io/kellnr/kellnr:5"],
+    options
+  );
+  core3.info(`Spawned kellnr (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
+  return { name, index, token, crateDir, indexDir, proc };
+}
+
 // src/publish-crates-cargo.ts
 function setup() {
-  const liveRun = core3.getBooleanInput("live-run", { required: true });
-  const branch = core3.getInput("branch", { required: true });
-  const repo = core3.getInput("repo", { required: true });
-  const submodulePath = core3.getInput("submodule-path");
-  const githubToken = core3.getInput("github-token", { required: true });
-  const cratesIoToken = core3.getInput("crates-io-token");
-  const artifactoryToken = core3.getInput("artifactory-token");
-  const artifactoryIndex = core3.getInput("artifactory-index");
-  const unpublishedDepsPatterns = core3.getInput("unpublished-deps-patterns");
-  const unpublishedDepsRepos = core3.getInput("unpublished-deps-repos");
-  const publicationTest = core3.getBooleanInput("publication-test");
+  const liveRun = core4.getBooleanInput("live-run", { required: true });
+  const branch = core4.getInput("branch", { required: true });
+  const repo = core4.getInput("repo", { required: true });
+  const submodulePath = core4.getInput("submodule-path");
+  const githubToken = core4.getInput("github-token", { required: true });
+  const cratesIoToken = core4.getInput("crates-io-token");
+  const artifactoryToken = core4.getInput("artifactory-token");
+  const artifactoryIndex = core4.getInput("artifactory-index");
+  const unpublishedDepsPatterns = core4.getInput("unpublished-deps-patterns");
+  const unpublishedDepsRepos = core4.getInput("unpublished-deps-repos");
+  const publicationTest = core4.getBooleanInput("publication-test");
   return {
     liveRun,
     branch,
@@ -63616,7 +63676,7 @@ function setup() {
 async function main(input) {
   try {
     if (input.publicationTest) {
-      core3.info("Running cargo check before publication");
+      core4.info("Running cargo check before publication");
       clone(input, input.repo, input.branch);
       const path = getPath(input);
       const options = {
@@ -63651,9 +63711,12 @@ async function main(input) {
         publishFn(input, repo);
       }
       publishFn(input, input.repo, input.branch);
+    } else {
+      const registry = await spawn2();
+      await publishToKellnr(input, input.repo, registry, input.branch);
     }
   } catch (error) {
-    if (error instanceof Error) core3.setFailed(error.message);
+    if (error instanceof Error) core4.setFailed(error.message);
   }
 }
 function clone(input, repo, branch) {
@@ -63665,10 +63728,10 @@ function clone(input, repo, branch) {
   }
 }
 async function deleteRepos(input) {
-  core3.info(`Deleting repository clone ${repoPath(input.repo)}`);
+  core4.info(`Deleting repository clone ${repoPath(input.repo)}`);
   await rm(repoPath(input.repo), { recursive: true, force: true });
   for (const repo of input.unpublishedDepsRepos) {
-    core3.info(`Deleting repository clone ${repoPath(repo)}`);
+    core4.info(`Deleting repository clone ${repoPath(repo)}`);
     await rm(repoPath(repo), { recursive: true, force: true });
   }
 }
@@ -63685,11 +63748,25 @@ function getPath(input) {
   if (input.submodulePath) {
     path = repoPath(input.repo) + "/" + input.submodulePath;
   }
-  core3.info(`Using path ${path}`);
+  core4.info(`Using path ${path}`);
   return path;
 }
+async function publishToKellnr(input, repo, registry, branch) {
+  core4.info("Publishing to Kellnr");
+  clone(input, repo, branch);
+  const path = getPath(input);
+  await configRegistry(path, registry.name, registry.index);
+  await setRegistry(path, input.unpublishedDepsRegExp, registry.name);
+  const env = {
+    CARGO_REGISTRIES_KELLNER_TOKEN: registry.token,
+    CARGO_REGISTRIES_KELLNER_INDEX: registry.index,
+    CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
+    CARGO_REGISTRY_DEFAULT: "kellnr"
+  };
+  publish(path, env, true);
+}
 function publishToArtifactory(input, repo, branch) {
-  core3.info("Publishing to Artifactory");
+  core4.info("Publishing to Artifactory");
   clone(input, repo, branch);
   const path = getPath(input);
   const env = {
@@ -63701,7 +63778,7 @@ function publishToArtifactory(input, repo, branch) {
   publish(path, env);
 }
 function publishToCratesIo(input, repo, branch) {
-  core3.info("Publishing to CratesIo");
+  core4.info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path = repoPath(repo);
   const env = {
