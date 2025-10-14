@@ -63638,8 +63638,19 @@ async function spawn2() {
     stdio: "inherit"
   };
   const proc = child_process.spawn(
-    "docker run --rm -it --name kellnr",
-    ["-p", "8000:8000", "-e", `KELLNR_ORIGIN__HOSTNAME=${baseUrl}`, "ghcr.io/kellnr/kellnr:5"],
+    "docker",
+    [
+      "run",
+      "-d",
+      "--rm",
+      "--name",
+      "kellnr",
+      "-p",
+      "8000:8000",
+      "-e",
+      `KELLNR_ORIGIN__HOSTNAME=${baseUrl}`,
+      "ghcr.io/kellnr/kellnr:5"
+    ],
     options
   );
   core3.info(`Spawned kellnr (${proc.pid}) with base URL ${baseUrl} and data directory ${tmp}`);
