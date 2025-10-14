@@ -69984,7 +69984,7 @@ function fixResponseChunkedTransferBadEnding(request3, errorCallback) {
 var core3 = __toESM(require_core(), 1);
 var name = "kellnr";
 var baseUrl = "localhost";
-var index = `sparse+https://${baseUrl}:8000/api/v1/crates/`;
+var index = `sparse+http://${baseUrl}:8000/api/v1/crates/`;
 var token = "Zy9HhJ02RJmg0GCrgLfaCVfU6IwDfhXD";
 var indexPath = "index";
 var cratePath = "crate";

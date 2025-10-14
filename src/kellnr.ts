@@ -8,7 +8,7 @@ import * as core from "@actions/core";
 
 const name = "kellnr";
 const baseUrl = "localhost";
-const index = `sparse+https://${baseUrl}:8000/api/v1/crates/`;
+const index = `sparse+http://${baseUrl}:8000/api/v1/crates/`;
 const token = "Zy9HhJ02RJmg0GCrgLfaCVfU6IwDfhXD"; // default admin token from kellnr
 const indexPath = "index";
 const cratePath = "crate";
