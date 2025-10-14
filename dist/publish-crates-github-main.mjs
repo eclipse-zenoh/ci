@@ -88155,7 +88155,7 @@ var require_public_api = __commonJS({
   }
 });
 
-// node_modules/node-fetch/lib/index.mjs
+// node_modules/@octokit/request/node_modules/node-fetch/lib/index.mjs
 import Stream from "stream";
 import http2 from "http";
 import Url from "url";
@@ -88753,7 +88753,7 @@ function destroyStream(stream, err) {
 }
 var import_whatwg_url, Readable5, BUFFER, TYPE, Blob2, convert, INTERNALS, PassThrough, invalidTokenRegex, invalidHeaderCharRegex, MAP, Headers, INTERNAL, HeadersIteratorPrototype, INTERNALS$1, STATUS_CODES, Response, INTERNALS$2, URL2, parse_url, format_url, streamDestructionSupported, Request, URL$1, PassThrough$1, isDomainOrSubdomain, isSameProtocol, lib_default;
 var init_lib = __esm({
-  "node_modules/node-fetch/lib/index.mjs"() {
+  "node_modules/@octokit/request/node_modules/node-fetch/lib/index.mjs"() {
     init_esm_shims();
     import_whatwg_url = __toESM(require_public_api(), 1);
     Readable5 = Stream.Readable;
