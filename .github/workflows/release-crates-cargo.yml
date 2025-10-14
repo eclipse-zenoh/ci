@@ -46,7 +46,7 @@ on:
 
 jobs:
   publish:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: eclipse-zenoh/ci/publish-crates-cargo@main
         with:
