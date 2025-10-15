@@ -61,7 +61,20 @@ jobs:
           sudo apt install -y --allow-change-held-packages wireshark
 
       - name: Update git/branch in release branch
-        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-dissector' }}
+        uses: eclipse-zenoh/ci/set-git-branch@main
+        with:
+          version: ${{ inputs.version }}
+          release-branch: release/${{ inputs.version }}
+          repo: ${{ matrix.repo }}
+          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          toolchain: 1.85.0
+          deps-pattern: zenoh.*
+          deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
+          deps-branch: main
+
+      - name: Update git/branch in release branch
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp", "eclipse-zenoh/zenoh-dissector"]'), matrix.repo) }}
         uses: eclipse-zenoh/ci/set-git-branch@main
         with:
           version: ${{ inputs.version }}
