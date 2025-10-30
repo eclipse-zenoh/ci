@@ -118,10 +118,18 @@ jobs:
           timeout 5400 bash -c '
             while true; do
               pr_state=$(gh pr view "$pr_number" --repo eclipse-zenoh/zenoh --json state --template '{{.state}}')
+              pr_merge_state=$(gh pr view "$pr_number" --repo eclipse-zenoh/zenoh --json mergeStateStatus --template '{{.mergeStateStatus}}')
               if [ "$pr_state" == "MERGED" ]; then
                 echo "PR #$pr_number has been merged."
                 exit 0
+              elif [ "$pr_state" == "OPEN" && "$pr_merge_state" == "BLOCKED"]; then
+                echo "PR #$pr_number failed CI checks."
+                exit 1
+              else
+                echo "PR #$pr_number is in unexpected state: $pr_state"
+                exit 1
               fi
+              echo "PR #$pr_number not merged yet ($pr_state - $pr_merge_state). Checking again in 10 seconds..."
               sleep 10
             done' || { echo "Timeout waiting for PR #$pr_number to be merged."; exit 1; }
         env:
