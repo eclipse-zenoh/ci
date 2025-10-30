@@ -25,8 +25,7 @@ jobs:
     name: Recreate Zenoh's lockfile
     runs-on: ubuntu-latest
     outputs:
-      zenoh-head-hash: ${{ steps.info.outputs.head-hash }}
-      zenoh-head-date: ${{ steps.info.outputs.head-date }}
+      pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
     steps:
       - name: Checkout Zenoh
         uses: actions/checkout@v4
@@ -90,10 +89,15 @@ jobs:
         run: >
           echo "::notice:: PR ${{ steps.cpr.outputs.pull-request-operation }}: https://github.com/eclipse-zenoh/zenoh/pull/${{ steps.cpr.outputs.pull-request-number }}"
 
+  wait-merge:
+    name: Wait for PR to be merged
+    runs-on: ubuntu-latest
+    needs: recreate-lockfile
+    steps:
       - name: Wait for PR to be merged into main
-        if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
+        if: ${{ needs.recreate-lockfile.outputs.pull-request-number != '' }}
         run: |
-          pr_number=${{ steps.cpr.outputs.pull-request-number }}
+          pr_number=${{ needs.recreate-lockfile.outputs.pull-request-number }}
           echo "Waiting for PR #$pr_number to be merged..."
           # Timeout after 90 minutes
           timeout 5400 bash -c '
@@ -111,7 +115,7 @@ jobs:
   fetch:
     name: Fetch Zenoh's lockfile
     runs-on: ubuntu-latest
-    needs: recreate-lockfile
+    needs: wait-merge
     outputs:
       zenoh-head-hash: ${{ steps.info.outputs.head-hash }}
       zenoh-head-date: ${{ steps.info.outputs.head-date }}
