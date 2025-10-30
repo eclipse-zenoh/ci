@@ -122,7 +122,7 @@ jobs:
               if [ "$pr_state" == "MERGED" ]; then
                 echo "PR #$pr_number has been merged."
                 exit 0
-              elif [ "$pr_state" == "OPEN" && "$pr_merge_state" == "BLOCKED"]; then
+              elif [ "$pr_state" == "OPEN" ] && [ "$pr_merge_state" == "BLOCKED" ]; then
                 echo "PR #$pr_number failed CI checks."
                 exit 1
               else
