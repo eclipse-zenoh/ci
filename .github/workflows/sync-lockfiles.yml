@@ -85,7 +85,7 @@ jobs:
         if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-          --subject "build: Recreate lockfile of ${{ steps.info.outputs.head-hash }} from ${{ steps.info.outputs.head-date }} (#${{ steps.cpr.outputs.pull-request-pull-request-number}})"
+          --subject "build: Recreate lockfile of ${{ steps.info.outputs.head-hash }} from ${{ steps.info.outputs.head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
           --repo "eclipse-zenoh/zenoh"
           --squash
           --auto
