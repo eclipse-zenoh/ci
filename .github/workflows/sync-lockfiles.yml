@@ -33,6 +33,12 @@ jobs:
           repository: eclipse-zenoh/zenoh
           ref: ${{ inputs.branch }}
 
+      - id: info
+        name: Get HEAD info
+        run: |
+          echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
+          echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
+
       - name: Install Rust toolchain
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
@@ -63,6 +69,8 @@ jobs:
           body: |
             This pull request recreates Zenoh's Cargo.lock.
 
+            - **sha**: eclipse-zenoh/zenoh@${{ steps.info.outputs.head-hash }}
+            - **date**: ${{ steps.info.outputs.head-date }}
             - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
           commit-message: "build: Recreate Cargo lockfile"
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
@@ -77,7 +85,7 @@ jobs:
         if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-          --subject "build: Recreate `Cargo.lock`"
+          --subject "build: Recreate lockfile of ${{ steps.info.outputs.head-hash }} from ${{ steps.info.outputs.head-date }} (#${{ steps.cpr.outputs.pull-request-pull-request-number}})"
           --repo "eclipse-zenoh/zenoh"
           --squash
           --auto
