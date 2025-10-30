@@ -102,6 +102,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: recreate-lockfile
     steps:
+      # Checkout is not really used, it's only to avoid gh pr view complaining about not being in a git repository
+      - name: Checkout Zenoh
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/zenoh
+          ref: ${{ inputs.branch }}
+
       - name: Wait for PR to be merged into main
         if: ${{ needs.recreate-lockfile.outputs.pull-request-number != '' }}
         run: |
