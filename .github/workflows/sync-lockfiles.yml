@@ -33,6 +33,12 @@ jobs:
           repository: eclipse-zenoh/zenoh
           ref: ${{ inputs.branch }}
 
+      - id: info
+        name: Get HEAD info
+        run: |
+          echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
+          echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
+
       - name: Install Rust toolchain
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
@@ -63,6 +69,8 @@ jobs:
           body: |
             This pull request recreates Zenoh's Cargo.lock.
 
+            - **sha**: eclipse-zenoh/zenoh@${{ steps.info.outputs.head-hash }}
+            - **date**: ${{ steps.info.outputs.head-date }}
             - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
           commit-message: "build: Recreate Cargo lockfile"
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
@@ -77,7 +85,7 @@ jobs:
         if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
         run: >
           gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
-          --subject "build: Recreate `Cargo.lock`"
+          --subject "build: Recreate lockfile of ${{ steps.info.outputs.head-hash }} from ${{ steps.info.outputs.head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
           --repo "eclipse-zenoh/zenoh"
           --squash
           --auto
@@ -94,6 +102,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: recreate-lockfile
     steps:
+      # Checkout is not really used, it's only to avoid gh pr view complaining about not being in a git repository
+      - name: Checkout Zenoh
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/zenoh
+          ref: ${{ inputs.branch }}
+
       - name: Wait for PR to be merged into main
         if: ${{ needs.recreate-lockfile.outputs.pull-request-number != '' }}
         run: |
@@ -103,10 +118,18 @@ jobs:
           timeout 5400 bash -c '
             while true; do
               pr_state=$(gh pr view "$pr_number" --repo eclipse-zenoh/zenoh --json state --template '{{.state}}')
+              pr_merge_state=$(gh pr view "$pr_number" --repo eclipse-zenoh/zenoh --json mergeStateStatus --template '{{.mergeStateStatus}}')
               if [ "$pr_state" == "MERGED" ]; then
                 echo "PR #$pr_number has been merged."
                 exit 0
+              elif [ "$pr_state" == "OPEN" && "$pr_merge_state" == "BLOCKED"]; then
+                echo "PR #$pr_number failed CI checks."
+                exit 1
+              else
+                echo "PR #$pr_number is in unexpected state: $pr_state"
+                exit 1
               fi
+              echo "PR #$pr_number not merged yet ($pr_state - $pr_merge_state). Checking again in 10 seconds..."
               sleep 10
             done' || { echo "Timeout waiting for PR #$pr_number to be merged."; exit 1; }
         env:
