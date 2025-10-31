@@ -1,0 +1,98 @@
+name: Recreate Cargo lockfile
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # At the end of every day
+  workflow_dispatch:
+    inputs:
+      branch:
+        type: string
+        description:
+          The branch to sync across all dependent repositories. Defaults to the default branch of the source repository (i.e. eclipse-zenoh/zenoh)
+        required: false
+      toolchain:
+        type: string
+        description:
+          The rust toolchain to use. Defaults to 1.75.0
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  recreate-lockfile:
+    name: Recreate Zenoh's lockfile
+    runs-on: ubuntu-latest
+    outputs:
+      pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+    steps:
+      - name: Checkout Zenoh
+        uses: actions/checkout@v4
+        with:
+          repository: eclipse-zenoh/zenoh
+          ref: ${{ inputs.branch }}
+
+      - id: info
+        name: Get HEAD info
+        run: |
+          echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
+          echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
+
+      - name: Install Rust toolchain
+        # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
+        # will have the side effect of installing it; if it's not installed already.
+        run: |
+          rustup update ${{ inputs.toolchain || '1.75.0' }}
+          rustup component add --toolchain ${{ inputs.toolchain || '1.75.0'}} clippy
+
+      # cyclors does not compile with cmake 4
+      - name: Install cmake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.x'
+
+      - name: Install build dependencies
+        run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
+
+      - name: Recreate Cargo.lock
+        run: |
+          rm -f Cargo.lock
+          cargo +${{ inputs.toolchain || '1.75.0' }} update --manifest-path Cargo.toml
+
+      - name: Create/Update a pull request if the lockfile changed
+        id: cpr
+        # NOTE: If there is a pending PR, this action will simply update it with a forced push.
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: "chore: recreate Cargo.lock"
+          body: |
+            This pull request recreates Zenoh's Cargo.lock.
+
+            - **sha**: eclipse-zenoh/zenoh@${{ steps.info.outputs.head-hash }}
+            - **date**: ${{ steps.info.outputs.head-date }}
+            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
+          commit-message: "build: Recreate Cargo lockfile"
+          committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
+          base: ${{ inputs.branch }}
+          branch: eclipse-zenoh-bot/recreate-lockfile
+          delete-branch: true
+          labels: dependencies
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Enable auto merge for the pull request
+        if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
+        run: >
+          gh pr merge "${{ steps.cpr.outputs.pull-request-number }}"
+          --subject "build: Recreate lockfile of ${{ steps.info.outputs.head-hash }} from ${{ steps.info.outputs.head-date }} (#${{ steps.cpr.outputs.pull-request-number }})"
+          --repo "eclipse-zenoh/zenoh"
+          --squash
+          --auto
+        env:
+          GH_TOKEN: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+
+      - name: Add the PR as annotation to workflow run
+        if: contains(fromJSON('["created", "updated"]'), steps.cpr.outputs.pull-request-operation)
+        run: >
+          echo "::notice:: PR ${{ steps.cpr.outputs.pull-request-operation }}: https://github.com/eclipse-zenoh/zenoh/pull/${{ steps.cpr.outputs.pull-request-number }}"
