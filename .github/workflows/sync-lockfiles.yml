@@ -65,7 +65,7 @@ jobs:
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
         uses: peter-evans/create-pull-request@v7
         with:
-          title: Recreate Cargo.lock
+          title: "chore: recreate Cargo.lock"
           body: |
             This pull request recreates Zenoh's Cargo.lock.
 
