@@ -8,7 +8,7 @@ on:
       branch:
         type: string
         description:
-          The branch to sync across all depedant repositories. Defaults to the default branch on each repository
+          The branch to sync across all dependent repositories. Defaults to the default branch of the source repository (i.e. eclipse-zenoh/zenoh)
         required: false
       toolchain:
         type: string
