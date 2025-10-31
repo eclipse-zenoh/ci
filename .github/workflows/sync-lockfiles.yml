@@ -63,7 +63,7 @@ jobs:
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           title: Recreate Cargo.lock
           body: |
@@ -262,7 +262,7 @@ jobs:
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           title: Sync `Cargo.lock` with Zenoh `${{ needs.fetch.outputs.zenoh-head-hash }}` from `${{needs.fetch.outputs.zenoh-head-date }}`
           body: |
