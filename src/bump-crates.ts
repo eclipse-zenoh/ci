@@ -78,8 +78,10 @@ export async function main(input: Input) {
     sh(`ls ${workspace}`);
 
     await cargo.bump(workspace, input.version);
-    sh("git add .", { cwd: repo });
-    sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
+    if (sh("git diff", { cwd: repo, check: false })) {
+      sh("git add .", { cwd: repo });
+      sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
+    }
 
     if (
       input.bumpDepsPattern &&
@@ -93,11 +95,14 @@ export async function main(input: Input) {
           input.bumpDepsVersion[i],
           input.bumpDepsBranch,
         );
-        sh("git add .", { cwd: repo });
-        sh(
-          `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
-          { cwd: repo, env: gitEnv, check: false },
-        );
+
+        if (sh("git diff", { cwd: repo, check: false })) {
+          sh("git add .", { cwd: repo });
+          sh(
+            `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
+            { cwd: repo, env: gitEnv, check: false },
+          );
+        }
       }
 
       sh(`cargo +${input.toolchain} check`, { cwd: repo });
