@@ -1,4 +1,4 @@
-name: Set git branch
+name: Set registry
 
 inputs:
   version:
@@ -21,6 +21,8 @@ inputs:
     required: true
   deps-pattern:
     required: true
+  toolchain:
+    required: false
 runs:
   using: node20
   main: ../dist/set-registry-main.mjs
