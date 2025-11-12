@@ -63676,8 +63676,10 @@ async function main(input) {
     sh(`git clone --recursive --single-branch --branch ${input.branch} ${remote}`);
     sh(`ls ${workspace}`);
     await bump(workspace, input.version);
-    sh("git add .", { cwd: repo });
-    sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
+    if (sh("git diff", { cwd: repo, check: false })) {
+      sh("git add .", { cwd: repo });
+      sh(`git commit --message 'chore: Bump version to \`${input.version}\`'`, { cwd: repo, env: gitEnv });
+    }
     if (input.bumpDepsPattern && input.bumpDepsVersion && input.bumpDepsPattern.length === input.bumpDepsVersion.length) {
       for (let i = 0; i < input.bumpDepsPattern.length; i++) {
         await bumpDependencies(
@@ -63686,11 +63688,13 @@ async function main(input) {
           input.bumpDepsVersion[i],
           input.bumpDepsBranch
         );
-        sh("git add .", { cwd: repo });
-        sh(
-          `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
-          { cwd: repo, env: gitEnv, check: false }
-        );
+        if (sh("git diff", { cwd: repo, check: false })) {
+          sh("git add .", { cwd: repo });
+          sh(
+            `git commit --message 'chore: Bump ${input.bumpDepsPattern[i].source} dependencies to \`${input.bumpDepsVersion[i]}\`'`,
+            { cwd: repo, env: gitEnv, check: false }
+          );
+        }
       }
       sh(`cargo +${input.toolchain} check`, { cwd: repo });
       sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
