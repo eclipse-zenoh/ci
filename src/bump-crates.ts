@@ -118,7 +118,7 @@ export async function main(input: Input) {
     if (input.liveRun) {
       const tag = input.tag === "" ? input.version : input.tag;
       sh(`git tag --force ${tag} --message v${tag}`, { cwd: repo, env: gitEnv });
-      sh(`git push --force ${remote} ${input.version}`, { cwd: repo });
+      sh(`git push --force ${remote} ${tag}`, { cwd: repo });
     }
 
     sh("git log -10", { cwd: repo });
