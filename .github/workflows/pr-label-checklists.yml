@@ -1,0 +1,274 @@
+name: PR Label-Based Checklists
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      checklists-repo:
+        description: 'Repository containing pr-checklists.json'
+        required: false
+        type: string
+        default: "eclipse-zenoh/ci"
+    secrets:
+      github-token:
+        required: true
+
+permissions:
+  pull-requests: write
+  statuses: write
+  contents: read
+
+env:
+  CHECKLIST_MARKER: '🏷️ Label-Based Checklist'
+  REQUIRED_LABELS: '["api-sync", "breaking-change", "bug", "ci", "dependencies", "documentation", "enhancement", "new feature", "internal"]'
+  GH_TOKEN: ${{ secrets.github-token }}
+
+jobs:
+  main:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 10
+    steps:
+      - name: Checkout checklist definitions
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.checklists-repo }}
+          sparse-checkout: |
+            pr-checklists.json
+          path: ci_tmp
+          sparse-checkout-cone-mode: false
+
+      - name: Load checklist definitions
+        id: load-defs
+        run: |
+          echo "defs<<EOF" >> $GITHUB_OUTPUT
+          cat ci_tmp/pr-checklists.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Get PR labels and generate checklists
+        id: generate
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const definitions = JSON.parse(`${{ steps.load-defs.outputs.defs }}`);
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const labels = pr.labels.map(l => l.name);
+            console.log('PR Labels:', labels);
+
+            const checklists = [];
+            const labelDefinitions = definitions.label_checklists;
+
+            for (const label of labels) {
+              if (labelDefinitions[label]) {
+                const def = labelDefinitions[label];
+                const items = def.items.map(item => `- [ ] ${item}`).join('\n');
+                const checklistText = [
+                  `## ${def.title}`,
+                  '',
+                  def.description,
+                  '',
+                  items,
+                  '',
+                  def.footer || ''
+                ].join('\n').trim();
+                checklists.push(checklistText);
+              }
+            }
+
+            const required_labels = JSON.parse(process.env.REQUIRED_LABELS);
+            const hasRequiredLabel = labels.some(l => required_labels.includes(l));
+
+            const marker = process.env.CHECKLIST_MARKER;
+            let comment = '';
+            if (!hasRequiredLabel) {
+              const labelsList = labels.length > 0 ? labels.map(l => `\`${l}\``).join(', ') : '_No labels_';
+              const requiredLabelsList = required_labels.map(l => `\`${l}\``).join(', ');
+              comment = [
+                `## ${marker}`,
+                '',
+                '**No specific label requirements detected.**',
+                '',
+                `Current labels: ${labelsList}`,
+                '',
+                `Add one of these labels to this PR to see relevant checklist items: ${requiredLabelsList}`,
+                '',
+                '---',
+                '*This comment updates automatically when labels change.*'
+              ].join('\n');
+            } else {
+              const labelsList = labels.map(l => `\`${l}\``).join(', ');
+              comment = [
+                `## ${marker}`,
+                '',
+                'Based on the labels applied to this PR, please complete these additional requirements:',
+                '',
+                `**Labels:** ${labelsList}`,
+                '',
+                '---',
+                '',
+                checklists.join('\n\n---\n\n'),
+                '',
+                '---',
+                '',
+                '**Instructions:**',
+                '1. Check off items as you complete them (change `- [ ]` to `- [x]`)',
+                '2. Edit this comment to update checkboxes',
+                '3. The PR checklist CI will verify these are completed',
+                '',
+                '*This comment updates automatically when labels change.*'
+              ].join('\n');
+            }
+
+            return JSON.stringify({ comment, labelCount: labels.length, checklistCount: checklists.length });
+
+      - name: Post or update checklist comment
+        uses: actions/github-script@v7
+        env:
+          RESULT_JSON: ${{ steps.generate.outputs.result }}
+        with:
+          script: |
+            const result = JSON.parse(process.env.RESULT_JSON);
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes(process.env.CHECKLIST_MARKER)
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: result.comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: result.comment
+              });
+            }
+
+      - name: Check for required labels
+        uses: actions/github-script@v7
+        env:
+          RESULT_JSON: ${{ steps.generate.outputs.result }}
+        with:
+          script: |
+            const result = JSON.parse(process.env.RESULT_JSON);
+            const required_labels = JSON.parse(process.env.REQUIRED_LABELS);
+
+            if (result.checklistCount === 0) {
+              core.setFailed(`❌ PR must have at least one of the required labels: ${required_labels.join(', ')}`);
+            }
+
+  verify:
+    name: Verify checklist
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 10
+    needs: [main]
+    if: always()
+
+    steps:
+      - name: Get PR info
+        id: pr-info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName === 'pull_request' || context.eventName === 'pull_request_target') {
+              return {
+                number: context.payload.pull_request.number,
+                sha: context.payload.pull_request.head.sha
+              };
+            } else if (context.eventName === 'issue_comment') {
+              return {
+                number: context.payload.issue.number,
+                sha: null
+              };
+            }
+            return { number: null, sha: null };
+
+      - name: Get checklist comment
+        id: checklist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prInfo = ${{ steps.pr-info.outputs.result }};
+            if (!prInfo.number) return '';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prInfo.number
+            });
+
+            const labelComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes(process.env.CHECKLIST_MARKER)
+            );
+
+            return labelComment ? labelComment.body : '';
+
+      - name: Verify checklist
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const checklistBody = ${{ steps.checklist.outputs.result }};
+
+            const uncheckedCheckboxes = (checklistBody.match(/^-\s*\[\s*\]\s*\*\*/gm) || []).length;
+            const checkedCheckboxes = (checklistBody.match(/^-\s*\[[xX]\]\s*\*\*/gm) || []).length;
+            const totalCheckboxes = uncheckedCheckboxes + checkedCheckboxes;
+
+            if (!checklistBody || totalCheckboxes === 0) {
+              return { status: 'success', message: 'No checklist requirements' };
+            }
+
+            const completionPercent = Math.round((checkedCheckboxes / totalCheckboxes) * 100);
+            const status = completionPercent === 100 ? 'success' : 'failure';
+            const message = completionPercent === 100
+              ? `Checklist complete: ${checkedCheckboxes}/${totalCheckboxes}`
+              : `Checklist incomplete: ${checkedCheckboxes}/${totalCheckboxes} (${completionPercent}%)`;
+
+            return { status, message };
+
+      - name: Update PR status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = ${{ steps.verify.outputs.result }};
+            const prInfo = ${{ steps.pr-info.outputs.result }};
+
+            let headSha = prInfo.sha;
+            if (!headSha && prInfo.number) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prInfo.number
+              });
+              headSha = pr.head.sha;
+            }
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: headSha,
+              state: result.status,
+              context: 'PR Checklist',
+              description: result.message,
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
