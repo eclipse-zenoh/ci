@@ -92,6 +92,7 @@ jobs:
               const labelsList = labels.length > 0 ? labels.map(l => `\`${l}\``).join(', ') : '_No labels_';
               const requiredLabelsList = required_labels.map(l => `\`${l}\``).join(', ');
               comment = [
+                '---',
                 `## ${marker}`,
                 '',
                 '**No specific label requirements detected.**',
@@ -100,23 +101,19 @@ jobs:
                 '',
                 `Add one of these labels to this PR to see relevant checklist items: ${requiredLabelsList}`,
                 '',
-                '---',
                 '*This section updates automatically when labels change.*'
               ].join('\n');
             } else {
               const labelsList = labels.map(l => `\`${l}\``).join(', ');
               comment = [
+                '---',
                 `## ${marker}`,
                 '',
                 'Based on the labels applied to this PR, please complete these additional requirements:',
                 '',
                 `**Labels:** ${labelsList}`,
                 '',
-                '---',
-                '',
-                checklists.join('\n\n---\n\n'),
-                '',
-                '---',
+                checklists.join('\n\n'),
                 '',
                 '**Instructions:**',
                 '1. Check off items as you complete them (change `- [ ]` to `- [x]`)',
