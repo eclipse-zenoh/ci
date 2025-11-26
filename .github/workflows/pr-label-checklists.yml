@@ -101,7 +101,7 @@ jobs:
                 `Add one of these labels to this PR to see relevant checklist items: ${requiredLabelsList}`,
                 '',
                 '---',
-                '*This comment updates automatically when labels change.*'
+                '*This section updates automatically when labels change.*'
               ].join('\n');
             } else {
               const labelsList = labels.map(l => `\`${l}\``).join(', ');
@@ -120,48 +120,75 @@ jobs:
                 '',
                 '**Instructions:**',
                 '1. Check off items as you complete them (change `- [ ]` to `- [x]`)',
-                '2. Edit this comment to update checkboxes',
-                '3. The PR checklist CI will verify these are completed',
+                '2. The PR checklist CI will verify these are completed',
                 '',
-                '*This comment updates automatically when labels change.*'
+                '*This checklist updates automatically when labels change, but preserves your checked boxes.*'
               ].join('\n');
             }
 
             return JSON.stringify({ comment, labelCount: labels.length, checklistCount: checklists.length });
 
-      - name: Post or update checklist comment
+      - name: Update PR description with checklist
         uses: actions/github-script@v7
         env:
           RESULT_JSON: ${{ steps.generate.outputs.result }}
         with:
           script: |
             const result = JSON.parse(process.env.RESULT_JSON);
-            const { data: comments } = await github.rest.issues.listComments({
+            const marker = process.env.CHECKLIST_MARKER;
+
+            // Get current PR description
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number
+              pull_number: context.payload.pull_request.number
             });
 
-            const botComment = comments.find(c =>
-              c.user.type === 'Bot' &&
-              c.body.includes(process.env.CHECKLIST_MARKER)
-            );
+            let currentBody = pr.body || '';
 
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body: result.comment
-              });
+            // Find existing checklist section
+            const markerStart = `<!-- ${marker} START -->`;
+            const markerEnd = `<!-- ${marker} END -->`;
+            const startIndex = currentBody.indexOf(markerStart);
+            const endIndex = currentBody.indexOf(markerEnd);
+
+            let newBody;
+            if (startIndex !== -1 && endIndex !== -1) {
+              // Replace existing checklist section, preserving checked boxes
+              const oldChecklistContent = currentBody.substring(startIndex + markerStart.length, endIndex);
+
+              // Try to preserve checked boxes by matching checkbox text
+              const newChecklistContent = result.comment;
+              const preservedContent = newChecklistContent.split('\n').map(line => {
+                if (line.match(/^-\s*\[\s*\]/)) {
+                  // Find matching line in old content
+                  const checkboxText = line.replace(/^-\s*\[\s*\]\s*/, '').trim();
+                  const oldLine = oldChecklistContent.split('\n').find(l =>
+                    l.includes(checkboxText) && l.match(/^-\s*\[[xX]\]/)
+                  );
+                  if (oldLine) {
+                    return line.replace('[ ]', '[x]');
+                  }
+                }
+                return line;
+              }).join('\n');
+
+              newBody = currentBody.substring(0, startIndex) +
+                        markerStart + '\n\n' + preservedContent + '\n\n' + markerEnd +
+                        currentBody.substring(endIndex + markerEnd.length);
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: result.comment
-              });
+              // Append new checklist section
+              newBody = currentBody.trim() + '\n\n' +
+                        markerStart + '\n\n' + result.comment + '\n\n' + markerEnd;
             }
+
+            // Update PR description
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              body: newBody.trim()
+            });
 
       - name: Check for required labels
         uses: actions/github-script@v7
@@ -202,7 +229,7 @@ jobs:
             }
             return { number: null, sha: null };
 
-      - name: Get checklist comment
+      - name: Get PR description with checklist
         id: checklist
         uses: actions/github-script@v7
         with:
@@ -210,18 +237,25 @@ jobs:
             const prInfo = ${{ steps.pr-info.outputs.result }};
             if (!prInfo.number) return '';
 
-            const { data: comments } = await github.rest.issues.listComments({
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: prInfo.number
+              pull_number: prInfo.number
             });
 
-            const labelComment = comments.find(c =>
-              c.user.type === 'Bot' &&
-              c.body.includes(process.env.CHECKLIST_MARKER)
-            );
+            const marker = process.env.CHECKLIST_MARKER;
+            const markerStart = `<!-- ${marker} START -->`;
+            const markerEnd = `<!-- ${marker} END -->`;
+            const body = pr.body || '';
 
-            return labelComment ? labelComment.body : '';
+            const startIndex = body.indexOf(markerStart);
+            const endIndex = body.indexOf(markerEnd);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+              return body.substring(startIndex + markerStart.length, endIndex);
+            }
+
+            return '';
 
       - name: Verify checklist
         id: verify
@@ -230,8 +264,8 @@ jobs:
           script: |
             const checklistBody = ${{ steps.checklist.outputs.result }};
 
-            const uncheckedCheckboxes = (checklistBody.match(/^-\s*\[\s*\]\s*\*\*/gm) || []).length;
-            const checkedCheckboxes = (checklistBody.match(/^-\s*\[[xX]\]\s*\*\*/gm) || []).length;
+            const uncheckedCheckboxes = (checklistBody.match(/^-\s*\[\s*\]/gm) || []).length;
+            const checkedCheckboxes = (checklistBody.match(/^-\s*\[[xX]\]/gm) || []).length;
             const totalCheckboxes = uncheckedCheckboxes + checkedCheckboxes;
 
             if (!checklistBody || totalCheckboxes === 0) {
