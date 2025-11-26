@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: "eclipse-zenoh/ci"
+      bot-authors:
+        description: 'Comma-separated list of bot author usernames to skip'
+        required: false
+        type: string
+        default: "dependabot,eclipse-zenoh-bot"
     secrets:
       github-token:
         required: true
@@ -31,7 +36,27 @@ jobs:
     runs-on: ${{ inputs.runner }}
     timeout-minutes: 10
     steps:
+      - name: Check if PR is from a bot
+        id: bot-check
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const botAuthors = '${{ inputs.bot-authors }}'.split(',').map(s => s.trim());
+            const isBot = pr.user.type === 'Bot' || botAuthors.includes(author);
+            console.log(`PR author: ${author}, isBot: ${isBot}`);
+            return isBot.toString();
+
+      - name: Skip workflow for bot PRs
+        if: steps.bot-check.outputs.result == 'true'
+        run: |
+          echo "Skipping checklist generation for automated PR"
+          exit 0
+
       - name: Checkout checklist definitions
+        if: steps.bot-check.outputs.result != 'true'
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.checklists-repo }}
@@ -41,6 +66,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Load checklist definitions
+        if: steps.bot-check.outputs.result != 'true'
         id: load-defs
         run: |
           echo "defs<<EOF" >> $GITHUB_OUTPUT
@@ -48,6 +74,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Get PR labels and generate checklists
+        if: steps.bot-check.outputs.result != 'true'
         id: generate
         uses: actions/github-script@v7
         with:
@@ -126,6 +153,7 @@ jobs:
             return JSON.stringify({ comment, labelCount: labels.length, checklistCount: checklists.length });
 
       - name: Update PR description with checklist
+        if: steps.bot-check.outputs.result != 'true'
         uses: actions/github-script@v7
         env:
           RESULT_JSON: ${{ steps.generate.outputs.result }}
@@ -188,6 +216,7 @@ jobs:
             });
 
       - name: Check for required labels
+        if: steps.bot-check.outputs.result != 'true'
         uses: actions/github-script@v7
         env:
           RESULT_JSON: ${{ steps.generate.outputs.result }}
@@ -208,7 +237,27 @@ jobs:
     if: always()
 
     steps:
+      - name: Check if PR is from a bot
+        id: bot-check
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const botAuthors = '${{ inputs.bot-authors }}'.split(',').map(s => s.trim());
+            const isBot = pr.user.type === 'Bot' || botAuthors.includes(author);
+            console.log(`PR author: ${author}, isBot: ${isBot}`);
+            return isBot.toString();
+
+      - name: Skip verification for bot PRs
+        if: steps.bot-check.outputs.result == 'true'
+        run: |
+          echo "Skipping checklist verification for automated PR"
+          exit 0
+
       - name: Get PR info
+        if: steps.bot-check.outputs.result != 'true'
         id: pr-info
         uses: actions/github-script@v7
         with:
@@ -227,6 +276,7 @@ jobs:
             return { number: null, sha: null };
 
       - name: Get PR description with checklist
+        if: steps.bot-check.outputs.result != 'true'
         id: checklist
         uses: actions/github-script@v7
         with:
@@ -255,6 +305,7 @@ jobs:
             return '';
 
       - name: Verify checklist
+        if: steps.bot-check.outputs.result != 'true'
         id: verify
         uses: actions/github-script@v7
         with:
@@ -278,6 +329,7 @@ jobs:
             return { status, message };
 
       - name: Update PR status
+        if: steps.bot-check.outputs.result != 'true'
         uses: actions/github-script@v7
         with:
           script: |
