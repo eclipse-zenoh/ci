@@ -1,0 +1,124 @@
+{
+  "label_checklists": {
+    "bug": {
+      "title": "🐛 Bug Fix Requirements",
+      "description": "Since this PR is labeled as a **bug fix**, please ensure:",
+      "items": [
+        "**Root cause documented** - Explain what caused the bug in the PR description",
+        "**Reproduction test added** - Test that fails on main branch without the fix",
+        "**Test passes with fix** - The reproduction test passes with your changes",
+        "**Regression prevention** - Test will catch if this bug reoccurs in the future",
+        "**Fix is minimal** - Changes are focused only on fixing the bug",
+        "**Related bugs checked** - Verified no similar bugs exist in related code"
+      ],
+      "footer": "**Why this matters:** Bugs without tests often reoccur."
+    },
+    "enhancement": {
+      "title": "✨ Enhancement Requirements",
+      "description": "Since this PR enhances existing functionality:",
+      "items": [
+        "**Enhancement scope documented** - Clear description of what is being improved",
+        "**Backwards compatible** - Existing code/APIs still work unchanged",
+        "**No new APIs added** - Only improving existing functionality",
+        "**Tests updated** - Existing tests pass, new test cases added if needed",
+        "**Performance improvement measured** - If applicable, before/after metrics provided",
+        "**Documentation updated** - Existing docs updated to reflect improvements",
+        "**User impact documented** - How users benefit from this enhancement"
+      ],
+      "footer": "**Remember:** Enhancements should not introduce new APIs or breaking changes."
+    },
+    "new feature": {
+      "title": "🆕 New Feature Requirements",
+      "description": "Since this PR adds a new feature:",
+      "items": [
+        "**Feature scope documented** - Clear description of what the feature does and why it's needed",
+        "**New APIs well-designed** - Public APIs are intuitive, consistent with existing APIs",
+        "**Comprehensive tests** - All functionality is tested (happy path + edge cases + error cases)",
+        "**Examples provided** - Usage examples in code comments or separate example files",
+        "**Documentation added** - New docs explaining the feature, its use cases, and API",
+        "**Feature flag considered** - Can the feature be enabled/disabled for gradual rollout?",
+        "**Performance impact assessed** - Memory, CPU, storage implications measured",
+        "**Integration tested** - Feature works with existing features"
+      ],
+      "footer": "**Consider:** Can this feature be split into smaller, incremental PRs?"
+    },
+    "breaking-change": {
+      "title": "💥 Breaking Change Requirements",
+      "description": "Since this PR contains breaking changes:",
+      "items": [
+        "**Breaking changes documented** - Clear list of what breaks",
+        "**Migration guide provided** - Step-by-step instructions for users",
+        "**Deprecation considered** - Could this be done with deprecation warnings first?",
+        "**Version bump planned** - Major or minor version bump needed",
+        "**Alternatives explored** - Why is breaking change necessary?",
+        "**Impact assessed** - How many users/use cases affected?"
+      ],
+      "footer": "**Note:** Breaking changes should be discussed with maintainers before implementation."
+    },
+    "documentation": {
+      "title": "📚 Documentation Update Requirements",
+      "description": "Since this PR updates documentation:",
+      "items": [
+        "**Accuracy verified** - Technical details are correct",
+        "**Examples tested** - Code examples actually work",
+        "**Links valid** - All links work and point to correct versions",
+        "**Grammar/spelling** - Text is clear and well-written",
+        "**Formatting correct** - Markdown/formatting renders properly",
+        "**Up-to-date** - Reflects current codebase state"
+      ],
+      "footer": "**Suggestion:** Have someone unfamiliar with the feature review for clarity."
+    },
+    "internal": {
+      "title": "🏠 Internal Change",
+      "description": "This PR is marked as **internal** (not user-facing):",
+      "items": [
+        "**No API changes** - Public APIs unchanged",
+        "**No behavior changes** - External behavior identical",
+        "**Refactoring/maintenance** - Code improvements only",
+        "**Tests still pass** - All existing tests pass without modification"
+      ],
+      "footer": "**Lighter review:** Internal changes may have lighter review requirements."
+    },
+    "ci": {
+      "title": "⚙️ CI/CD Changes",
+      "description": "Since this PR modifies CI/CD pipelines:",
+      "items": [
+        "**Changes tested on fork** - Workflow tested on personal fork before PR",
+        "**No secrets exposed** - No credentials or tokens in logs/code",
+        "**Backwards compatible** - Doesn't break existing PRs/branches in flight",
+        "**Resource limits considered** - No excessive runner usage or costs",
+        "**Documentation updated** - README/CONTRIBUTING reflects workflow changes if needed",
+        "**Rollback plan** - How to revert if this breaks CI for others",
+        "**All jobs tested** - Verified all workflow jobs complete successfully"
+      ],
+      "footer": "**Critical:** CI changes affect all contributors. Test thoroughly on fork first!"
+    },
+    "dependencies": {
+      "title": "📦 Dependency Updates",
+      "description": "Since this PR updates dependencies:",
+      "items": [
+        "**Changelog reviewed** - Breaking changes in dependency identified and addressed",
+        "**Security advisories checked** - No known vulnerabilities in new version",
+        "**License compatible** - New version license is compatible with project",
+        "**Tests pass** - All tests pass with new dependency versions",
+        "**Transitive deps reviewed** - New transitive dependencies checked",
+        "**Version pinned appropriately** - Semver range is intentional and correct",
+        "**Update scope limited** - Updating one major dependency at a time when possible"
+      ],
+      "footer": "**Best practice:** Keep dependency updates focused and test thoroughly."
+    },
+    "api-sync": {
+      "title": "🔄 API Sync",
+      "description": "Since this PR synchronizes APIs:",
+      "items": [
+        "**API consistency verified** - APIs are consistent across implementations",
+        "**All implementations updated** - Changes applied to all relevant API implementations",
+        "**Version compatibility checked** - API versions are compatible",
+        "**Tests synchronized** - Tests updated across all implementations",
+        "**Documentation synchronized** - Docs consistent across implementations",
+        "**Breaking changes handled** - If breaking, all implementations handle it consistently"
+      ],
+      "footer": "**Note:** API sync PRs require careful review to ensure consistency."
+    }
+  }
+}
