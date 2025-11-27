@@ -195,9 +195,11 @@ function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = fal
   for (const package_ of cargo.packagesOrdered(path, options)) {
     // Crates.io won't allow packages to be published with the same version
     if (!cargo.isPublished(package_, options) && (package_.publish === undefined || package_.publish)) {
-      const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
+      const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
       if (allowDirty) {
         command.push("--allow-dirty");
+      } else {
+        command.push("--locked");
       }
       sh(command.join(" "), options);
     }

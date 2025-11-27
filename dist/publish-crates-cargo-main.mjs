@@ -70185,9 +70185,11 @@ function publish(path, env, allowDirty = false) {
   };
   for (const package_ of packagesOrdered(path, options)) {
     if (!isPublished(package_, options) && (package_.publish === void 0 || package_.publish)) {
-      const command = ["cargo", "publish", "--locked", "--manifest-path", package_.manifestPath];
+      const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
       if (allowDirty) {
         command.push("--allow-dirty");
+      } else {
+        command.push("--locked");
       }
       sh(command.join(" "), options);
     }
