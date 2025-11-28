@@ -11,6 +11,7 @@ type Config = {
     cratesio: {
       [key: string]: string;
     };
+    kellnr: string;
     git: {
       [key: string]: {
         url: string;
@@ -29,3 +30,5 @@ export const gitEnv: NodeJS.ProcessEnv = {
   GIT_COMMITTER_NAME: process.env.GIT_AUTHOR_NAME || config.git.user.name,
   GIT_COMMITTER_EMAIL: process.env.GIT_AUTHOR_EMAIL || config.git.user.email,
 };
+
+export const kellnrImage = process.env.KELLNR_IMAGE || config.lock.kellnr
