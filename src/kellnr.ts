@@ -2,6 +2,7 @@ import * as child_process from "child_process";
 import { mkdtemp } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
+import { kellnrImage } from "./config";
 import fetch from "node-fetch";
 
 import * as core from "@actions/core";
@@ -64,7 +65,7 @@ export async function spawn(): Promise<Kellnr> {
       "8000:8000",
       "-e",
       `KELLNR_ORIGIN__HOSTNAME=${baseUrl}`,
-      "ghcr.io/kellnr/kellnr:5",
+      kellnrImage,
     ],
     options,
   );

@@ -12,6 +12,7 @@
       "cross": "0.2.5",
       "toml-cli2": "0.3.2"
     },
+    "kellnr": "ghcr.io/kellnr/kellnr:5",
     "git": {
       "estuary": {
         "url": "https://github.com/ZettaScaleLabs/estuary.git",

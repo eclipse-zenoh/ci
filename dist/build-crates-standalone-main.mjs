@@ -102525,6 +102525,7 @@ var ci_config_default = {
       cross: "0.2.5",
       "toml-cli2": "0.3.2"
     },
+    kellnr: "ghcr.io/kellnr/kellnr:5",
     git: {
       estuary: {
         url: "https://github.com/ZettaScaleLabs/estuary.git",
@@ -102542,6 +102543,7 @@ var gitEnv = {
   GIT_COMMITTER_NAME: process.env.GIT_AUTHOR_NAME || config.git.user.name,
   GIT_COMMITTER_EMAIL: process.env.GIT_AUTHOR_EMAIL || config.git.user.email
 };
+var kellnrImage = process.env.KELLNR_IMAGE || config.lock.kellnr;
 
 // src/cargo.ts
 var toml = await TOML.init();
