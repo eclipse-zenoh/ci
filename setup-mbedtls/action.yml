@@ -58,10 +58,10 @@ runs:
     - name: Add mbed TLS to environment for following steps
       run: |
         echo "MBEDTLS_INSTALL=${INSTALL_PREFIX}" >> $GITHUB_ENV
-        # Make pkg-config find it if your project uses pkg-config
-        echo "${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_PATH
-        # Make runtime loader find shared libs (for steps in same job)
-        echo "${INSTALL_PREFIX}/lib" >> $GITHUB_PATH
+        ## Make pkg-config find it if your project uses pkg-config
+        #echo "${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_PATH
+        ## Make runtime loader find shared libs (for steps in same job)
+        #echo "${INSTALL_PREFIX}/lib" >> $GITHUB_PATH
       shell: bash
       env:
         INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
