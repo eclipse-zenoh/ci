@@ -59,9 +59,7 @@ runs:
       run: |
         echo "MBEDTLS_INSTALL=${INSTALL_PREFIX}" >> $GITHUB_ENV
         ## Make pkg-config find it if your project uses pkg-config
-        #echo "${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_PATH
-        ## Make runtime loader find shared libs (for steps in same job)
-        #echo "${INSTALL_PREFIX}/lib" >> $GITHUB_PATH
+        echo "PKG_CONFIG_PATH=${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_ENV
       shell: bash
       env:
         INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
