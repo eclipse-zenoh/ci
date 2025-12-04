@@ -52,6 +52,8 @@ runs:
         cmake --build "$BUILD_DIR" --parallel
         cmake --install "$BUILD_DIR" --prefix "${INSTALL_PREFIX}"
       shell: bash
+      env:
+        INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
 
     - name: Add mbed TLS to environment for following steps
       run: |
@@ -61,6 +63,8 @@ runs:
         # Make runtime loader find shared libs (for steps in same job)
         echo "${INSTALL_PREFIX}/lib" >> $GITHUB_PATH
       shell: bash
+      env:
+        INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
 
     - name: Verify installed mbed TLS version (compile small test)
       run: |
@@ -75,3 +79,5 @@ runs:
           -lmbedtls -lmbedx509 -lmbedcrypto
         ./show_mbedtls_version
       shell: bash
+      env:
+        INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
