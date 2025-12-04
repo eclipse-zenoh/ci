@@ -1,0 +1,18 @@
+name: Setup mbed TLS
+description: Build and install mbed TLS from source
+
+inputs:
+  mbedtls-version:
+    description: The version of mbed TLS to install
+    required: true
+  runner:
+    description: The runner to use. Defaults to ubuntu-latest
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Build and install mbed TLS
+      uses: ../.github/workflows/setup-mbedtls.yml@main
+      with:
+        mbedtls-version: ${{ inputs.mbedtls-version }}
+        runner: ${{ inputs.runner || 'ubuntu-latest' }}
