@@ -12,7 +12,7 @@ runs:
   using: "composite"
   steps:
     - name: Build and install mbed TLS
-      uses: zettascalelabs/ci/.github/workflows/setup-mbedtls.yml@setup-mbedtls
+      uses: ZettaScaleLabs/ci/.github/workflows/setup-mbedtls.yml@setup-mbedtls
       with:
         mbedtls-version: ${{ inputs.mbedtls-version }}
         runner: ${{ inputs.runner || 'ubuntu-latest' }}
