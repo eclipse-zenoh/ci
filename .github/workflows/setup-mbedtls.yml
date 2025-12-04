@@ -1,0 +1,95 @@
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: 'Runner to use'
+        type: string
+        required: false
+        default: 'ubuntu-latest'
+      mbedtls-version:
+        type: string
+        description: 'mbed TLS version to build'
+        required: true
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'Runner to use'
+        type: string
+        required: false
+        default: 'ubuntu-latest'
+      mbedtls-version:
+        type: string
+        description: 'mbed TLS version to build'
+        required: true
+
+jobs:
+  build-and-install-mbedtls:
+    name: Build & install mbed TLS on ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
+    env:
+      INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache built mbed TLS install
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.INSTALL_PREFIX }}
+          key: mbedtls-${{ runner.os }}-${{ inputs.mbedtls-version }}-v1
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build git pkg-config
+
+      - name: Fetch mbed TLS source
+        run: |
+          # shallow clone the exact tag to save time
+          mkdir -p $GITHUB_WORKSPACE/_mbedtls_src
+          cd $GITHUB_WORKSPACE/_mbedtls_src
+          if [ ! -d mbedtls ]; then
+            git clone --depth 1 --branch "${{ inputs.mbedtls-version }}" https://github.com/Mbed-TLS/mbedtls.git
+          fi
+          cd mbedtls
+          git fetch --tags --depth=1
+          git checkout --detach "${{ inputs.mbedtls-version }}"
+          git submodule update --init --recursive
+        shell: bash
+
+      - name: Build and install mbed TLS
+        run: |
+          SRC=$GITHUB_WORKSPACE/_mbedtls_src/mbedtls/
+          BUILD_DIR=$SRC/build
+          mkdir -p "$BUILD_DIR"
+          cmake -S "$SRC" -B "$BUILD_DIR" \
+            -G Ninja \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D BUILD_SHARED_LIBS=ON \
+            -D CMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
+          cmake --build "$BUILD_DIR" --parallel
+          cmake --install "$BUILD_DIR" --prefix "${INSTALL_PREFIX}"
+        shell: bash
+
+      - name: Add mbed TLS to environment for following steps
+        run: |
+          echo "MBEDTLS_INSTALL=${INSTALL_PREFIX}" >> $GITHUB_ENV
+          # Make pkg-config find it if your project uses pkg-config
+          echo "${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_PATH
+          # Make runtime loader find shared libs (for steps in same job)
+          echo "${INSTALL_PREFIX}/lib" >> $GITHUB_PATH
+        shell: bash
+
+      - name: Verify installed mbed TLS version (compile small test)
+        run: |
+          cat > show_mbedtls_version.c <<'C'
+          #include <stdio.h>
+          #include <mbedtls/version.h>
+          int main(void){ printf("%s\n", MBEDTLS_VERSION_STRING); return 0; }
+          C
+          gcc show_mbedtls_version.c -o show_mbedtls_version \
+            -I"${INSTALL_PREFIX}/include" \
+            -L"${INSTALL_PREFIX}/lib" -Wl,-rpath,"${INSTALL_PREFIX}/lib" \
+            -lmbedtls -lmbedx509 -lmbedcrypto
+          ./show_mbedtls_version
+        shell: bash
