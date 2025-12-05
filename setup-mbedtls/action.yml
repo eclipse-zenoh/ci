@@ -60,6 +60,11 @@ runs:
         echo "MBEDTLS_INSTALL=${INSTALL_PREFIX}" >> $GITHUB_ENV
         ## Make pkg-config find it if your project uses pkg-config
         echo "PKG_CONFIG_PATH=${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_ENV
+        ## Set compiler and linker flags to find mbed TLS
+        echo "LDFLAGS=-L${INSTALL_PREFIX}/lib" >> $GITHUB_ENV
+        echo "CPPFLAGS=-I${INSTALL_PREFIX}/include" >> $GITHUB_ENV
+        ## Set CMAKE_PREFIX_PATH to help CMake find mbed TLS
+        echo "CMAKE_PREFIX_PATH=${INSTALL_PREFIX}" >> $GITHUB_ENV
       shell: bash
       env:
         INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
