@@ -23,6 +23,6 @@ jobs:
 
       - name: Run Eclipse IPDDP License Tool
         run: |
-          echo ${{ inputs.dependencies }} >> dependencies.txt
+          echo "${{ inputs.dependencies }}" >> dependencies.txt
           java -jar org.eclipse.dash.licenses-latest.jar -summary DEPENDENCIES dependencies.txt
           exit $?
