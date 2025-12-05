@@ -14,14 +14,15 @@ jobs:
     steps:
       - uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '11'
+          distribution: "temurin"
+          java-version: "11"
 
       - name: Download Eclipse IPDDP License Tool
         run: |
           wget "https://repo.eclipse.org/service/local/artifact/maven/redirect?r=dash-licenses&g=org.eclipse.dash&a=org.eclipse.dash.licenses&v=LATEST" -O org.eclipse.dash.licenses-latest.jar
 
       - name: Run Eclipse IPDDP License Tool
-        run: | 
-          echo -e ${{ inputs.dependencies}} | java -jar org.eclipse.dash.licenses-latest.jar -summary DEPENDENCIES -
+        run: |
+          echo ${{ inputs.dependencies }} >> dependencies.txt
+          java -jar org.eclipse.dash.licenses-latest.jar -summary DEPENDENCIES dependencies.txt
           exit $?
