@@ -18,6 +18,7 @@
       "description": "Since this PR enhances existing functionality:",
       "items": [
         "**Enhancement scope documented** - Clear description of what is being improved",
+        "**Minimum necessary code** - Implementation is as simple as possible, doesn't overcomplicate the system",
         "**Backwards compatible** - Existing code/APIs still work unchanged",
         "**No new APIs added** - Only improving existing functionality",
         "**Tests updated** - Existing tests pass, new test cases added if needed",
@@ -32,6 +33,7 @@
       "description": "Since this PR adds a new feature:",
       "items": [
         "**Feature scope documented** - Clear description of what the feature does and why it's needed",
+        "**Minimum necessary code** - Implementation is as simple as possible, doesn't overcomplicate the system",
         "**New APIs well-designed** - Public APIs are intuitive, consistent with existing APIs",
         "**Comprehensive tests** - All functionality is tested (happy path + edge cases + error cases)",
         "**Examples provided** - Usage examples in code comments or separate example files",
