@@ -47,7 +47,7 @@ runs:
         cmake -S "$SRC" -B "$BUILD_DIR" \
           -G Ninja \
           -D CMAKE_BUILD_TYPE=Release \
-          -D BUILD_SHARED_LIBS=ON \
+          -D USE_SHARED_MBEDTLS_LIBRARY=ON \
           -D CMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
         cmake --build "$BUILD_DIR" --parallel
         cmake --install "$BUILD_DIR" --prefix "${INSTALL_PREFIX}"
@@ -60,11 +60,10 @@ runs:
         echo "MBEDTLS_INSTALL=${INSTALL_PREFIX}" >> $GITHUB_ENV
         ## Make pkg-config find it if your project uses pkg-config
         echo "PKG_CONFIG_PATH=${INSTALL_PREFIX}/lib/pkgconfig" >> $GITHUB_ENV
-        ## Set compiler and linker flags to find mbed TLS
-        echo "LDFLAGS=-L${INSTALL_PREFIX}/lib" >> $GITHUB_ENV
-        echo "CPPFLAGS=-I${INSTALL_PREFIX}/include" >> $GITHUB_ENV
         ## Set CMAKE_PREFIX_PATH to help CMake find mbed TLS
         echo "CMAKE_PREFIX_PATH=${INSTALL_PREFIX}" >> $GITHUB_ENV
+        ## Set LD_LIBRARY_PATH to find shared libraries at runtime
+        echo "LD_LIBRARY_PATH=${INSTALL_PREFIX}/lib:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
       shell: bash
       env:
         INSTALL_PREFIX: /home/runner/.local/mbedtls/${{ inputs.mbedtls-version }}
