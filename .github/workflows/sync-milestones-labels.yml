@@ -21,6 +21,7 @@ on:
         description: A space-separated list of repositories to sync.
         required: false
         default: "eclipse-zenoh/zenoh-c eclipse-zenoh/zenoh-pico eclipse-zenoh/zenoh-cpp eclipse-zenoh/zenoh-python eclipse-zenoh/zenoh-java eclipse-zenoh/zenoh-kotlin eclipse-zenoh/zenoh-ts eclipse-zenoh/zenoh-plugin-dds eclipse-zenoh/zenoh-plugin-mqtt eclipse-zenoh/zenoh-plugin-ros2dds eclipse-zenoh/zenoh-plugin-webserver eclipse-zenoh/zenoh-backend-filesystem eclipse-zenoh/zenoh-backend-influxdb eclipse-zenoh/zenoh-backend-rocksdb eclipse-zenoh/zenoh-backend-s3 eclipse-zenoh/zenoh-dissector"
+
 defaults:
   run:
     shell: bash
@@ -29,35 +30,61 @@ jobs:
   sync-labels:
     name: Sync Zenoh's labels with dependant repositories
     runs-on: ubuntu-latest
+    permissions:
+      issues: write # required for label/milestone writes if using GITHUB_TOKEN; adjust if using a bot token
+      contents: read
     steps:
       - uses: actions/checkout@v6
+
       - name: Read required labels
         id: read-labels
         run: |
-          echo "labels=$(cat ./pr-checklists.json | jq -r '.label_checklists | keys | join(" ")')" >> $GITHUB_OUTPUT
+          if [ ! -f ./pr-checklists.json ]; then
+            echo "labels=" >> $GITHUB_OUTPUT
+          else
+            echo "labels=$(jq -r '.label_checklists | keys | join(\" \")' ./pr-checklists.json)" >> $GITHUB_OUTPUT
+          fi
 
+      # Checkout the external github-sync repository into a subdirectory
       - uses: actions/checkout@v6
         with:
-          repository: https://github.com/pbochynski/github-sync.git
+          repository: pbochynski/github-sync
           ref: 131ac0c
+          path: github-sync
 
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: npm install
-      - run: |
-          github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels  \
+
+      - name: Install github-sync dependencies
+        run: npm ci --prefix github-sync
+
+      - name: Run label sync (live)
+        if: ${{ inputs.live-run }}
+        run: |
+          node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
             -s eclipse-zenoh/zenoh \
             -t "${{ inputs.repositories }}" \
-            -l ${{ steps.read-labels.outputs.labels }} \
-            ${{ inputs.live-run == true && '' || '--dry-run' }}
+            -l "${{ steps.read-labels.outputs.labels }}"
+
+      - name: Run label sync (dry-run)
+        if: ${{ !inputs.live-run }}
+        run: |
+          node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
+            -s eclipse-zenoh/zenoh \
+            -t "${{ inputs.repositories }}" \
+            -l "${{ steps.read-labels.outputs.labels }}" \
+            --dry-run
 
   sync-milestones:
     name: Sync Zenoh's milestones with dependant repositories
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
     steps:
       - name: Create milestone in zenoh if it does not exist
-        if: ${{ inputs.milestone != '' && inputs.due_date != '' }}
+        if: ${{ inputs.milestone != '' && inputs.milestone != null }}
         uses: actions/github-script@v7
         with:
           result-encoding: string
@@ -68,26 +95,42 @@ jobs:
             });
             const milestone = milestones.data.find(m => m.title === '${{ inputs.milestone }}');
 
-            if !(milestone) {
-              await github.rest.issues.createMilestone({
+            if (!milestone) {
+              const createParams = {
                 owner: 'eclipse-zenoh',
                 repo: 'zenoh',
-                title: '${{ inputs.milestone }}',
-                due_on: '${{ inputs.due_date }}'
-              });
+                title: '${{ inputs.milestone }}'
+              };
+              if ('${{ inputs.due_date }}' && '${{ inputs.due_date }}' !== '') {
+                createParams.due_on = '${{ inputs.due_date }}';
+              }
+              await github.rest.issues.createMilestone(createParams);
             }
 
       - uses: actions/checkout@v6
         with:
-          repository: https://github.com/pbochynski/github-sync.git
+          repository: pbochynski/github-sync
           ref: 131ac0c
+          path: github-sync
 
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - run: npm install
-      - run: |
-          github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} milestones \
+
+      - name: Install github-sync dependencies (milestones)
+        run: npm ci --prefix github-sync
+
+      - name: Run milestone sync (live)
+        if: ${{ inputs.live-run }}
+        run: |
+          node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} milestones \
+            -s eclipse-zenoh/zenoh \
+            -t "${{ inputs.repositories }}"
+
+      - name: Run milestone sync (dry-run)
+        if: ${{ !inputs.live-run }}
+        run: |
+          node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} milestones \
             -s eclipse-zenoh/zenoh \
             -t "${{ inputs.repositories }}" \
-            ${{ inputs.live-run == true && '' || '--dry-run' }}
+            --dry-run
