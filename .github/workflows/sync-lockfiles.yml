@@ -5,25 +5,21 @@ on:
     inputs:
       branch:
         type: string
-        description:
-          The branch to sync across all depedant repositories. Defaults to the default branch on each repository
+        description: The branch to sync across all depedant repositories. Defaults to the default branch on each repository
         required: false
       toolchain:
         type: string
-        description:
-          The rust toolchain to use. Defaults to 1.75.0
+        description: The rust toolchain to use. Defaults to 1.75.0
         required: false
   workflow_dispatch:
     inputs:
       branch:
         type: string
-        description:
-          The branch to sync across all depedant repositories. Defaults to the default branch on each repository
+        description: The branch to sync across all depedant repositories. Defaults to the default branch on each repository
         required: false
       toolchain:
         type: string
-        description:
-          The rust toolchain to use. Defaults to 1.75.0
+        description: The rust toolchain to use. Defaults to 1.75.0
         required: false
 
 defaults:
@@ -97,7 +93,7 @@ jobs:
       - name: Install cmake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.x'
+          cmake-version: "3.31.x"
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
@@ -122,7 +118,6 @@ jobs:
           else
             echo "value=--all-features" >> $GITHUB_OUTPUT
           fi
-
 
       - name: Override ${{ matrix.dependant }} lockfile with Zenoh's
         uses: actions/download-artifact@v4
@@ -172,7 +167,7 @@ jobs:
           base: ${{ inputs.branch }}
           branch: eclipse-zenoh-bot/sync-lockfile
           delete-branch: true
-          labels: dependencies
+          labels: dependencies, internal
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request

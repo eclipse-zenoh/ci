@@ -7,13 +7,11 @@ on:
     inputs:
       branch:
         type: string
-        description:
-          The branch to sync across all dependent repositories. Defaults to the default branch of the source repository (i.e. eclipse-zenoh/zenoh)
+        description: The branch to sync across all dependent repositories. Defaults to the default branch of the source repository (i.e. eclipse-zenoh/zenoh)
         required: false
       toolchain:
         type: string
-        description:
-          The rust toolchain to use. Defaults to 1.75.0
+        description: The rust toolchain to use. Defaults to 1.75.0
         required: false
 
 defaults:
@@ -50,7 +48,7 @@ jobs:
       - name: Install cmake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.31.x'
+          cmake-version: "3.31.x"
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
@@ -78,7 +76,7 @@ jobs:
           base: ${{ inputs.branch }}
           branch: eclipse-zenoh-bot/recreate-lockfile
           delete-branch: true
-          labels: dependencies
+          labels: dependencies, internal
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request
