@@ -78,7 +78,7 @@ jobs:
           base: ${{ inputs.branch }}
           branch: eclipse-zenoh-bot/recreate-lockfile
           delete-branch: true
-          labels: dependencies
+          labels: dependencies, internal
           token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
 
       - name: Enable auto merge for the pull request
