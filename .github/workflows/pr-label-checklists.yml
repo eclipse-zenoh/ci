@@ -55,8 +55,14 @@ jobs:
           echo "Skipping checklist generation for automated PR"
           exit 0
 
+      - name: Skip checklist update on edit events
+        if: steps.bot-check.outputs.result != 'true' && github.event.action == 'edited'
+        run: |
+          echo "Skipping checklist generation for edit events - only verification will run"
+          exit 0
+
       - name: Checkout checklist definitions
-        if: steps.bot-check.outputs.result != 'true'
+        if: steps.bot-check.outputs.result != 'true' && github.event.action != 'edited'
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.checklists-repo }}
@@ -66,7 +72,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Load checklist definitions
-        if: steps.bot-check.outputs.result != 'true'
+        if: steps.bot-check.outputs.result != 'true' && github.event.action != 'edited'
         id: load-defs
         run: |
           echo "defs<<EOF" >> $GITHUB_OUTPUT
@@ -74,7 +80,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Get PR labels and generate checklists
-        if: steps.bot-check.outputs.result != 'true'
+        if: steps.bot-check.outputs.result != 'true' && github.event.action != 'edited'
         id: generate
         uses: actions/github-script@v7
         with:
@@ -153,7 +159,7 @@ jobs:
             return JSON.stringify({ comment, labelCount: labels.length, checklistCount: checklists.length });
 
       - name: Update PR description with checklist
-        if: steps.bot-check.outputs.result != 'true'
+        if: steps.bot-check.outputs.result != 'true' && github.event.action != 'edited'
         uses: actions/github-script@v7
         env:
           RESULT_JSON: ${{ steps.generate.outputs.result }}
@@ -216,7 +222,7 @@ jobs:
             });
 
       - name: Check for required labels
-        if: steps.bot-check.outputs.result != 'true'
+        if: steps.bot-check.outputs.result != 'true' && github.event.action != 'edited'
         uses: actions/github-script@v7
         env:
           RESULT_JSON: ${{ steps.generate.outputs.result }}
