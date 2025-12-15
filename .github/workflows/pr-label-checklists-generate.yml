@@ -29,7 +29,6 @@ permissions:
 env:
   CHECKLIST_MARKER: '🏷️ Label-Based Checklist'
   REQUIRED_LABELS: '["api-sync", "breaking-change", "bug", "ci", "dependencies", "documentation", "enhancement", "new feature", "internal"]'
-  GH_TOKEN: ${{ secrets.github-token }}
 
 jobs:
   main:
@@ -230,128 +229,11 @@ jobs:
             }
 
   verify:
-    name: Verify checklist
-    runs-on: ${{ inputs.runner }}
-    timeout-minutes: 10
     needs: [main]
     if: always()
-
-    steps:
-      - name: Check if PR is from a bot
-        id: bot-check
-        uses: actions/github-script@v7
-        with:
-          result-encoding: string
-          script: |
-            const pr = context.payload.pull_request;
-            const author = pr.user.login;
-            const botAuthors = '${{ inputs.bot-authors }}'.split(',').map(s => s.trim());
-            const isBot = pr.user.type === 'Bot' || botAuthors.includes(author);
-            console.log(`PR author: ${author}, isBot: ${isBot}`);
-            return isBot.toString();
-
-      - name: Skip verification for bot PRs
-        if: steps.bot-check.outputs.result == 'true'
-        run: |
-          echo "Skipping checklist verification for automated PR"
-          exit 0
-
-      - name: Get PR info
-        if: steps.bot-check.outputs.result != 'true'
-        id: pr-info
-        uses: actions/github-script@v7
-        with:
-          script: |
-            if (context.eventName === 'pull_request' || context.eventName === 'pull_request_target') {
-              return {
-                number: context.payload.pull_request.number,
-                sha: context.payload.pull_request.head.sha
-              };
-            } else if (context.eventName === 'issue_comment') {
-              return {
-                number: context.payload.issue.number,
-                sha: null
-              };
-            }
-            return { number: null, sha: null };
-
-      - name: Get PR description with checklist
-        if: steps.bot-check.outputs.result != 'true'
-        id: checklist
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const prInfo = ${{ steps.pr-info.outputs.result }};
-            if (!prInfo.number) return '';
-
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prInfo.number
-            });
-
-            const marker = process.env.CHECKLIST_MARKER;
-            const markerStart = `<!-- ${marker} START -->`;
-            const markerEnd = `<!-- ${marker} END -->`;
-            const body = pr.body || '';
-
-            const startIndex = body.indexOf(markerStart);
-            const endIndex = body.indexOf(markerEnd);
-
-            if (startIndex !== -1 && endIndex !== -1) {
-              return body.substring(startIndex + markerStart.length, endIndex);
-            }
-
-            return '';
-
-      - name: Verify checklist
-        if: steps.bot-check.outputs.result != 'true'
-        id: verify
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const checklistBody = ${{ steps.checklist.outputs.result }};
-
-            const uncheckedCheckboxes = (checklistBody.match(/^-\s*\[\s*\]/gm) || []).length;
-            const checkedCheckboxes = (checklistBody.match(/^-\s*\[[xX]\]/gm) || []).length;
-            const totalCheckboxes = uncheckedCheckboxes + checkedCheckboxes;
-
-            if (!checklistBody || totalCheckboxes === 0) {
-              return { status: 'success', message: 'No checklist requirements' };
-            }
-
-            const completionPercent = Math.round((checkedCheckboxes / totalCheckboxes) * 100);
-            const status = completionPercent === 100 ? 'success' : 'failure';
-            const message = completionPercent === 100
-              ? `Checklist complete: ${checkedCheckboxes}/${totalCheckboxes}`
-              : `Checklist incomplete: ${checkedCheckboxes}/${totalCheckboxes} (${completionPercent}%)`;
-
-            return { status, message };
-
-      - name: Update PR status
-        if: steps.bot-check.outputs.result != 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const result = ${{ steps.verify.outputs.result }};
-            const prInfo = ${{ steps.pr-info.outputs.result }};
-
-            let headSha = prInfo.sha;
-            if (!headSha && prInfo.number) {
-              const { data: pr } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prInfo.number
-              });
-              headSha = pr.head.sha;
-            }
-
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: headSha,
-              state: result.status,
-              context: 'PR Checklist',
-              description: result.message,
-              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
-            });
+    uses: ./.github/workflows/pr-label-checklists-verify.yml
+    with:
+      runner: ${{ inputs.runner }}
+      bot-authors: ${{ inputs.bot-authors }}
+    secrets:
+      github-token: ${{ secrets.github-token }}
