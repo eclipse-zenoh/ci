@@ -1,0 +1,107 @@
+name: PR Label-Based Checklists
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      bot-authors:
+        description: 'Comma-separated list of bot author usernames to skip'
+        required: false
+        type: string
+        default: "dependabot,eclipse-zenoh-bot"
+    secrets:
+      github-token:
+        required: true
+
+permissions:
+  statuses: write
+  contents: read
+
+jobs:
+  main:
+    name: Verify checklist
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Check if PR is from a bot
+        id: bot-check
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const botAuthors = '${{ inputs.bot-authors }}'.split(',').map(s => s.trim());
+            const isBot = pr.user.type === 'Bot' || botAuthors.includes(author);
+            console.log(`PR author: ${author}, isBot: ${isBot}`);
+            return isBot.toString();
+
+      - name: Skip verification for bot PRs
+        if: steps.bot-check.outputs.result == 'true'
+        run: |
+          echo "Skipping checklist verification for automated PR"
+          exit 0
+
+      - name: Get PR info
+        if: steps.bot-check.outputs.result != 'true'
+        id: pr-info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            return {
+              number: context.payload.pull_request.number,
+              sha: context.payload.pull_request.head.sha
+            };
+
+      - name: Get PR description with checklist
+        if: steps.bot-check.outputs.result != 'true'
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            const body = pr.body || '';
+
+            // Count all checkboxes in the entire PR description
+            const uncheckedCheckboxes = (body.match(/^-\s*\[\s*\]/gm) || []).length;
+            const checkedCheckboxes = (body.match(/^-\s*\[[xX]\]/gm) || []).length;
+            const totalCheckboxes = uncheckedCheckboxes + checkedCheckboxes;
+
+            if (totalCheckboxes === 0) {
+              return { status: 'success', message: 'No checklist requirements' };
+            }
+
+            const completionPercent = Math.round((checkedCheckboxes / totalCheckboxes) * 100);
+            const status = completionPercent === 100 ? 'success' : 'failure';
+            const message = completionPercent === 100
+              ? `Checklist complete: ${checkedCheckboxes}/${totalCheckboxes}`
+              : `Checklist incomplete: ${checkedCheckboxes}/${totalCheckboxes} (${completionPercent}%)`;
+
+            return { status, message };
+
+      - name: Update PR status
+        if: steps.bot-check.outputs.result != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = ${{ steps.verify.outputs.result }};
+            const prInfo = ${{ steps.pr-info.outputs.result }};
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: prInfo.sha,
+              state: result.status,
+              context: 'PR Checklist',
+              description: result.message,
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
