@@ -151,6 +151,8 @@ async function publishToKellnr(input: Input, repo: string, registry: kellnr.Kell
   const env = {
     CARGO_REGISTRIES_KELLNER_TOKEN: registry.token,
     CARGO_REGISTRIES_KELLNER_INDEX: registry.index,
+    CARGO_REGISTRIES_ARTIFACTORY_TOKEN: input.artifactoryToken,
+    CARGO_REGISTRIES_ARTIFACTORY_INDEX: input.artifactoryIndex,
     CARGO_REGISTRY_GLOBAL_CREDENTIAL_PROVIDERS: "cargo:token",
     CARGO_REGISTRY_DEFAULT: "kellnr",
   };
