@@ -42,7 +42,7 @@ jobs:
           if [ ! -f ./pr-checklists.json ]; then
             echo "labels=" >> $GITHUB_OUTPUT
           else
-            echo "labels=$(jq -r '.label_checklists | keys | join(\" \")' ./pr-checklists.json)" >> $GITHUB_OUTPUT
+            echo "labels=$(jq -r '.label_checklists | keys | map(@json) | join(" ")' ./pr-checklists.json)" >> $GITHUB_OUTPUT
           fi
 
       # Checkout the external github-sync repository into a subdirectory
