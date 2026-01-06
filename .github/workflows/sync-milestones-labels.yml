@@ -60,7 +60,7 @@ jobs:
         run: npm ci --prefix github-sync
 
       - name: Run label sync (live)
-        if: ${{ inputs.live-run }}
+        if: ${{ steps.read-labels.outputs.labels && inputs.live-run }}
         run: |
           node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
             -s eclipse-zenoh/zenoh \
@@ -68,7 +68,7 @@ jobs:
             -l "${{ steps.read-labels.outputs.labels }}"
 
       - name: Run label sync (dry-run)
-        if: ${{ !inputs.live-run }}
+        if: ${{ steps.read-labels.outputs.labels && !inputs.live-run }}
         run: |
           node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
             -s eclipse-zenoh/zenoh \
