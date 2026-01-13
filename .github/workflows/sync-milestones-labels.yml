@@ -62,26 +62,34 @@ jobs:
       - name: Run label sync (live)
         if: ${{ steps.read-labels.outputs.labels && inputs.live-run }}
         run: |
-          args=()
+          repo_args=()
           for repo in ${{ inputs.repositories }}; do
-            args+=(-t "$repo")
+            repo_args+=(-t "$repo")
+          done
+          label_args=()
+          for label in ${{ steps.read-labels.outputs.labels }}; do
+            label_args+=(-l "$label")
           done
           node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
             -s eclipse-zenoh/zenoh \
-            "${args[@]}" \
-            -l "${{ steps.read-labels.outputs.labels }}"
+            "${repo_args[@]}" \
+            "${label_args[@]}"
 
       - name: Run label sync (dry-run)
         if: ${{ steps.read-labels.outputs.labels && !inputs.live-run }}
         run: |
-          args=()
+          repo_args=()
           for repo in ${{ inputs.repositories }}; do
-            args+=(-t "$repo")
+            repo_args+=(-t "$repo")
+          done
+          label_args=()
+          for label in ${{ steps.read-labels.outputs.labels }}; do
+            label_args+=(-l "$label")
           done
           node github-sync/github-sync.js --token ${{ secrets.BOT_TOKEN_WORKFLOW }} labels \
             -s eclipse-zenoh/zenoh \
-            "${args[@]}" \
-            -l "${{ steps.read-labels.outputs.labels }}" \
+            "${repo_args[@]}" \
+            "${label_args[@]}" \
             --dry-run
 
   sync-milestones:
