@@ -17,6 +17,7 @@ on:
         required: true
 
 permissions:
+  pull-requests: read
   statuses: write
   contents: read
 
