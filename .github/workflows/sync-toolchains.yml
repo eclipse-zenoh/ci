@@ -38,6 +38,7 @@ jobs:
           - zenoh-backend-rocksdb
           - zenoh-backend-s3
           - zenoh-ts
+          - zenoh-dissector
     steps:
       - name: Clone ${{ matrix.dependant }}
         uses: actions/checkout@v4
@@ -47,16 +48,6 @@ jobs:
 
       - name: Update ${{ matrix.dependant }}'s Rust toolchain to ${{ inputs.version }}
         run: sed "s;^channel = .*\$;channel = \"${{ inputs.version }}\";" --in-place rust-toolchain.toml
-        shell: bash
-
-      - name: Update ${{ matrix.dependant }}' rust-version in Cargo.toml to ${{ inputs.version }}
-        if: ${{ matrix.dependant == 'zenoh' }}
-        run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place Cargo.toml
-        shell: bash
-
-      - name: Update ${{ matrix.dependant }}' rust-version in zenoh-jni/Cargo.toml to ${{ inputs.version }}
-        if: ${{ contains(fromJSON('["zenoh-java", "zenoh-kotlin"]'), matrix.dependant ) }}
-        run: sed "s;^rust-version = .*\$;rust-version = \"${{ inputs.version }}\";" --in-place zenoh-jni/Cargo.toml
         shell: bash
 
       - name: Create/Update a pull request if the toolchain changed
