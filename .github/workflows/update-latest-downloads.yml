@@ -1,0 +1,81 @@
+name: Update latest downloads on download.eclipse.org
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to mark as latest (e.g., 1.7.2)'
+        required: true
+        type: string
+
+jobs:
+  update-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4.1.1
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
+
+      - name: Update latest symlinks on download.eclipse.org
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              genie.zenoh@projects-storage.eclipse.org \
+              "
+              set -e
+              VERSION='${{ inputs.version }}'
+              BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
+              UPDATED_COUNT=0
+              
+              echo '🔍 Scanning for zenoh packages with version \$VERSION...'
+              for i in \$BASE_PATH/z*/\$VERSION; do
+                if [ -d \"\$i\" ]; then
+                  DEST=\$(realpath \$i/../latest)
+                  echo \"📦 Updating: \$i → \$DEST\"
+                  rm -rf \"\$DEST\"
+                  mkdir -p \"\$DEST\"
+                  cp -r \"\$i\"/* \"\$DEST/\"
+                  UPDATED_COUNT=\$((UPDATED_COUNT + 1))
+                  echo \"✅ Updated: \$DEST\"
+                fi
+              done
+              
+              if [ \$UPDATED_COUNT -eq 0 ]; then
+                echo '⚠️  No packages found for version '\$VERSION
+                exit 1
+              fi
+              
+              echo \"\"
+              echo \"🎉 Successfully updated \$UPDATED_COUNT package(s) to latest\"
+              "
+
+      - name: Verify updates
+        run: |
+          ssh -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              genie.zenoh@projects-storage.eclipse.org \
+              "
+              set -e
+              BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
+              
+              echo '🔍 Verifying latest directories...'
+              for latest_dir in \$BASE_PATH/z*/latest; do
+                if [ -d \"\$latest_dir\" ]; then
+                  FILE_COUNT=\$(find \"\$latest_dir\" -type f | wc -l)
+                  echo \"  ✅ \$latest_dir (\$FILE_COUNT files)\"
+                fi
+              done
+              "
+
+      - name: Report completion
+        if: always()
+        run: |
+          echo "Update Latest Downloads Workflow Completed"
+          echo "Version: ${{ inputs.version }}"
+          echo "Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
