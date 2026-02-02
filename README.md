@@ -3,3 +3,103 @@
 This repository contains a set of GitHub actions and (reusable) workflows used
 to implement cross-repository workflows and reuse workflows across the
 eclipse-zenoh organization.
+
+## Workflows
+
+### update-latest-downloads.yml
+
+**Purpose**: Update the "latest" symlink on download.eclipse.org to point to a specific release version.
+
+**Trigger**: Manual (`workflow_dispatch`)
+
+**Inputs**:
+
+- `version` (required): The version to mark as latest (e.g., `1.7.2`)
+- `dry-run` (optional): Test mode - verify credentials and show what would be updated without modifying (default: `false`)
+
+**Required Secrets**:
+
+- `SSH_PRIVATE_KEY`: SSH private key (ED25519) for `genie.zenoh` authentication
+- `SSH_PASSPHRASE`: Passphrase for the SSH key (if key is encrypted)
+
+**Setup**:
+Request SCP credentials from Eclipse CBI by opening a [HelpDesk issue](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/new) with the following:
+
+- Project: Zenoh
+- Request: SSH credentials for `projects-storage.eclipse.org`
+- Purpose: Automated downloads.eclipse.org management
+
+Once credentials are provided, add them as GitHub Secrets:
+
+1. Navigate to Settings → Secrets and variables → Actions
+2. Create the two secrets listed above
+3. Alternatively, add via [Otterdog configuration](https://github.com/eclipse-cbi/.eclipsefdn)
+
+**Behavior**:
+
+1. Connects to `projects-storage.eclipse.org` via SSH
+2. For each package directory matching `/home/data/httpd/download.eclipse.org/zenoh/z*/{version}/`:
+   - **Dry-run mode**: Lists symlinks that would be created without making changes
+   - **Live mode**: Creates symlinks from `latest/` to the version directory (removes old symlinks first)
+3. Symlinks are force-created with `ln -sfr` (space-efficient, points to actual version directory)
+4. Reports the number of symlinks created/would be created
+5. In dry-run: Verifies SSH connection and credentials work
+6. In live: Verifies all `latest/` symlinks point to correct version directories
+
+**Usage**:
+First-time setup: Use `dry-run: true` to verify credentials:
+
+1. Navigate to Actions → Update latest downloads on download.eclipse.org
+2. Click "Run workflow"
+3. Enter the version (e.g., `1.7.2`)
+4. Check `dry-run` checkbox
+5. Click "Run workflow"
+6. Workflow will connect and show what would be updated without making changes
+
+Production run: Once dry-run succeeds, run again with `dry-run: false` to actually update files.
+
+**Idempotency**:
+✅ Safe to run multiple times with same version - always produces same result
+
+**Rollback Procedure**:
+To revert `/latest/` to a previous version:
+
+1. Navigate to Actions → Update latest downloads on download.eclipse.org
+2. Click "Run workflow"
+3. Enter the previous version (e.g., `1.7.1`)
+4. Uncheck `dry-run`
+5. Click "Run workflow"
+
+The symlinks will be updated to point to the previous version directory.
+
+**Integration with Release Process**:
+This workflow is typically run as a manual step after all release artifacts have been published and verified:
+
+1. `release-crates-*` workflows publish artifacts to download.eclipse.org
+2. Manual verification: Spot-check artifacts on download.eclipse.org
+3. **Run this workflow** with `dry-run=true` to verify connectivity
+4. **Run this workflow** with `dry-run=false` to mark as latest
+5. Verify: Check that `/latest/` symlinks point to correct version
+
+**Security Considerations**:
+
+- Only users with repo write permissions can run this workflow
+- SSH key is protected as a GitHub secret
+- Blast radius limited to `/latest/` symlinks (cannot modify `/version/` directories)
+- Each run creates an audit trail in GitHub Actions logs
+- Dry-run mode allows testing without production changes
+
+**Assumptions & Limitations**:
+
+- Depends on single host: `projects-storage.eclipse.org`
+- SSH connectivity is required (network failures will cause timeout after 10s)
+- Assumes `/latest/` symlinks are writable by `genie.zenoh` user
+- Version directory must already exist on download.eclipse.org
+- Only supports semantic versioning (X.Y.Z format, e.g. 1.7.2)
+
+**Troubleshooting**:
+
+- **"Failed to load SSH key"**: SSH credentials not set up in GitHub secrets
+- **"No packages found for version X.Y.Z"**: Version directory doesn't exist on download.eclipse.org
+- **"Invalid version format"**: Version must be X.Y.Z (e.g., 1.7.2)
+- **SSH timeout (10s)**: Network connectivity issue to projects-storage.eclipse.org
