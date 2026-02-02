@@ -34,11 +34,12 @@ Once credentials are provided, add them as GitHub Secrets:
 **Behavior**:
 1. Connects to `projects-storage.eclipse.org` via SSH
 2. For each package directory matching `/home/data/httpd/download.eclipse.org/zenoh/z*/{version}/`:
-   - **Dry-run mode**: Lists files that would be copied without making changes
-   - **Live mode**: Copies all files to the corresponding `latest/` directory, removing old `latest/` first
-3. Reports the number of packages updated/would be updated
-4. In dry-run: Verifies SSH connection and credentials work
-5. In live: Verifies all `latest/` directories contain files
+   - **Dry-run mode**: Lists symlinks that would be created without making changes
+   - **Live mode**: Creates symlinks from `latest/` to the version directory (removes old symlinks first)
+3. Symlinks are force-created with `ln -sfr` (space-efficient, points to actual version directory)
+4. Reports the number of symlinks created/would be created
+5. In dry-run: Verifies SSH connection and credentials work
+6. In live: Verifies all `latest/` symlinks point to correct version directories
 
 **Usage**:
 First-time setup: Use `dry-run: true` to verify credentials:

@@ -50,14 +50,12 @@ jobs:
                   DEST=\$(realpath \$i/../latest)
                   
                   if [ \"\$DRY_RUN\" = \"true\" ]; then
-                    FILE_COUNT=\$(find \"\$i\" -type f | wc -l)
-                    echo \"📦 [DRY-RUN] Would update: \$i (\$FILE_COUNT files) → \$DEST\"
+                    echo \"🔗 [DRY-RUN] Would create symlink: \$DEST → \$i\"
                   else
-                    echo \"📦 Updating: \$i → \$DEST\"
+                    echo \"🔗 Creating symlink: \$DEST → \$i\"
                     rm -rf \"\$DEST\"
-                    mkdir -p \"\$DEST\"
-                    cp -r \"\$i\"/* \"\$DEST/\"
-                    echo \"✅ Updated: \$DEST\"
+                    ln -sfr \"\$i\" \"\$DEST\"
+                    echo \"✅ Symlink created: \$DEST\"
                   fi
                   
                   UPDATED_COUNT=\$((UPDATED_COUNT + 1))
@@ -71,9 +69,9 @@ jobs:
               
               echo \"\"
               if [ \"\$DRY_RUN\" = \"true\" ]; then
-                echo \"🎉 DRY-RUN successful: would update \$UPDATED_COUNT package(s)\"
+                echo \"🎉 DRY-RUN successful: would create \$UPDATED_COUNT symlink(s)\"
               else
-                echo \"🎉 Successfully updated \$UPDATED_COUNT package(s) to latest\"
+                echo \"🎉 Successfully created \$UPDATED_COUNT symlink(s) to latest\"
               fi
               "
 
@@ -86,11 +84,11 @@ jobs:
               set -e
               BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
               
-              echo '🔍 Verifying latest directories...'
-              for latest_dir in \$BASE_PATH/z*/latest; do
-                if [ -d \"\$latest_dir\" ]; then
-                  FILE_COUNT=\$(find \"\$latest_dir\" -type f | wc -l)
-                  echo \"  ✅ \$latest_dir (\$FILE_COUNT files)\"
+              echo '🔍 Verifying latest symlinks...'
+              for latest_link in \$BASE_PATH/z*/latest; do
+                if [ -L \"\$latest_link\" ]; then
+                  TARGET=\$(readlink \"\$latest_link\")
+                  echo \"  ✅ \$latest_link → \$TARGET\"
                 fi
               done
               "
