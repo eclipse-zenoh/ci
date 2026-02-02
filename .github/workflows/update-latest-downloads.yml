@@ -25,19 +25,34 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
+          echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/id_ed25519
+          # Validate SSH key was loaded
+          ssh-add -l | grep -q ed25519 || {
+            echo "ERROR: Failed to load SSH key"
+            exit 1
+          }
 
       - name: Update latest symlinks on download.eclipse.org
         run: |
           DRY_RUN="${{ inputs.dry-run }}"
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=10 \
+              -o BatchMode=yes \
+              -o ControlMaster=auto \
+              -o ControlPersist=60s \
               genie.zenoh@projects-storage.eclipse.org \
               "
               set -e
               VERSION='${{ inputs.version }}'
               BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
               UPDATED_COUNT=0
+              
+              # Validate version format (X.Y.Z)
+              if ! echo \"\$VERSION\" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+                echo \"ERROR: Invalid version format: \$VERSION (expected X.Y.Z)\"
+                exit 1
+              fi
               
               if [ \"\$DRY_RUN\" = \"true\" ]; then
                 echo '🧪 DRY-RUN MODE - Credentials verified, no changes will be made'
@@ -76,9 +91,12 @@ jobs:
               "
 
       - name: Verify updates
+        if: ${{ !inputs.dry-run }}
         run: |
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=10 \
+              -o BatchMode=yes \
               genie.zenoh@projects-storage.eclipse.org \
               "
               set -e
