@@ -7,6 +7,11 @@ on:
         description: 'Version to mark as latest (e.g., 1.7.2)'
         required: true
         type: string
+      dry-run:
+        description: 'Test mode - verify connections and show what would be updated without modifying'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   update-latest:
@@ -24,6 +29,7 @@ jobs:
 
       - name: Update latest symlinks on download.eclipse.org
         run: |
+          DRY_RUN="${{ inputs.dry-run }}"
           ssh -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               genie.zenoh@projects-storage.eclipse.org \
@@ -33,16 +39,28 @@ jobs:
               BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
               UPDATED_COUNT=0
               
+              if [ \"\$DRY_RUN\" = \"true\" ]; then
+                echo '🧪 DRY-RUN MODE - Credentials verified, no changes will be made'
+                echo ''
+              fi
+              
               echo '🔍 Scanning for zenoh packages with version \$VERSION...'
               for i in \$BASE_PATH/z*/\$VERSION; do
                 if [ -d \"\$i\" ]; then
                   DEST=\$(realpath \$i/../latest)
-                  echo \"📦 Updating: \$i → \$DEST\"
-                  rm -rf \"\$DEST\"
-                  mkdir -p \"\$DEST\"
-                  cp -r \"\$i\"/* \"\$DEST/\"
+                  
+                  if [ \"\$DRY_RUN\" = \"true\" ]; then
+                    FILE_COUNT=\$(find \"\$i\" -type f | wc -l)
+                    echo \"📦 [DRY-RUN] Would update: \$i (\$FILE_COUNT files) → \$DEST\"
+                  else
+                    echo \"📦 Updating: \$i → \$DEST\"
+                    rm -rf \"\$DEST\"
+                    mkdir -p \"\$DEST\"
+                    cp -r \"\$i\"/* \"\$DEST/\"
+                    echo \"✅ Updated: \$DEST\"
+                  fi
+                  
                   UPDATED_COUNT=\$((UPDATED_COUNT + 1))
-                  echo \"✅ Updated: \$DEST\"
                 fi
               done
               
@@ -52,7 +70,11 @@ jobs:
               fi
               
               echo \"\"
-              echo \"🎉 Successfully updated \$UPDATED_COUNT package(s) to latest\"
+              if [ \"\$DRY_RUN\" = \"true\" ]; then
+                echo \"🎉 DRY-RUN successful: would update \$UPDATED_COUNT package(s)\"
+              else
+                echo \"🎉 Successfully updated \$UPDATED_COUNT package(s) to latest\"
+              fi
               "
 
       - name: Verify updates

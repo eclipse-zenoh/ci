@@ -14,6 +14,7 @@ eclipse-zenoh organization.
 
 **Inputs**:
 - `version` (required): The version to mark as latest (e.g., `1.7.2`)
+- `dry-run` (optional): Test mode - verify credentials and show what would be updated without modifying (default: `false`)
 
 **Required Secrets**:
 - `SSH_PRIVATE_KEY`: SSH private key (ED25519) for `genie.zenoh` authentication
@@ -33,17 +34,19 @@ Once credentials are provided, add them as GitHub Secrets:
 **Behavior**:
 1. Connects to `projects-storage.eclipse.org` via SSH
 2. For each package directory matching `/home/data/httpd/download.eclipse.org/zenoh/z*/{version}/`:
-   - Copies all files to the corresponding `latest/` directory
-   - Removes old `latest/` directory before copying
-   - Creates `latest/` if it doesn't exist
-3. Reports the number of packages updated
-4. Verifies all `latest/` directories contain files
+   - **Dry-run mode**: Lists files that would be copied without making changes
+   - **Live mode**: Copies all files to the corresponding `latest/` directory, removing old `latest/` first
+3. Reports the number of packages updated/would be updated
+4. In dry-run: Verifies SSH connection and credentials work
+5. In live: Verifies all `latest/` directories contain files
 
-**Example**:
-To update latest downloads for version 1.7.2:
+**Usage**:
+First-time setup: Use `dry-run: true` to verify credentials:
 1. Navigate to Actions → Update latest downloads on download.eclipse.org
 2. Click "Run workflow"
-3. Enter `1.7.2` in the version field
-4. Click "Run workflow"
+3. Enter the version (e.g., `1.7.2`)
+4. Check `dry-run` checkbox
+5. Click "Run workflow"
+6. Workflow will connect and show what would be updated without making changes
 
-The workflow will update all package "latest" directories to mirror the 1.7.2 release artifacts.
+Production run: Once dry-run succeeds, run again with `dry-run: false` to actually update files.
