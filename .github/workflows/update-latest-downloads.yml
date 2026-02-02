@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to mark as latest (e.g., 1.7.2)'
+        description: "Version to mark as latest (e.g., 1.7.2)"
         required: true
         type: string
       dry-run:
-        description: 'Test mode - verify connections and show what would be updated without modifying'
+        description: "Test mode - verify connections and show what would be updated without modifying"
         required: false
         type: boolean
         default: false

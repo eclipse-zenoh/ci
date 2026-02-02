@@ -48,6 +48,7 @@ Once credentials are provided, add them as GitHub Secrets:
 
 **Usage**:
 First-time setup: Use `dry-run: true` to verify credentials:
+
 1. Navigate to Actions → Update latest downloads on download.eclipse.org
 2. Click "Run workflow"
 3. Enter the version (e.g., `1.7.2`)
@@ -62,6 +63,7 @@ Production run: Once dry-run succeeds, run again with `dry-run: false` to actual
 
 **Rollback Procedure**:
 To revert `/latest/` to a previous version:
+
 1. Navigate to Actions → Update latest downloads on download.eclipse.org
 2. Click "Run workflow"
 3. Enter the previous version (e.g., `1.7.1`)
@@ -80,6 +82,7 @@ This workflow is typically run as a manual step after all release artifacts have
 5. Verify: Check that `/latest/` symlinks point to correct version
 
 **Security Considerations**:
+
 - Only users with repo write permissions can run this workflow
 - SSH key is protected as a GitHub secret
 - Blast radius limited to `/latest/` symlinks (cannot modify `/version/` directories)
@@ -87,6 +90,7 @@ This workflow is typically run as a manual step after all release artifacts have
 - Dry-run mode allows testing without production changes
 
 **Assumptions & Limitations**:
+
 - Depends on single host: `projects-storage.eclipse.org`
 - SSH connectivity is required (network failures will cause timeout after 10s)
 - Assumes `/latest/` symlinks are writable by `genie.zenoh` user
@@ -94,6 +98,7 @@ This workflow is typically run as a manual step after all release artifacts have
 - Only supports semantic versioning (X.Y.Z format, e.g. 1.7.2)
 
 **Troubleshooting**:
+
 - **"Failed to load SSH key"**: SSH credentials not set up in GitHub secrets
 - **"No packages found for version X.Y.Z"**: Version directory doesn't exist on download.eclipse.org
 - **"Invalid version format"**: Version must be X.Y.Z (e.g., 1.7.2)
