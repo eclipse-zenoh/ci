@@ -51,3 +51,45 @@ First-time setup: Use `dry-run: true` to verify credentials:
 6. Workflow will connect and show what would be updated without making changes
 
 Production run: Once dry-run succeeds, run again with `dry-run: false` to actually update files.
+
+**Idempotency**:
+✅ Safe to run multiple times with same version - always produces same result
+
+**Rollback Procedure**:
+To revert `/latest/` to a previous version:
+1. Navigate to Actions → Update latest downloads on download.eclipse.org
+2. Click "Run workflow"
+3. Enter the previous version (e.g., `1.7.1`)
+4. Uncheck `dry-run`
+5. Click "Run workflow"
+
+The symlinks will be updated to point to the previous version directory.
+
+**Integration with Release Process**:
+This workflow is typically run as a manual step after all release artifacts have been published and verified:
+
+1. `release-crates-*` workflows publish artifacts to download.eclipse.org
+2. Manual verification: Spot-check artifacts on download.eclipse.org
+3. **Run this workflow** with `dry-run=true` to verify connectivity
+4. **Run this workflow** with `dry-run=false` to mark as latest
+5. Verify: Check that `/latest/` symlinks point to correct version
+
+**Security Considerations**:
+- Only users with repo write permissions can run this workflow
+- SSH key is protected as a GitHub secret
+- Blast radius limited to `/latest/` symlinks (cannot modify `/version/` directories)
+- Each run creates an audit trail in GitHub Actions logs
+- Dry-run mode allows testing without production changes
+
+**Assumptions & Limitations**:
+- Depends on single host: `projects-storage.eclipse.org`
+- SSH connectivity is required (network failures will cause timeout after 10s)
+- Assumes `/latest/` symlinks are writable by `genie.zenoh` user
+- Version directory must already exist on download.eclipse.org
+- Only supports semantic versioning (X.Y.Z format, e.g. 1.7.2)
+
+**Troubleshooting**:
+- **"Failed to load SSH key"**: SSH credentials not set up in GitHub secrets
+- **"No packages found for version X.Y.Z"**: Version directory doesn't exist on download.eclipse.org
+- **"Invalid version format"**: Version must be X.Y.Z (e.g., 1.7.2)
+- **SSH timeout (10s)**: Network connectivity issue to projects-storage.eclipse.org
