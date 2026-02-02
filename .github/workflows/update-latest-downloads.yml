@@ -64,11 +64,16 @@ jobs:
                 if [ -d \"\$i\" ]; then
                   DEST=\$(realpath \$i/../latest)
                   
+                  # Safety check: validate path is a valid zenoh package symlink
+                  if ! echo \"\$DEST\" | grep -qE '/zenoh/z[^/]*/latest$'; then
+                    echo \"ERROR: Safety check failed - invalid path: \$DEST\"
+                    exit 1
+                  fi
+                  
                   if [ \"\$DRY_RUN\" = \"true\" ]; then
                     echo \"🔗 [DRY-RUN] Would create symlink: \$DEST → \$i\"
                   else
                     echo \"🔗 Creating symlink: \$DEST → \$i\"
-                    rm -rf \"\$DEST\"
                     ln -sfr \"\$i\" \"\$DEST\"
                     echo \"✅ Symlink created: \$DEST\"
                   fi
