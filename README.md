@@ -13,25 +13,30 @@ eclipse-zenoh organization.
 **Trigger**: Manual (`workflow_dispatch`)
 
 **Inputs**:
+
 - `version` (required): The version to mark as latest (e.g., `1.7.2`)
 - `dry-run` (optional): Test mode - verify credentials and show what would be updated without modifying (default: `false`)
 
 **Required Secrets**:
+
 - `SSH_PRIVATE_KEY`: SSH private key (ED25519) for `genie.zenoh` authentication
 - `SSH_PASSPHRASE`: Passphrase for the SSH key (if key is encrypted)
 
 **Setup**:
 Request SCP credentials from Eclipse CBI by opening a [HelpDesk issue](https://gitlab.eclipse.org/eclipsefdn/helpdesk/-/issues/new) with the following:
+
 - Project: Zenoh
 - Request: SSH credentials for `projects-storage.eclipse.org`
 - Purpose: Automated downloads.eclipse.org management
 
 Once credentials are provided, add them as GitHub Secrets:
+
 1. Navigate to Settings → Secrets and variables → Actions
-2. Create the four secrets listed above
+2. Create the two secrets listed above
 3. Alternatively, add via [Otterdog configuration](https://github.com/eclipse-cbi/.eclipsefdn)
 
 **Behavior**:
+
 1. Connects to `projects-storage.eclipse.org` via SSH
 2. For each package directory matching `/home/data/httpd/download.eclipse.org/zenoh/z*/{version}/`:
    - **Dry-run mode**: Lists symlinks that would be created without making changes
