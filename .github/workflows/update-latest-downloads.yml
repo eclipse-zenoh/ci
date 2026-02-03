@@ -22,12 +22,11 @@ jobs:
 
       - name: Setup SSH key
         run: |
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-agent -a /tmp/ssh_agent.sock > /dev/null
           mkdir -p ~/.ssh
           echo '#!/bin/sh' > ~/.ssh_askpass
           echo 'echo ${{ secrets.SSH_PASSPHRASE }}' >> ~/.ssh_askpass && chmod +x ~/.ssh_askpass
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | DISPLAY=None SSH_ASKPASS=~/.ssh_askpass ssh-add - >/dev/null
-          echo "$SSH_PUBLIC_KEY" > /tmp/id_ed25519.pub
           # Validate SSH key was loaded
           ssh-add -l | grep -q ed25519 || {
             echo "ERROR: Failed to load SSH key"
@@ -96,6 +95,8 @@ jobs:
                 echo \"🎉 Successfully created \$UPDATED_COUNT symlink(s) to latest\"
               fi
               "
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
       - name: Verify updates
         if: ${{ !inputs.dry-run }}
@@ -117,6 +118,8 @@ jobs:
                 fi
               done
               "
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
       - name: Report completion
         if: always()
