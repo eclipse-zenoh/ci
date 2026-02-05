@@ -29,56 +29,56 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             DRY_RUN="${{ inputs.dry-run }}"
-                set -e
-                VERSION='${{ inputs.version }}'
-                BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
-                UPDATED_COUNT=0
-                
-                # Validate version format (X.Y.Z)
-                if ! echo \"\$VERSION\" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
-                  echo \"ERROR: Invalid version format: \$VERSION (expected X.Y.Z)\"
-                  exit 1
-                fi
-                
-                if [ \"\$DRY_RUN\" = \"true\" ]; then
-                  echo '🧪 DRY-RUN MODE - Credentials verified, no changes will be made'
-                  echo ''
-                fi
-                
-                echo '🔍 Scanning for zenoh packages with version \$VERSION...'
-                for i in \$BASE_PATH/z*/\$VERSION; do
-                  if [ -d \"\$i\" ]; then
-                    DEST=\$(realpath \$i/../latest)
-                    
-                    # Safety check: validate path is a valid zenoh package symlink
-                    if ! echo \"\$DEST\" | grep -qE '/zenoh/z[^/]*/latest$'; then
-                      echo \"ERROR: Safety check failed - invalid path: \$DEST\"
-                      exit 1
-                    fi
-                    
-                    if [ \"\$DRY_RUN\" = \"true\" ]; then
-                      echo \"🔗 [DRY-RUN] Would create symlink: \$DEST → \$i\"
-                    else
-                      echo \"🔗 Creating symlink: \$DEST → \$i\"
-                      ln -sfr \"\$i\" \"\$DEST\"
-                      echo \"✅ Symlink created: \$DEST\"
-                    fi
-                    
-                    UPDATED_COUNT=\$((UPDATED_COUNT + 1))
-                  fi
-                done
-                
-                if [ \$UPDATED_COUNT -eq 0 ]; then
-                  echo '⚠️  No packages found for version '\$VERSION
-                  exit 1
-                fi
-                
-                echo \"\"
-                if [ \"\$DRY_RUN\" = \"true\" ]; then
-                  echo \"🎉 DRY-RUN successful: would create \$UPDATED_COUNT symlink(s)\"
-                else
-                  echo \"🎉 Successfully created \$UPDATED_COUNT symlink(s) to latest\"
-                fi
+             set -e
+             VERSION='${{ inputs.version }}'
+             BASE_PATH='/home/data/httpd/download.eclipse.org/zenoh'
+             UPDATED_COUNT=0
+             
+             # Validate version format (X.Y.Z)
+             if ! echo \"\$VERSION\" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+               echo \"ERROR: Invalid version format: \$VERSION (expected X.Y.Z)\"
+               exit 1
+             fi
+             
+             if [ \"\$DRY_RUN\" = \"true\" ]; then
+               echo '🧪 DRY-RUN MODE - Credentials verified, no changes will be made'
+               echo ''
+             fi
+             
+             echo '🔍 Scanning for zenoh packages with version \$VERSION...'
+             for i in \$BASE_PATH/z*/\$VERSION; do
+               if [ -d \"\$i\" ]; then
+                 DEST=\$(realpath \$i/../latest)
+                 
+                 # Safety check: validate path is a valid zenoh package symlink
+                 if ! echo \"\$DEST\" | grep -qE '/zenoh/z[^/]*/latest$'; then
+                   echo \"ERROR: Safety check failed - invalid path: \$DEST\"
+                   exit 1
+                 fi
+                 
+                 if [ \"\$DRY_RUN\" = \"true\" ]; then
+                   echo \"🔗 [DRY-RUN] Would create symlink: \$DEST → \$i\"
+                 else
+                   echo \"🔗 Creating symlink: \$DEST → \$i\"
+                   ln -sfr \"\$i\" \"\$DEST\"
+                   echo \"✅ Symlink created: \$DEST\"
+                 fi
+                 
+                 UPDATED_COUNT=\$((UPDATED_COUNT + 1))
+               fi
+             done
+             
+             if [ \$UPDATED_COUNT -eq 0 ]; then
+               echo '⚠️  No packages found for version '\$VERSION
+               exit 1
+             fi
+             
+             echo \"\"
+             if [ \"\$DRY_RUN\" = \"true\" ]; then
+               echo \"🎉 DRY-RUN successful: would create \$UPDATED_COUNT symlink(s)\"
+             else
+               echo \"🎉 Successfully created \$UPDATED_COUNT symlink(s) to latest\"
+             fi
 
       - name: Verify updates
         if: ${{ !inputs.dry-run }}
