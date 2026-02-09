@@ -8,15 +8,25 @@ on:
         type: string
         default: "ubuntu-latest"
       checklists-repo:
-        description: 'Repository containing pr-checklists.json'
+        description: "Repository containing pr-checklists.json"
         required: false
         type: string
         default: "eclipse-zenoh/ci"
       bot-authors:
-        description: 'Comma-separated list of bot author usernames to skip'
+        description: "Comma-separated list of bot author usernames to skip"
         required: false
         type: string
         default: "dependabot,eclipse-zenoh-bot"
+      enable-eca-notify:
+        description: "Enable Eclipse ECA notification for contributors who have not signed"
+        required: false
+        type: boolean
+        default: false
+      eca-check-context:
+        description: "The context name of the ECA check status"
+        required: false
+        type: string
+        default: "eclipsefdn/eca"
     secrets:
       github-token:
         required: true
@@ -27,8 +37,10 @@ permissions:
   contents: read
 
 env:
-  CHECKLIST_MARKER: '🏷️ Label-Based Checklist'
-  REQUIRED_LABELS: '["api-sync", "breaking-change", "bug", "ci", "dependencies", "documentation", "enhancement", "new feature", "internal"]'
+  CHECKLIST_MARKER: "🏷️ Label-Based Checklist"
+  REQUIRED_LABELS:
+    '["api-sync", "breaking-change", "bug", "ci", "dependencies", "documentation", "enhancement", "new feature",
+    "internal"]'
 
 jobs:
   main:
@@ -235,5 +247,16 @@ jobs:
     with:
       runner: ${{ inputs.runner }}
       bot-authors: ${{ inputs.bot-authors }}
+    secrets:
+      github-token: ${{ secrets.github-token }}
+
+  eca-notify:
+    needs: [main]
+    if: inputs.enable-eca-notify
+    uses: ./.github/workflows/pr-eca-notify.yml
+    with:
+      runner: ${{ inputs.runner }}
+      bot-authors: ${{ inputs.bot-authors }}
+      eca-check-context: ${{ inputs.eca-check-context }}
     secrets:
       github-token: ${{ secrets.github-token }}

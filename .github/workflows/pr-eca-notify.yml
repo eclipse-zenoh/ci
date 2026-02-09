@@ -1,0 +1,228 @@
+name: PR ECA Notification
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: false
+        type: string
+        default: "ubuntu-latest"
+      bot-authors:
+        description: "Comma-separated list of bot author usernames to skip"
+        required: false
+        type: string
+        default: "dependabot,eclipse-zenoh-bot"
+      eca-check-context:
+        description: "The context name of the ECA check status"
+        required: false
+        type: string
+        default: "eclipsefdn/eca"
+    secrets:
+      github-token:
+        required: true
+
+permissions:
+  pull-requests: write
+  statuses: read
+  contents: read
+
+env:
+  ECA_COMMENT_MARKER: "<!-- eclipse-eca-notification -->"
+
+jobs:
+  notify:
+    name: ECA notification
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Check if PR is from a bot
+        id: bot-check
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const botAuthors = '${{ inputs.bot-authors }}'.split(',').map(s => s.trim());
+            const isBot = pr.user.type === 'Bot' || botAuthors.includes(author);
+            console.log(`PR author: ${author}, isBot: ${isBot}`);
+            return isBot.toString();
+
+      - name: Skip for bot PRs
+        if: steps.bot-check.outputs.result == 'true'
+        run: |
+          echo "Skipping ECA notification for automated PR"
+          exit 0
+
+      - name: Check ECA status
+        if: steps.bot-check.outputs.result != 'true'
+        id: eca-check
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github-token }}
+          script: |
+            const pr = context.payload.pull_request;
+            const sha = pr.head.sha;
+            const ecaContext = '${{ inputs.eca-check-context }}';
+
+            console.log(`Checking ECA status for SHA: ${sha}`);
+            console.log(`Looking for context: ${ecaContext}`);
+
+            // Get commit statuses
+            const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: sha,
+              per_page: 100
+            });
+
+            // Find the most recent ECA status
+            const ecaStatuses = statuses.filter(s => s.context === ecaContext);
+
+            if (ecaStatuses.length === 0) {
+              console.log('No ECA status found yet');
+              return JSON.stringify({ ecaFound: false, ecaState: 'pending', needsNotification: false });
+            }
+
+            // Get the most recent status (first in the list)
+            const latestEcaStatus = ecaStatuses[0];
+            console.log(`Latest ECA status: ${latestEcaStatus.state}`);
+            console.log(`Description: ${latestEcaStatus.description}`);
+
+            const needsNotification = latestEcaStatus.state === 'failure';
+
+            return JSON.stringify({
+              ecaFound: true,
+              ecaState: latestEcaStatus.state,
+              ecaDescription: latestEcaStatus.description,
+              ecaUrl: latestEcaStatus.target_url,
+              needsNotification: needsNotification
+            });
+
+      - name: Check for existing notification comment
+        if: steps.bot-check.outputs.result != 'true'
+        id: existing-comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.github-token }}
+          script: |
+            const marker = process.env.ECA_COMMENT_MARKER;
+            const prNumber = context.payload.pull_request.number;
+
+            // Get existing comments
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+
+            // Find our notification comment
+            const existingComment = comments.find(c => c.body.includes(marker));
+
+            if (existingComment) {
+              console.log(`Found existing ECA notification comment: ${existingComment.id}`);
+              return JSON.stringify({ found: true, commentId: existingComment.id });
+            }
+
+            console.log('No existing ECA notification comment found');
+            return JSON.stringify({ found: false, commentId: null });
+
+      - name: Post or update ECA notification comment
+        if: steps.bot-check.outputs.result != 'true'
+        uses: actions/github-script@v7
+        env:
+          ECA_RESULT: ${{ steps.eca-check.outputs.result }}
+          EXISTING_COMMENT: ${{ steps.existing-comment.outputs.result }}
+        with:
+          github-token: ${{ secrets.github-token }}
+          script: |
+            const ecaResult = JSON.parse(process.env.ECA_RESULT);
+            const existingComment = JSON.parse(process.env.EXISTING_COMMENT);
+            const marker = process.env.ECA_COMMENT_MARKER;
+            const prNumber = context.payload.pull_request.number;
+            const prAuthor = context.payload.pull_request.user.login;
+
+            // Build the ECA status URL
+            const ecaStatusUrl = `https://api.eclipse.org/git/eca/status/gh/${context.repo.owner}/${context.repo.repo}/${prNumber}`;
+            const ecaSignUrl = 'https://accounts.eclipse.org/user/eca';
+            const ecaFaqUrl = 'https://www.eclipse.org/legal/ecafaq.php';
+
+            if (ecaResult.needsNotification) {
+              // ECA check failed - create or update notification
+              const commentBody = `${marker}
+            ## Eclipse Contributor Agreement (ECA) Required
+
+            Hi @${prAuthor},
+
+            Thank you for your contribution! Before we can merge this pull request, you need to sign the **Eclipse Contributor Agreement (ECA)**.
+
+            ### What is the ECA?
+
+            The ECA is a legal agreement that ensures you have the rights to contribute your code and that you agree to license it under the project's open source license. This is required for all contributions to Eclipse Foundation projects.
+
+            ### How to sign the ECA:
+
+            1. **Create an Eclipse Foundation account** (if you don't have one): [Register here](https://accounts.eclipse.org/user/register)
+            2. **Sign the ECA**: [Sign here](${ecaSignUrl})
+            3. **Important**: Make sure the email address in your Eclipse account matches the email used in your Git commits
+
+            ### Verify your commit email:
+
+            Run this command in your local repository to check the email associated with your commits:
+            \`\`\`bash
+            git log --format='%ae' HEAD~1..HEAD
+            \`\`\`
+
+            If the email doesn't match your Eclipse account, you may need to:
+            - Add the email to your Eclipse account, or
+            - Amend your commits to use the correct email
+
+            ### More information:
+
+            - [ECA Validation Status](${ecaStatusUrl})
+            - [ECA FAQ](${ecaFaqUrl})
+
+            ---
+            *This comment was automatically generated. Once you've signed the ECA, push a new commit or re-run the ECA validation to update the status.*`;
+
+              if (existingComment.found) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.commentId,
+                  body: commentBody
+                });
+                console.log('Updated existing ECA notification comment');
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: commentBody
+                });
+                console.log('Created new ECA notification comment');
+              }
+            } else if (ecaResult.ecaState === 'success' && existingComment.found) {
+              // ECA check passed - update the comment to reflect success
+              const successBody = `${marker}
+            ## Eclipse Contributor Agreement (ECA) - Signed
+
+            Thank you @${prAuthor}! Your Eclipse Contributor Agreement has been verified successfully.
+
+            ---
+            *This comment was automatically generated.*`;
+
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.commentId,
+                body: successBody
+              });
+              console.log('Updated ECA notification comment to show success');
+            } else {
+              console.log('No action needed - ECA status:', ecaResult.ecaState);
+            }
