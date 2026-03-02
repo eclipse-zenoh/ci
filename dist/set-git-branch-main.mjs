@@ -63553,15 +63553,6 @@ async function setGitBranch(manifestPath, pattern, gitUrl, gitBranch) {
     }
   }
 }
-function setCargoLockVersion(cargoLockPath) {
-  core2.startGroup(`Setting Cargo.lock version`);
-  const record = toml.get(cargoLockPath, ["version"]);
-  if (record != void 0 && record["version"] != 3) {
-    const sedCommand = `sed -i.bak 's/^version = [[:digit:]]$/version = 3/' ${cargoLockPath}`;
-    sh(sedCommand);
-    sh(`rm -f ${cargoLockPath}.bak`);
-  }
-}
 async function installBinaryCached(name) {
   const env = { CARGO_REGISTRY_DEFAULT: "crates-io" };
   const version2 = config.lock.cratesio[name];
@@ -63595,8 +63586,7 @@ function setup() {
     releaseBranch,
     repo,
     path: path === "" ? void 0 : path,
-    toolchain: toolchain === "" ? "1.75.0" : toolchain,
-    // Default to 1.75.0 to avoid updating Cargo.lock file version.
+    toolchain: toolchain === "" ? "1.93.0" : toolchain,
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern),
@@ -63612,14 +63602,6 @@ async function main(input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
-    const cargoLockPaths = sh(`find ${workspace} -name "Cargo.lock"`).split("\n").filter((r) => r);
-    for (const path2 of cargoLockPaths) {
-      setCargoLockVersion(path2);
-      if (sh("git diff", { cwd: repo, check: false })) {
-        sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
-        sh(`git commit --message 'chore: Update Cargo.lock version ${path2}'`, { cwd: repo, env: gitEnv });
-      }
-    }
     const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`).split("\n").filter((r) => r);
     const pathsToCheck = [];
     let path;

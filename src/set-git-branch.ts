@@ -37,7 +37,7 @@ export function setup(): Input {
     releaseBranch,
     repo,
     path: path === "" ? undefined : path,
-    toolchain: toolchain === "" ? "1.75.0" : toolchain, // Default to 1.75.0 to avoid updating Cargo.lock file version.
+    toolchain: toolchain === "" ? "1.93.0" : toolchain,
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
@@ -55,17 +55,6 @@ export async function main(input: Input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
-    // Correct Cargo.lock version to 1.75 toolchain compatible version
-    const cargoLockPaths = sh(`find ${workspace} -name "Cargo.lock"`)
-      .split("\n")
-      .filter(r => r);
-    for (const path of cargoLockPaths) {
-      cargo.setCargoLockVersion(path);
-      if (sh("git diff", { cwd: repo, check: false })) {
-        sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
-        sh(`git commit --message 'chore: Update Cargo.lock version ${path}'`, { cwd: repo, env: gitEnv });
-      }
-    }
     // find all Cargo.toml files in the workspace, filtering out the empty string from the array
     const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`)
       .split("\n")

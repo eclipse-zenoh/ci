@@ -11,7 +11,7 @@ on:
         required: false
       toolchain:
         type: string
-        description: The rust toolchain to use. Defaults to 1.75.0
+        description: The rust toolchain to use. Defaults to 1.93.0
         required: false
 
 defaults:
@@ -41,8 +41,8 @@ jobs:
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
         run: |
-          rustup update ${{ inputs.toolchain || '1.75.0' }}
-          rustup component add --toolchain ${{ inputs.toolchain || '1.75.0'}} clippy
+          rustup update ${{ inputs.toolchain || '1.93.0' }}
+          rustup component add --toolchain ${{ inputs.toolchain || '1.93.0'}} clippy
 
       # cyclors does not compile with cmake 4
       - name: Install cmake
@@ -56,7 +56,7 @@ jobs:
       - name: Recreate Cargo.lock
         run: |
           rm -f Cargo.lock
-          cargo +${{ inputs.toolchain || '1.75.0' }} update --manifest-path Cargo.toml
+          cargo +${{ inputs.toolchain || '1.93.0' }} update --manifest-path Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr

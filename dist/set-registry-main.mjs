@@ -63575,8 +63575,7 @@ function setup() {
     releaseBranch,
     repo,
     path: path === "" ? void 0 : path,
-    toolchain: toolchain === "" ? "1.75.0" : toolchain,
-    // Default to 1.75.0 to avoid updating Cargo.lock file version.
+    toolchain: toolchain === "" ? "1.93.0" : toolchain,
     githubToken,
     depsRegExp: depsPattern === "" ? new RegExp("$^") : new RegExp(depsPattern)
   };
