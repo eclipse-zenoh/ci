@@ -126,8 +126,8 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          repository: pbochynski/github-sync
-          ref: 131ac0c6d4a7682b027fb570a421197ed316a5db
+          repository: ZettaScaleLabs/github-sync
+          ref: main
           path: github-sync
 
       - uses: actions/setup-node@v4
