@@ -76,10 +76,13 @@ jobs:
         if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
         run: |
           cd zenoh-c
-          if [[ -f ci/scripts/sync-cargo-toml-in.bash ]]; then
+          if [[ -f "ci/scripts/sync-cargo-toml-in.bash" ]]; then
+            echo "Running sync script for zenoh-c"
             bash ci/scripts/sync-cargo-toml-in.bash
-            git add Cargo.toml.in
-            git commit --message 'chore: Sync Cargo.toml.in' || true
+            if ! git diff --exit-code Cargo.toml.in > /dev/null 2>&1; then
+              git add Cargo.toml.in
+              git commit --message "chore: Sync Cargo.toml.in with Cargo.toml"
+            fi
           fi
         env:
           GIT_AUTHOR_NAME: eclipse-zenoh-bot
