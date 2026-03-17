@@ -85,6 +85,21 @@ jobs:
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
           deps-branch: main
 
+      - name: Update zenoh-c Cargo.toml.in CMake template
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
+        run: |
+          cd zenoh-c
+          if [[ -f ci/scripts/sync-cargo-toml-in.bash ]]; then
+            bash ci/scripts/sync-cargo-toml-in.bash
+            git add Cargo.toml.in
+            git commit --message 'chore: Sync Cargo.toml.in' || true
+          fi
+        env:
+          GIT_AUTHOR_NAME: eclipse-zenoh-bot
+          GIT_AUTHOR_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
+          GIT_COMMITTER_NAME: eclipse-zenoh-bot
+          GIT_COMMITTER_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
+
       - name: Compute branch
         id: compute-branch
         run: |
