@@ -61,29 +61,34 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
 
       - name: Update git/branch in release branch
-        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-dissector' }}
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
         uses: eclipse-zenoh/ci/set-git-branch@main
         with:
           version: ${{ inputs.version }}
           release-branch: release/${{ inputs.version }}
           repo: ${{ matrix.repo }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-          toolchain: 1.93.0
           deps-pattern: zenoh.*
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
           deps-branch: main
 
-      - name: Update git/branch in release branch
-        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp", "eclipse-zenoh/zenoh-dissector"]'), matrix.repo) }}
-        uses: eclipse-zenoh/ci/set-git-branch@main
-        with:
-          version: ${{ inputs.version }}
-          release-branch: release/${{ inputs.version }}
-          repo: ${{ matrix.repo }}
-          github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-          deps-pattern: zenoh.*
-          deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
-          deps-branch: main
+      - name: Update zenoh-c Cargo.toml.in CMake template
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
+        run: |
+          cd zenoh-c
+          if [[ -f "ci/scripts/sync-cargo-toml-in.bash" ]]; then
+            echo "Running sync script for zenoh-c"
+            bash ci/scripts/sync-cargo-toml-in.bash
+            if ! git diff --exit-code Cargo.toml.in > /dev/null 2>&1; then
+              git add Cargo.toml.in
+              git commit --message "chore: Sync Cargo.toml.in with Cargo.toml"
+            fi
+          fi
+        env:
+          GIT_AUTHOR_NAME: eclipse-zenoh-bot
+          GIT_AUTHOR_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
+          GIT_COMMITTER_NAME: eclipse-zenoh-bot
+          GIT_COMMITTER_EMAIL: eclipse-zenoh-bot@users.noreply.github.com
 
       - name: Compute branch
         id: compute-branch
