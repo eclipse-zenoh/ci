@@ -56,7 +56,7 @@ export async function main(input: Input) {
     sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
     // find all Cargo.toml files in the workspace, filtering out the empty string from the array
-    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`)
+    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml"`)
       .split("\n")
       .filter(r => r);
 

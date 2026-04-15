@@ -63602,7 +63602,7 @@ async function main(input) {
     sh(`git clone --recursive --single-branch --branch ${input.releaseBranch} ${remote}`);
     sh(`git switch -c ${input.githubUser}/post-release-${input.version}`, { cwd: repo });
     sh(`ls ${workspace}`);
-    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml*"`).split("\n").filter((r) => r);
+    const cargoPaths = sh(`find ${workspace} -name "Cargo.toml"`).split("\n").filter((r) => r);
     const pathsToCheck = [];
     let path;
     for (path of cargoPaths) {
