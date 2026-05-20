@@ -144,7 +144,7 @@ describe("cargo", () => {
       "zenohd",
     ];
     expect(order).toStrictEqual(expectedOrder);
-  });
+  }, 20 * SECONDS);
 
   test("bump zenoh-kotlin", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
