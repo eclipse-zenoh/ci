@@ -101,50 +101,54 @@ describe("cargo", () => {
     expect(packages).toStrictEqual(expectedPackages);
   });
 
-  test("list packages zenoh", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
-    const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
-    await rm(tmp, { recursive: true, force: true });
-    const expectedOrder = [
-      "zenoh-collections",
-      "zenoh-result",
-      "zenoh-crypto",
-      "zenoh-buffers",
-      "zenoh-keyexpr",
-      "zenoh-macros",
-      "zenoh-runtime",
-      "zenoh-protocol",
-      "zenoh-core",
-      "zenoh-util",
-      "zenoh-config",
-      "zenoh-stats",
-      "zenoh-sync",
-      "zenoh-task",
-      "zenoh-plugin-trait",
-      "zenoh-shm",
-      "zenoh-codec",
-      "zenoh-link-commons",
-      "zenoh-link-quic_datagram",
-      "zenoh-link-serial",
-      "zenoh-link-tcp",
-      "zenoh-link-tls",
-      "zenoh-link-udp",
-      "zenoh-link-unixpipe",
-      "zenoh-link-unixsock_stream",
-      "zenoh-link-vsock",
-      "zenoh-link-ws",
-      "zenoh-link-quic",
-      "zenoh-link",
-      "zenoh-transport",
-      "zenoh",
-      "zenoh-ext",
-      "zenoh_backend_traits",
-      "zenoh-plugin-rest",
-      "zenoh-plugin-storage-manager",
-      "zenohd",
-    ];
-    expect(order).toStrictEqual(expectedOrder);
-  }, 20 * SECONDS);
+  test(
+    "list packages zenoh",
+    async () => {
+      const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
+      const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
+      await rm(tmp, { recursive: true, force: true });
+      const expectedOrder = [
+        "zenoh-collections",
+        "zenoh-result",
+        "zenoh-crypto",
+        "zenoh-buffers",
+        "zenoh-keyexpr",
+        "zenoh-macros",
+        "zenoh-runtime",
+        "zenoh-protocol",
+        "zenoh-core",
+        "zenoh-util",
+        "zenoh-config",
+        "zenoh-stats",
+        "zenoh-sync",
+        "zenoh-task",
+        "zenoh-plugin-trait",
+        "zenoh-shm",
+        "zenoh-codec",
+        "zenoh-link-commons",
+        "zenoh-link-quic_datagram",
+        "zenoh-link-serial",
+        "zenoh-link-tcp",
+        "zenoh-link-tls",
+        "zenoh-link-udp",
+        "zenoh-link-unixpipe",
+        "zenoh-link-unixsock_stream",
+        "zenoh-link-vsock",
+        "zenoh-link-ws",
+        "zenoh-link-quic",
+        "zenoh-link",
+        "zenoh-transport",
+        "zenoh",
+        "zenoh-ext",
+        "zenoh_backend_traits",
+        "zenoh-plugin-rest",
+        "zenoh-plugin-storage-manager",
+        "zenohd",
+      ];
+      expect(order).toStrictEqual(expectedOrder);
+    },
+    20 * SECONDS,
+  );
 
   test("bump zenoh-kotlin", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
