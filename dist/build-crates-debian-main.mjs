@@ -102565,7 +102565,8 @@ function packages(path2, options) {
         (dep) => ({
           name: dep.name,
           req: dep.req,
-          path: dep.path
+          path: dep.path,
+          kind: dep.kind
         })
       )
     });

@@ -68592,7 +68592,8 @@ function packages(path, options) {
         (dep) => ({
           name: dep.name,
           req: dep.req,
-          path: dep.path
+          path: dep.path,
+          kind: dep.kind
         })
       )
     });
@@ -68610,15 +68611,34 @@ function shouldPublish(publish2) {
 }
 function* packagesOrdered(path, options) {
   const allPackages = packages(path, options);
-  const seen = [];
-  const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.includes(dep.name));
-  while (allPackages.length != 0) {
-    for (const [index2, package_] of allPackages.entries()) {
+  const publishablePackages = allPackages.filter((package_) => package_.publish !== false);
+  const publishableNames = new Set(publishablePackages.map((package_) => package_.name));
+  const remaining = publishablePackages.map((package_) => ({
+    ...package_,
+    workspaceDependencies: package_.workspaceDependencies.filter(
+      (dep) => dep.kind == null && publishableNames.has(dep.name)
+    )
+  }));
+  const seen = /* @__PURE__ */ new Set();
+  const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.has(dep.name));
+  while (remaining.length != 0) {
+    let progressed = false;
+    for (let index2 = 0; index2 < remaining.length; ) {
+      const package_ = remaining[index2];
       if (isReady(package_)) {
-        seen.push(package_.name);
-        allPackages.splice(index2, 1);
+        seen.add(package_.name);
+        remaining.splice(index2, 1);
+        progressed = true;
         yield package_;
+      } else {
+        index2++;
       }
+    }
+    if (!progressed) {
+      const unresolved = remaining.map(
+        (package_) => `${package_.name}: ${package_.workspaceDependencies.filter((dep) => !seen.has(dep.name)).map((dep) => dep.name).join(", ")}`
+      ).join("; ");
+      throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
     }
   }
 }

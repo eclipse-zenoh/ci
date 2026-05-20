@@ -23,6 +23,7 @@ export type WorkspaceDependency = {
   name: string;
   req: string;
   path: string;
+  kind?: string | null;
 };
 
 type CargoMetadataDependency = {
@@ -72,6 +73,7 @@ export function packages(path: string, options?: CommandOptions): Package[] {
               name: dep.name,
               req: dep.req,
               path: dep.path,
+              kind: dep.kind,
             }) as WorkspaceDependency,
         ),
     });
@@ -102,17 +104,43 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
  */
 export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
   const allPackages = packages(path, options);
-  const seen: string[] = [];
 
-  const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
+  const publishablePackages = allPackages.filter(package_ => package_.publish !== false);
 
-  while (allPackages.length != 0) {
-    for (const [index, package_] of allPackages.entries()) {
+  const publishableNames = new Set(publishablePackages.map(package_ => package_.name));
+  const remaining = publishablePackages.map(package_ => ({
+    ...package_,
+    workspaceDependencies: package_.workspaceDependencies.filter(
+      dep => dep.kind == null && publishableNames.has(dep.name),
+    ),
+  }));
+
+  const seen = new Set<string>();
+  const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.has(dep.name));
+  while (remaining.length != 0) {
+    let progressed = false;
+    for (let index = 0; index < remaining.length; ) {
+      const package_ = remaining[index];
       if (isReady(package_)) {
-        seen.push(package_.name);
-        allPackages.splice(index, 1);
+        seen.add(package_.name);
+        remaining.splice(index, 1);
+        progressed = true;
         yield package_;
+      } else {
+        index++;
       }
+    }
+    if (!progressed) {
+      const unresolved = remaining
+        .map(
+          package_ =>
+            `${package_.name}: ${package_.workspaceDependencies
+              .filter(dep => !seen.has(dep.name))
+              .map(dep => dep.name)
+              .join(", ")}`,
+        )
+        .join("; ");
+      throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
     }
   }
 }
