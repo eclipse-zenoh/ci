@@ -13,7 +13,7 @@ import { TOML } from "../src/toml";
 
 const toml = await TOML.init();
 
-const SHA_ZENOH: string = "9ecc9031ac34f6ae0f8e5b996999277b02b3038e";
+const SHA_ZENOH: string = "12442bb42056afc005e8c3429aa720a1e69e4a45";
 const SHA_ZENOH_C: string = "ffa4bddc947f7ed6c0e3b4546205dd1b73e7df81";
 const SHA_ZENOH_TS: string = "d0ee49fd8ccb4016d90b03be431de4c3cb087bdd";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
@@ -111,18 +111,20 @@ describe("cargo", () => {
       "zenoh-crypto",
       "zenoh-buffers",
       "zenoh-keyexpr",
-      "zenoh-shm",
       "zenoh-macros",
-      "zenoh-protocol",
       "zenoh-runtime",
-      "zenoh-codec",
+      "zenoh-protocol",
       "zenoh-core",
-      "zenoh-sync",
-      "zenoh-task",
       "zenoh-util",
       "zenoh-config",
+      "zenoh-stats",
+      "zenoh-sync",
+      "zenoh-task",
+      "zenoh-plugin-trait",
+      "zenoh-shm",
+      "zenoh-codec",
       "zenoh-link-commons",
-      "zenoh-link-quic",
+      "zenoh-link-quic_datagram",
       "zenoh-link-serial",
       "zenoh-link-tcp",
       "zenoh-link-tls",
@@ -131,7 +133,7 @@ describe("cargo", () => {
       "zenoh-link-unixsock_stream",
       "zenoh-link-vsock",
       "zenoh-link-ws",
-      "zenoh-plugin-trait",
+      "zenoh-link-quic",
       "zenoh-link",
       "zenoh-transport",
       "zenoh",
@@ -139,7 +141,6 @@ describe("cargo", () => {
       "zenoh_backend_traits",
       "zenoh-plugin-rest",
       "zenoh-plugin-storage-manager",
-      "zenoh-ext-examples",
       "zenohd",
     ];
     expect(order).toStrictEqual(expectedOrder);
@@ -173,7 +174,8 @@ describe("cargo", () => {
     const debian_version = "1.2.3~beta.1-1";
     await cargo.bumpDependencies(tmp, /zenoh.*/, version);
 
-    expect(toml.get(`${tmp}/Cargo.toml`, ["workspace", "dependencies", "zenoh", "version"])).toEqual(version);
+    // zenoh versions are pinned to the exact version in Cargo.toml so we add the `=` prefix
+    expect(toml.get(`${tmp}/Cargo.toml`, ["workspace", "dependencies", "zenoh", "version"])).toEqual(`=${version}`);
     expect(toml.get(`${tmp}/zenoh/Cargo.toml`, ["package", "metadata", "deb", "depends"])).toEqual(
       `zenohd (=${debian_version}), zenoh-plugin-rest (=${debian_version}), zenoh-plugin-storage-manager (=${debian_version})`,
     );
