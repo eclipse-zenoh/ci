@@ -20416,7 +20416,7 @@ var require_brace_expansion = __commonJS({
         }
         var pad = n.some(isPadded);
         N = [];
-        for (var i2 = x2; test(i2, y); i2 += incr) {
+        for (var i2 = x2; test(i2, y) && N.length < max; i2 += incr) {
           var c;
           if (isAlphaSequence) {
             c = String.fromCharCode(i2);
