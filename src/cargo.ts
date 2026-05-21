@@ -98,26 +98,38 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
   }
 }
 
-/**
- * Yields packages in topological (suitable for publishing) order in a workspace.
+ /**
+ * Yields workspace packages in a topological order suitable for crate publication.
+ *
+ * Ordering rules:
+ * - Only packages that are publishable are included. Packages with `publish = false`
+ *   or `publish = []` are excluded.
+ * - Only normal workspace path dependencies are considered ordering constraints.
+ *   Development and build dependencies do not affect the order.
+ * - A package is yielded only after all included workspace dependencies it depends
+ *   on have already been yielded.
+ *
+ * If the remaining package graph cannot be resolved, this function throws instead
+ * of looping indefinitely.
+ *
  * @param path Path to the Cargo workspace.
  */
 export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
   const allPackages = packages(path, options);
 
-  const publishablePackages = allPackages.filter(package_ => package_.publish !== false);
+  const publishablePackages = allPackages.filter(package_ => (package_.publish === undefined || package_.publish));
 
   const publishableNames = new Set(publishablePackages.map(package_ => package_.name));
   const remaining = publishablePackages.map(package_ => ({
     ...package_,
     workspaceDependencies: package_.workspaceDependencies.filter(
-      dep => dep.kind == null && publishableNames.has(dep.name),
+      dep => dep.kind === null && publishableNames.has(dep.name),
     ),
   }));
 
   const seen = new Set<string>();
   const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.has(dep.name));
-  while (remaining.length != 0) {
+  while (remaining.length !== 0) {
     let progressed = false;
     for (let index = 0; index < remaining.length; ) {
       const package_ = remaining[index];
