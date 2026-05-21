@@ -98,7 +98,7 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
   }
 }
 
- /**
+/**
  * Yields workspace packages in a topological order suitable for crate publication.
  *
  * Ordering rules:
@@ -117,7 +117,7 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
 export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
   const allPackages = packages(path, options);
 
-  const publishablePackages = allPackages.filter(package_ => (package_.publish === undefined || package_.publish));
+  const publishablePackages = allPackages.filter(package_ => package_.publish === undefined || package_.publish);
 
   const publishableNames = new Set(publishablePackages.map(package_ => package_.name));
   const remaining = publishablePackages.map(package_ => ({
