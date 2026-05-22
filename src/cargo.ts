@@ -30,6 +30,7 @@ type CargoMetadataDependency = {
   name: string;
   req: string;
   path?: string;
+  kind?: string | null;
   [key: string]: unknown;
 };
 

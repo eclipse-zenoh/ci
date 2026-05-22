@@ -68564,7 +68564,7 @@ function* packagesOrdered(path12, options) {
   const remaining = publishablePackages.map((package_) => ({
     ...package_,
     workspaceDependencies: package_.workspaceDependencies.filter(
-      (dep) => dep.kind === null && publishableNames.has(dep.name)
+      (dep) => dep.kind === null && dep.kind === "build" && publishableNames.has(dep.name)
     )
   }));
   const seen = /* @__PURE__ */ new Set();
