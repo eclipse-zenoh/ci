@@ -68559,35 +68559,60 @@ function shouldPublish(publish2) {
 }
 function* packagesOrdered(path12, options) {
   const allPackages = packages(path12, options);
-  const publishablePackages = allPackages.filter((package_) => package_.publish === void 0 || package_.publish);
+  const publishablePackages = allPackages.filter((package_) => package_.publish !== false);
   const publishableNames = new Set(publishablePackages.map((package_) => package_.name));
-  const remaining = publishablePackages.map((package_) => ({
-    ...package_,
-    workspaceDependencies: package_.workspaceDependencies.filter(
-      (dep) => dep.kind === null && dep.kind === "build" && publishableNames.has(dep.name)
-    )
-  }));
-  const seen = /* @__PURE__ */ new Set();
-  const isReady = (package_) => package_.workspaceDependencies.every((dep) => seen.has(dep.name));
-  while (remaining.length !== 0) {
-    let progressed = false;
-    for (let index2 = 0; index2 < remaining.length; ) {
-      const package_ = remaining[index2];
-      if (isReady(package_)) {
-        seen.add(package_.name);
-        remaining.splice(index2, 1);
-        progressed = true;
-        yield package_;
-      } else {
-        index2++;
+  const remaining = publishablePackages.map((package_) => {
+    const orderingDependencies = package_.workspaceDependencies.filter((dep) => dep.kind == null || dep.kind === "build");
+    const nonPublishableDependencies = orderingDependencies.filter((dep) => !publishableNames.has(dep.name));
+    if (nonPublishableDependencies.length > 0) {
+      throw new Error(
+        `Package ${package_.name} depends on non-publishable workspace crates: ${nonPublishableDependencies.map((dep) => dep.name).join(", ")}`
+      );
+    }
+    return {
+      ...package_,
+      workspaceDependencies: orderingDependencies
+    };
+  });
+  const dependenciesByPackage = /* @__PURE__ */ new Map();
+  const dependentsByPackage = /* @__PURE__ */ new Map();
+  const indegreeByPackage = /* @__PURE__ */ new Map();
+  const packageByName = /* @__PURE__ */ new Map();
+  for (const package_ of remaining) {
+    packageByName.set(package_.name, package_);
+    const dependencyNames = new Set(package_.workspaceDependencies.map((dep) => dep.name));
+    dependenciesByPackage.set(package_.name, dependencyNames);
+    indegreeByPackage.set(package_.name, dependencyNames.size);
+    for (const dependencyName of dependencyNames) {
+      if (!dependentsByPackage.has(dependencyName)) {
+        dependentsByPackage.set(dependencyName, /* @__PURE__ */ new Set());
+      }
+      dependentsByPackage.get(dependencyName).add(package_.name);
+    }
+  }
+  const ready = remaining.filter((package_) => (indegreeByPackage.get(package_.name) ?? 0) === 0).map((package_) => package_.name);
+  let emitted = 0;
+  while (ready.length !== 0) {
+    const name2 = ready.shift();
+    const package_ = packageByName.get(name2);
+    emitted++;
+    yield package_;
+    for (const dependentName of dependentsByPackage.get(name2) ?? []) {
+      const nextInDegree = (indegreeByPackage.get(dependentName) ?? 0) - 1;
+      indegreeByPackage.set(dependentName, nextInDegree);
+      if (nextInDegree === 0) {
+        ready.push(dependentName);
       }
     }
-    if (!progressed) {
-      const unresolved = remaining.map(
-        (package_) => `${package_.name}: ${package_.workspaceDependencies.filter((dep) => !seen.has(dep.name)).map((dep) => dep.name).join(", ")}`
-      ).join("; ");
-      throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
-    }
+  }
+  if (emitted !== remaining.length) {
+    const unresolved = remaining.filter((package_) => (indegreeByPackage.get(package_.name) ?? 0) > 0).map((package_) => {
+      const unresolvedDeps = [...dependenciesByPackage.get(package_.name) ?? /* @__PURE__ */ new Set()].filter(
+        (dep) => (indegreeByPackage.get(dep) ?? 0) >= 0
+      );
+      return `${package_.name}: ${unresolvedDeps.join(", ")}`;
+    }).join("; ");
+    throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
   }
 }
 async function setRegistry(path12, pattern, registry) {

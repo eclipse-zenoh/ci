@@ -105,8 +105,8 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
  * Ordering rules:
  * - Only packages that are publishable are included. Packages with `publish = false`
  *   or `publish = []` are excluded.
- * - Only normal workspace path dependencies are considered ordering constraints.
- *   Development and build dependencies do not affect the order.
+ * - Normal workspace path dependencies and build dependencies are considered ordering constraints.
+ *   Development dependencies do not affect the order.
  * - A package is yielded only after all included workspace dependencies it depends
  *   on have already been yielded.
  *
@@ -117,44 +117,67 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
  */
 export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
   const allPackages = packages(path, options);
-
-  const publishablePackages = allPackages.filter(package_ => package_.publish === undefined || package_.publish);
-
+  const publishablePackages = allPackages.filter(package_ => package_.publish !== false);
   const publishableNames = new Set(publishablePackages.map(package_ => package_.name));
-  const remaining = publishablePackages.map(package_ => ({
-    ...package_,
-    workspaceDependencies: package_.workspaceDependencies.filter(
-      dep => dep.kind === null && publishableNames.has(dep.name),
-    ),
-  }));
-
-  const seen = new Set<string>();
-  const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.has(dep.name));
-  while (remaining.length !== 0) {
-    let progressed = false;
-    for (let index = 0; index < remaining.length; ) {
-      const package_ = remaining[index];
-      if (isReady(package_)) {
-        seen.add(package_.name);
-        remaining.splice(index, 1);
-        progressed = true;
-        yield package_;
-      } else {
-        index++;
+  const remaining = publishablePackages.map(package_ => {
+    const orderingDependencies = package_.workspaceDependencies.filter(dep => dep.kind == null || dep.kind === "build");
+    const nonPublishableDependencies = orderingDependencies.filter(dep => !publishableNames.has(dep.name));
+    if (nonPublishableDependencies.length > 0) {
+      throw new Error(
+        `Package ${package_.name} depends on non-publishable workspace crates: ${nonPublishableDependencies
+          .map(dep => dep.name)
+          .join(", ")}`,
+      );
+    }
+    return {
+      ...package_,
+      workspaceDependencies: orderingDependencies,
+    };
+  });
+  const dependenciesByPackage = new Map<string, Set<string>>();
+  const dependentsByPackage = new Map<string, Set<string>>();
+  const indegreeByPackage = new Map<string, number>();
+  const packageByName = new Map<string, Package>();
+  for (const package_ of remaining) {
+    packageByName.set(package_.name, package_);
+    const dependencyNames = new Set(package_.workspaceDependencies.map(dep => dep.name));
+    dependenciesByPackage.set(package_.name, dependencyNames);
+    indegreeByPackage.set(package_.name, dependencyNames.size);
+    for (const dependencyName of dependencyNames) {
+      if (!dependentsByPackage.has(dependencyName)) {
+        dependentsByPackage.set(dependencyName, new Set());
+      }
+      dependentsByPackage.get(dependencyName)!.add(package_.name);
+    }
+  }
+  const ready = remaining
+    .filter(package_ => (indegreeByPackage.get(package_.name) ?? 0) === 0)
+    .map(package_ => package_.name);
+  let emitted = 0;
+  while (ready.length !== 0) {
+    const name = ready.shift()!;
+    const package_ = packageByName.get(name)!;
+    emitted++;
+    yield package_;
+    for (const dependentName of dependentsByPackage.get(name) ?? []) {
+      const nextInDegree = (indegreeByPackage.get(dependentName) ?? 0) - 1;
+      indegreeByPackage.set(dependentName, nextInDegree);
+      if (nextInDegree === 0) {
+        ready.push(dependentName);
       }
     }
-    if (!progressed) {
-      const unresolved = remaining
-        .map(
-          package_ =>
-            `${package_.name}: ${package_.workspaceDependencies
-              .filter(dep => !seen.has(dep.name))
-              .map(dep => dep.name)
-              .join(", ")}`,
-        )
-        .join("; ");
-      throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
-    }
+  }
+  if (emitted !== remaining.length) {
+    const unresolved = remaining
+      .filter(package_ => (indegreeByPackage.get(package_.name) ?? 0) > 0)
+      .map(package_ => {
+        const unresolvedDeps = [...(dependenciesByPackage.get(package_.name) ?? new Set())].filter(
+          dep => (indegreeByPackage.get(dep) ?? 0) >= 0,
+        );
+        return `${package_.name}: ${unresolvedDeps.join(", ")}`;
+      })
+      .join("; ");
+    throw new Error(`Unable to resolve cargo package publication order: ${unresolved}`);
   }
 }
 

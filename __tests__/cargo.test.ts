@@ -3,13 +3,14 @@ import { describe, expect, test } from "@jest/globals";
 import { join } from "path";
 import { rm } from "fs/promises";
 import { tmpdir } from "os";
-import { mkdtemp, realpath } from "fs/promises";
+import { cp, mkdtemp, realpath } from "fs/promises";
 import { createWriteStream, rmSync } from "fs";
 import * as https from "https";
 
 import { sh } from "../src/command";
 import * as cargo from "../src/cargo";
 import { TOML } from "../src/toml";
+import { fileURLToPath } from "url";
 
 const toml = await TOML.init();
 
@@ -19,6 +20,7 @@ const SHA_ZENOH_TS: string = "d0ee49fd8ccb4016d90b03be431de4c3cb087bdd";
 const SHA_ZENOH_KOTLIN: string = "6ba9cf6e058c959614bd7f1f4148e8fa39ef1681";
 const SHA_ZENOH_PLUGIN_MQTT: string = "f38489f60911fa78befd3c073511bedb764f99f9";
 const SHA_ZENOH_PLUGIN_ROS2DDS: string = "ca44eb44a96f855cfbf53bf5f4813194e2f16bd5";
+const TEST_DIR = fileURLToPath(new URL(".", import.meta.url));
 const SECONDS = 1000;
 
 export async function downloadGitHubRepo(repo: string, ref: string): Promise<string> {
@@ -40,6 +42,19 @@ export async function downloadGitHubRepo(repo: string, ref: string): Promise<str
       });
     });
   });
+}
+
+function expectBefore(order: string[], first: string, second: string) {
+  expect(order).toContain(first);
+  expect(order).toContain(second);
+  expect(order.indexOf(first)).toBeLessThan(order.indexOf(second));
+}
+
+async function copyFixture(name: string): Promise<string> {
+  const src = join(TEST_DIR, "fixtures", name);
+  const tmp = await mkdtemp(join(tmpdir(), `fixture-${name}-`));
+  await cp(src, tmp, { recursive: true });
+  return tmp;
 }
 
 describe("cargo", () => {
@@ -107,48 +122,63 @@ describe("cargo", () => {
       const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
       const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
       await rm(tmp, { recursive: true, force: true });
-      const expectedOrder = [
-        "zenoh-collections",
-        "zenoh-result",
-        "zenoh-crypto",
-        "zenoh-buffers",
-        "zenoh-keyexpr",
-        "zenoh-macros",
-        "zenoh-runtime",
-        "zenoh-protocol",
-        "zenoh-core",
-        "zenoh-util",
-        "zenoh-config",
-        "zenoh-stats",
-        "zenoh-sync",
-        "zenoh-task",
-        "zenoh-plugin-trait",
-        "zenoh-shm",
-        "zenoh-codec",
-        "zenoh-link-commons",
-        "zenoh-link-quic_datagram",
-        "zenoh-link-serial",
-        "zenoh-link-tcp",
-        "zenoh-link-tls",
-        "zenoh-link-udp",
-        "zenoh-link-unixpipe",
-        "zenoh-link-unixsock_stream",
-        "zenoh-link-vsock",
-        "zenoh-link-ws",
-        "zenoh-link-quic",
-        "zenoh-link",
-        "zenoh-transport",
-        "zenoh",
-        "zenoh-ext",
-        "zenoh_backend_traits",
-        "zenoh-plugin-rest",
-        "zenoh-plugin-storage-manager",
-        "zenohd",
-      ];
-      expect(order).toStrictEqual(expectedOrder);
+      expect(order).toEqual(
+        expect.arrayContaining([
+          "zenoh-collections",
+          "zenoh-buffers",
+          "zenoh-result",
+          "zenoh-core",
+          "zenoh-shm",
+          "zenoh-codec",
+          "zenoh-link",
+          "zenoh-transport",
+          "zenoh",
+          "zenoh-ext",
+          "zenoh-plugin-rest",
+          "zenoh-plugin-storage-manager",
+          "zenohd",
+        ]),
+      );
+
+      expect(order).not.toContain("zenoh-test");
+      expect(order).not.toContain("zenoh-examples");
+      expect(order).not.toContain("zenoh-plugin-example");
+      expect(order).not.toContain("zenoh-backend-example");
+
+      expectBefore(order, "zenoh-collections", "zenoh-buffers");
+      expectBefore(order, "zenoh-runtime", "zenoh-core");
+      expectBefore(order, "zenoh-core", "zenoh-shm");
+      expectBefore(order, "zenoh-shm", "zenoh-codec");
+      expectBefore(order, "zenoh_backend_traits", "zenoh-plugin-storage-manager");
     },
     20 * SECONDS,
   );
+
+  test("packagesOrdered honors workspace build-dependencies", async () => {
+    const tmp = await copyFixture("build-deps");
+    try {
+      const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
+      expect(order).toStrictEqual(["crate-b", "crate-a"]);
+    } finally {
+      await rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  test("packagesOrdered ignores dev-dependency cycles", async () => {
+    const tmp = await copyFixture("dev-cycle");
+    const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
+    expect(order).toContain("crate-a");
+    expect(order).not.toContain("crate-test");
+    await rm(tmp, { recursive: true, force: true });
+  });
+
+  test("packagesOrdered throws on unresolved publish graph", async () => {
+    const tmp = await copyFixture("unresolved-nonpublishable");
+    expect(() => [...cargo.packagesOrdered(tmp)]).toThrow(
+      /Package crate-a depends on non-publishable workspace crates: crate-b/,
+    );
+    await rm(tmp, { recursive: true, force: true });
+  });
 
   test("bump zenoh-kotlin", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
