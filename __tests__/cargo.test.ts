@@ -100,53 +100,6 @@ describe("cargo", () => {
     expect(packages).toStrictEqual(expectedPackages);
   });
 
-  test("list packages zenoh", async () => {
-    const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh", SHA_ZENOH);
-    const order = [...cargo.packagesOrdered(tmp)].map(p => p.name);
-    await rm(tmp, { recursive: true, force: true });
-    const expectedOrder = [
-      "zenoh-collections",
-      "zenoh-result",
-      "zenoh-crypto",
-      "zenoh-buffers",
-      "zenoh-keyexpr",
-      "zenoh-macros",
-      "zenoh-protocol",
-      "zenoh-runtime",
-      "zenoh-shm",
-      "zenoh-core",
-      "zenoh-sync",
-      "zenoh-util",
-      "zenoh-task",
-      "zenoh-plugin-trait",
-      "zenoh-codec",
-      "zenoh-link-commons",
-      "zenoh-link-serial",
-      "zenoh-link-udp",
-      "zenoh-link-unixsock_stream",
-      "zenoh-link-ws",
-      "zenoh-config",
-      "zenoh-link-quic",
-      "zenoh-link-tls",
-      "zenoh-link-vsock",
-      "zenoh-link-tcp",
-      "zenoh-link-unixpipe",
-      "zenoh-link",
-      "zenoh-transport",
-      "zenoh",
-      "zenoh_backend_traits",
-      "zenoh-plugin-rest",
-      "zenohd",
-      "zenoh-ext",
-      "zenoh-plugin-example",
-      "zenoh-ext-examples",
-      "zenoh-examples",
-      "zenoh-plugin-storage-manager",
-      "zenoh-backend-example",
-    ];
-    expect(order).toStrictEqual(expectedOrder);
-  });
-
   test("bump zenoh-kotlin", async () => {
     const tmp = await downloadGitHubRepo("eclipse-zenoh/zenoh-kotlin", SHA_ZENOH_KOTLIN);
 

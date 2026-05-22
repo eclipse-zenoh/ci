@@ -96,27 +96,6 @@ function shouldPublish(publish: string[] | null | boolean): boolean | undefined 
   }
 }
 
-/**
- * Yields packages in topological (suitable for publishing) order in a workspace.
- * @param path Path to the Cargo workspace.
- */
-export function* packagesOrdered(path: string, options?: CommandOptions): Generator<Package> {
-  const allPackages = packages(path, options);
-  const seen: string[] = [];
-
-  const isReady = (package_: Package) => package_.workspaceDependencies.every(dep => seen.includes(dep.name));
-
-  while (allPackages.length != 0) {
-    for (const [index, package_] of allPackages.entries()) {
-      if (isReady(package_)) {
-        seen.push(package_.name);
-        allPackages.splice(index, 1);
-        yield package_;
-      }
-    }
-  }
-}
-
 type CargoManifestPackage = {
   version: string | { workspace: boolean };
   metadata?: {
@@ -532,24 +511,4 @@ export function toDebianVersion(version: string, revision?: number): string {
     }
   }
   return `${debVersion}`;
-}
-
-/**
- * Check if Package is already published
- * @param pkg Package to check.
- */
-export function isPublished(pkg: Package, options?: CommandOptions): boolean {
-  const optionsCopy: CommandOptions = Object.assign({}, options);
-  optionsCopy.check = false;
-  // Hackish but registries don't have a stable api anyway.
-  const results = sh(`cargo search ${pkg.name}`, optionsCopy);
-  if (!results || results.startsWith("error:")) {
-    return false;
-  }
-  // Make sure the returned package matches the one we're looking for
-  if (results.split("\n").at(0)?.match(/^.* =/g)?.at(0)?.replace(" =", "") != pkg.name) {
-    return false;
-  }
-  const publishedVersion = results.split("\n").at(0)?.match(/".*"/g)?.at(0)?.slice(1, -1);
-  return publishedVersion === pkg.version;
 }
