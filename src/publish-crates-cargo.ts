@@ -52,7 +52,7 @@ export function setup(): Input {
 export async function main(input: Input) {
   try {
     if (input.publicationTest) {
-      core.info("Running cargo check before publication");
+      core.info("Running cargo publish --workspace --dry-run before publication");
       clone(input, input.repo, input.branch);
       const path = getPath(input);
       const options = {
@@ -70,10 +70,8 @@ export async function main(input: Input) {
         };
       }
 
-      for (const package_ of cargo.packagesOrdered(path)) {
-        const command = ["cargo", "check", "-p", package_.name, "--manifest-path", package_.manifestPath];
-        sh(command.join(" "), options);
-      }
+      const command = ["cargo", "publish", "--workspace", "--dry-run"];
+      sh(command.join(" "), options);
 
       await deleteRepos(input);
     }
@@ -194,18 +192,13 @@ function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = fal
     check: true,
   };
 
-  for (const package_ of cargo.packagesOrdered(path, options)) {
-    // Crates.io won't allow packages to be published with the same version
-    if (!cargo.isPublished(package_, options) && (package_.publish === undefined || package_.publish)) {
-      const command = ["cargo", "publish", "--manifest-path", package_.manifestPath];
-      if (allowDirty) {
-        command.push("--allow-dirty");
-      } else {
-        command.push("--locked");
-      }
-      sh(command.join(" "), options);
-    }
+  const command = ["cargo", "publish", "--workspace"];
+  if (allowDirty) {
+    command.push("--allow-dirty");
+  } else {
+    command.push("--locked");
   }
+  sh(command.join(" "), options);
 
   sh("cargo clean", options);
 }
