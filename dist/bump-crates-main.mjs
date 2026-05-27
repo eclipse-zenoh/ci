@@ -71653,9 +71653,14 @@ async function bumpDependencies(path2, pattern, version, _branch) {
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
       const d = manifest.dependencies[dep];
-      let depVersion = version;
-      if (d.version.startsWith("=")) {
-        depVersion = "=" + version;
+      let depVersion;
+      if (typeof d === "string") {
+        depVersion = d.startsWith("=") ? `=${version}` : version;
+      } else if (typeof d === "object" && d !== null && typeof d.version === "string") {
+        depVersion = d.version.startsWith("=") ? `=${version}` : version;
+      } else {
+        core2.info(`Skipping ${dep}: no version field to bump`);
+        continue;
       }
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
       await toml.unset(manifestPath, prefix.concat("dependencies", dep, "git"));

@@ -109,7 +109,9 @@ type CargoManifestMetadataDebianVariant = {
 };
 
 type CargoManifestDependencyTable = {
-  version: string;
+  version?: string;
+  path?: string;
+  workspace?: boolean;
   git?: string;
   branch?: string;
   registry?: string;
@@ -162,8 +164,8 @@ export async function bump(path: string, version: string) {
  * virtual manifest from which all workspace members inherit their dependencies
  * (e.g. eclipse-zenoh/zenoh and eclipse-zenoh/zenoh-plugin-influxdb), or (2) a
  * manifest without a workspace section with only one member (e.g.
- * eclipse-zenoh/zenoh-plugin-webserver). It also assumes that all matching
- * dependencies define a version, a git repository remote and a git branch.
+ * eclipse-zenoh/zenoh-plugin-webserver). It only bumps matching
+ * dependencies that define a version, a git repository remote and a git branch.
  *
  * @param path Path to the Cargo workspace.
  * @param pattern A regular expression that matches the dependencies to be
@@ -189,12 +191,19 @@ export async function bumpDependencies(path: string, pattern: RegExp, version: s
 
   for (const dep in manifest.dependencies) {
     if (pattern.test(dep)) {
+      const d = manifest.dependencies[dep];
+      let depVersion: string;
+
       // Respect the pins if they exist in the dependency
-      const d = manifest.dependencies[dep] as CargoManifestDependencyTable;
-      let depVersion = version;
-      if (d.version.startsWith("=")) {
-        depVersion = "=" + version;
+      if (typeof d === "string") {
+        depVersion = d.startsWith("=") ? `=${version}` : version;
+      } else if (typeof d === "object" && d !== null && typeof d.version === "string") {
+        depVersion = d.version.startsWith("=") ? `=${version}` : version;
+      } else {
+        core.info(`Skipping ${dep}: no version field to bump`);
+        continue;
       }
+
       await toml.set(manifestPath, prefix.concat("dependencies", dep, "version"), depVersion);
 
       // FIXME(fuzzypixelz): Previously, we set the branch of the git source in dependencies,
