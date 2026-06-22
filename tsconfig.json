@@ -1,35 +1,11 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "compilerOptions": {
-    "target": "es2022",
-    "module": "es2022",
-    "moduleResolution": "bundler",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "declaration": false,
-    "declarationMap": false,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node"],
-    "lib": [
-      "ES2022"
-    ],
-    "newLine": "lf",
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "pretty": true,
-    "strict": false,
-    "strictNullChecks": true,
-  },
-  "exclude": [
-    "./dist",
-    "./node_modules",
-    "./__tests__",
-    "./build.cjs",
-    "./tsup.config.ts",
-    "./eslint.config.mjs"
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.src.json"
+    },
+    {
+      "path": "./tsconfig.test.json"
+    }
   ]
 }
