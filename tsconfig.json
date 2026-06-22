@@ -12,6 +12,7 @@
     "declaration": false,
     "declarationMap": false,
     "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
     "lib": [
       "ES2022"
     ],

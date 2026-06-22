@@ -3,7 +3,6 @@ import { mkdtemp } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { kellnrImage } from "./config";
-import fetch from "node-fetch";
 
 import * as core from "@actions/core";
 
