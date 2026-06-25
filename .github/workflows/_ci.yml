@@ -14,7 +14,7 @@ jobs:
         with:
           node-version-file: .node-version
 
-      - uses: taiki-e/cache-cargo-install-action@v2
+      - uses: taiki-e/cache-cargo-install-action@v3
         with:
           tool: toml-cli2
 
