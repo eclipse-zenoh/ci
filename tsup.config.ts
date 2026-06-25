@@ -13,9 +13,6 @@ export default defineConfig({
     target: "es2022",
     format: 'esm',
     outDir: "dist/",
-    banner: {
-        js: `import { createRequire } from 'module'; const require = createRequire(import.meta.url);`,
-    },
     outExtension({ format }) {
         return {
             js: `.mjs`,
