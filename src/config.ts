@@ -1,4 +1,4 @@
-import _config from "../ci.config.json";
+import _config from "../ci.config.json" with { type: "json" };
 
 type Config = {
   git: {
