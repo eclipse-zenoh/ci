@@ -92,6 +92,7 @@ export async function main(input: Input) {
 
     sh(`brew untap ${input.tap}`, { check: false });
     sh(`brew tap ${input.tap} ${tapUrl}`);
+    sh(`brew trust ${input.tap}`);
 
     const releasePath = `${tapPath}/release.json`;
     const releaseFile = await fs.readFile(releasePath, "utf-8");

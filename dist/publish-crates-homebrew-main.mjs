@@ -105373,6 +105373,7 @@ async function main(input) {
     }
     sh(`brew untap ${input.tap}`, { check: false });
     sh(`brew tap ${input.tap} ${tapUrl}`);
+    sh(`brew trust ${input.tap}`);
     const releasePath = `${tapPath}/release.json`;
     const releaseFile = await fs14.readFile(releasePath, "utf-8");
     const release2 = JSON.parse(releaseFile);
