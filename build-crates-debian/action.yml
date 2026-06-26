@@ -1,4 +1,5 @@
 name: Build crates (Debian)
+description: Build Debian packaging
 
 inputs:
   repo:

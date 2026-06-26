@@ -74,6 +74,9 @@ type Release = {
 export async function main(input: Input) {
   try {
     const repo = input.repo.split("/").at(1);
+    if (repo === undefined) {
+      throw new Error(`Invalid repo format: ${input.repo}`);
+    }
     const tapPath = `${sh("brew --repository").trim()}/Library/Taps/${input.tap}`;
     const tapUrl = `https://${input.githubToken}@github.com/${input.tap}.git`;
 

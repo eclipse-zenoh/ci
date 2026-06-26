@@ -1,4 +1,5 @@
 name: Publish crates (Debian)
+description: Publish to Debian repository
 
 inputs:
   live-run:

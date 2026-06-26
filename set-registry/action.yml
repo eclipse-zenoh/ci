@@ -1,4 +1,5 @@
 name: Set registry
+description: Set registry for dependencies
 
 inputs:
   version:

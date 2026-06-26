@@ -1,4 +1,5 @@
 name: Create release branch
+description: Create a release branch for the given version
 
 inputs:
   version:

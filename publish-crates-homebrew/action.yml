@@ -1,4 +1,5 @@
 name: Publish crates (Homebrew)
+description: Publish to Homebrew repository
 
 inputs:
   live-run:

@@ -1,4 +1,5 @@
 name: Bump crates
+description: Bump crates versions and dependencies
 
 inputs:
   version:

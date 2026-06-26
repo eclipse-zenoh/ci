@@ -1,4 +1,5 @@
 name: Publish crates (Cargo)
+description: Publish crates to crates.io and/or Artifactory
 
 inputs:
   live-run:

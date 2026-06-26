@@ -1,4 +1,5 @@
 name: Publish crates (Eclipse)
+description: Publish to Eclipse repository
 
 inputs:
   live-run:

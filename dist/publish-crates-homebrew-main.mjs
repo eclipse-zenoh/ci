@@ -105358,6 +105358,9 @@ var X86_64_SHA256 = "x86_64-sha256";
 async function main(input) {
   try {
     const repo = input.repo.split("/").at(1);
+    if (repo === void 0) {
+      throw new Error(`Invalid repo format: ${input.repo}`);
+    }
     const tapPath = `${sh("brew --repository").trim()}/Library/Taps/${input.tap}`;
     const tapUrl = `https://${input.githubToken}@github.com/${input.tap}.git`;
     for (const target of [X86_64_APPLE_DARWIN, AARCH64_APPLE_DARWIN]) {
