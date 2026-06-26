@@ -1,4 +1,5 @@
 name: Build crates (Standalone)
+description: Build standalone artifacts
 
 inputs:
   repo:
