@@ -104,14 +104,13 @@ export async function main(input: Input) {
           );
         }
       }
-
-      sh(`cargo +${input.toolchain} check`, { cwd: repo });
-      sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
-        cwd: repo,
-        env: gitEnv,
-        check: false,
-      });
     }
+    sh(`cargo +${input.toolchain} check`, { cwd: repo });
+    sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
+      cwd: repo,
+      env: gitEnv,
+      check: false,
+    });
 
     sh(`git push --force ${remote} ${input.branch}`, { cwd: repo });
 
