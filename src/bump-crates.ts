@@ -13,7 +13,7 @@ export type Input = {
   branch: string;
   repo: string;
   path?: string;
-  toolchain?: string;
+  toolchain: string;
   tag?: string;
   githubToken: string;
   bumpDepsPattern?: RegExp[];
@@ -27,7 +27,7 @@ export function setup(): Input {
   const branch = core.getInput("branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
-  const toolchain = core.getInput("toolchain");
+  const toolchain = core.getInput("toolchain", { required: false });
   const tag = core.getInput("tag", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
   const bumpDepsBranch = core.getInput("bump-deps-branch");
@@ -59,7 +59,7 @@ export function setup(): Input {
     branch,
     repo,
     path: path === "" ? undefined : path,
-    toolchain: toolchain === "" ? "1.93.0" : toolchain,
+    toolchain: toolchain === "" ? "" : `+${toolchain}`,
     tag,
     githubToken,
     bumpDepsPattern,
@@ -105,7 +105,7 @@ export async function main(input: Input) {
         }
       }
     }
-    sh(`cargo +${input.toolchain} check`, { cwd: repo });
+    sh(`cargo ${input.toolchain} check`, { cwd: repo });
     sh("git commit Cargo.lock --message 'chore: Update Cargo lockfile'", {
       cwd: repo,
       env: gitEnv,

@@ -11,7 +11,7 @@ on:
         required: false
       toolchain:
         type: string
-        description: The rust toolchain to use. Defaults to 1.93.0
+        description: The rust toolchain to use. Defaults to rust-toolchain.toml's channel value
         required: false
 
 defaults:
@@ -37,18 +37,32 @@ jobs:
           echo "head-hash=$(git log -1 --format=%h)" >> $GITHUB_OUTPUT
           echo "head-date=$(git log -1 --format=%as)" >> $GITHUB_OUTPUT
 
+      - id: toolchain
+        name: Get Rust toolchain
+        env:
+          TOOLCHAIN_INPUT: ${{ inputs.toolchain }}
+        run: |
+          set -euo pipefail
+
+          if [[ -n "$TOOLCHAIN_INPUT" ]]; then
+            RUST_TOOLCHAIN="$TOOLCHAIN_INPUT"
+          else
+            RUST_TOOLCHAIN="$(yq -r '.toolchain.channel // ""' rust-toolchain.toml)"
+          fi
+
+          if [[ ! "$RUST_TOOLCHAIN" =~ ^[A-Za-z0-9][A-Za-z0-9._+@-]*$ ]]; then
+            echo "Invalid Rust toolchain" >&2
+            exit 1
+          fi
+
+          printf 'RUST_TOOLCHAIN=%s\n' "$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
+
       - name: Install Rust toolchain
         # NOTE: Showing the active Rust toolchain (defined by the rust-toolchain.toml file)
         # will have the side effect of installing it; if it's not installed already.
         run: |
-          rustup update ${{ inputs.toolchain || '1.93.0' }}
-          rustup component add --toolchain ${{ inputs.toolchain || '1.93.0'}} clippy
-
-      # cyclors does not compile with cmake 4
-      - name: Install cmake
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: "3.31.x"
+          rustup update "$RUST_TOOLCHAIN"
+          rustup component add --toolchain "$RUST_TOOLCHAIN" clippy
 
       - name: Install build dependencies
         run: sudo apt-get install -y llvm-dev libclang-dev clang libacl1-dev
@@ -56,7 +70,7 @@ jobs:
       - name: Recreate Cargo.lock
         run: |
           rm -f Cargo.lock
-          cargo +${{ inputs.toolchain || '1.93.0' }} update --manifest-path Cargo.toml
+          cargo "+${RUST_TOOLCHAIN}" update --manifest-path Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
