@@ -68082,7 +68082,7 @@ function setup() {
   const releaseBranch = getInput("release-branch", { required: true });
   const repo = getInput("repo", { required: true });
   const path12 = getInput("path");
-  const toolchain = getInput("toolchain");
+  const toolchain = getInput("toolchain", { required: false });
   const githubToken = getInput("github-token", { required: true });
   const githubUser = getInput("github-user");
   const depsPattern = getInput("deps-pattern");
@@ -68093,7 +68093,7 @@ function setup() {
     releaseBranch,
     repo,
     path: path12 === "" ? void 0 : path12,
-    toolchain: toolchain === "" ? "1.93.0" : toolchain,
+    toolchain: toolchain === "" ? "" : `+${toolchain}`,
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? void 0 : new RegExp(depsPattern),
@@ -68123,7 +68123,7 @@ async function main(input) {
       }
     }
     for (path12 of pathsToCheck) {
-      sh(`cargo +${input.toolchain} check -vv --manifest-path ../${path12}`, { cwd: repo, env: gitEnv });
+      sh(`cargo ${input.toolchain} check -vv --manifest-path ../${path12}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,

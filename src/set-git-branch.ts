@@ -12,7 +12,7 @@ export type Input = {
   releaseBranch: string;
   repo: string;
   path?: string;
-  toolchain?: string;
+  toolchain: string;
   githubToken: string;
   githubUser?: string;
   depsRegExp: RegExp;
@@ -25,7 +25,7 @@ export function setup(): Input {
   const releaseBranch = core.getInput("release-branch", { required: true });
   const repo = core.getInput("repo", { required: true });
   const path = core.getInput("path");
-  const toolchain = core.getInput("toolchain");
+  const toolchain = core.getInput("toolchain", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
   const githubUser = core.getInput("github-user");
   const depsPattern = core.getInput("deps-pattern");
@@ -37,7 +37,7 @@ export function setup(): Input {
     releaseBranch,
     repo,
     path: path === "" ? undefined : path,
-    toolchain: toolchain === "" ? "1.93.0" : toolchain,
+    toolchain: toolchain === "" ? "" : `+${toolchain}`,
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
     depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
@@ -76,7 +76,7 @@ export async function main(input: Input) {
     for (path of pathsToCheck) {
       // cargo check fails if not executed from the directory containing Cargo.toml even when using --manifest-path
       // so we pass cwd as the repo root and use ../ in the manifest-path
-      sh(`cargo +${input.toolchain} check -vv --manifest-path ../${path}`, { cwd: repo, env: gitEnv });
+      sh(`cargo ${input.toolchain} check -vv --manifest-path ../${path}`, { cwd: repo, env: gitEnv });
       sh("find . -name 'Cargo.lock' | xargs git add", { cwd: repo });
       sh("git commit --message 'chore: Update Cargo lockfile'", {
         cwd: repo,
