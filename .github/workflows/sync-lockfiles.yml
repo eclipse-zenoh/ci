@@ -64,6 +64,8 @@ jobs:
           - eclipse-zenoh/zenoh-python
           - eclipse-zenoh/zenoh-java
           - eclipse-zenoh/zenoh-kotlin
+          - eclipse-zenoh/zenoh-flat
+          - eclipse-zenoh/zenoh-flat-jni
           - eclipse-zenoh/zenoh-plugin-dds
           - eclipse-zenoh/zenoh-plugin-mqtt
           - eclipse-zenoh/zenoh-plugin-ros2dds
