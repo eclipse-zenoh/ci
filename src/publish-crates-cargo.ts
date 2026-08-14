@@ -77,7 +77,7 @@ export async function main(input: Input) {
     }
 
     if (input.liveRun) {
-      let publishFn: (input: Input, repo: string, branch?: string) => void;
+      let publishFn: (input: Input, repo: string, branch?: string) => void | Promise<void>;
       if (input.artifactoryToken) {
         publishFn = publishToArtifactory;
       } else if (input.cratesIoToken) {
@@ -87,10 +87,10 @@ export async function main(input: Input) {
       }
 
       for (const repo of input.unpublishedDepsRepos) {
-        publishFn(input, repo);
+        await publishFn(input, repo);
       }
 
-      publishFn(input, input.repo, input.branch);
+      await publishFn(input, input.repo, input.branch);
     } else {
       const registry = await kellnr.spawn();
       await publishToKellnr(input, input.repo, registry, input.branch);
@@ -173,7 +173,7 @@ function publishToArtifactory(input: Input, repo: string, branch?: string) {
   publish(path, env);
 }
 
-function publishToCratesIo(input: Input, repo: string, branch?: string) {
+async function publishToCratesIo(input: Input, repo: string, branch?: string) {
   core.info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path = repoPath(repo);
@@ -182,10 +182,44 @@ function publishToCratesIo(input: Input, repo: string, branch?: string) {
     CARGO_REGISTRY_TOKEN: input.cratesIoToken,
   };
 
-  publish(path, env);
+  const packages = cargo.packages(path);
+  const published = await publishedPackages(packages);
+  const candidates = packages.filter(package_ => package_.publish !== false);
+  if (published.length === candidates.length) {
+    core.info("All publishable workspace packages are already published on crates.io");
+    return;
+  }
+
+  publish(path, env, false, published);
 }
 
-function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = false) {
+export async function publishedPackages(
+  packages: cargo.Package[],
+  fetchFn: typeof fetch = fetch,
+): Promise<cargo.Package[]> {
+  const published = [] as cargo.Package[];
+
+  for (const package_ of packages) {
+    if (package_.publish === false) {
+      continue;
+    }
+
+    const url = `https://crates.io/api/v1/crates/${encodeURIComponent(package_.name)}/${encodeURIComponent(package_.version)}`;
+    const response = await fetchFn(url);
+    if (response.status === 200) {
+      core.info(`Skipping ${package_.name}@${package_.version}; it is already published on crates.io`);
+      published.push(package_);
+    } else if (response.status !== 404) {
+      throw new Error(
+        `Failed to check whether ${package_.name}@${package_.version} is published on crates.io: HTTP ${response.status}`,
+      );
+    }
+  }
+
+  return published;
+}
+
+function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = false, excluded: cargo.Package[] = []) {
   const options = {
     env,
     cwd: path,
@@ -197,6 +231,9 @@ function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = fal
     command.push("--allow-dirty");
   } else {
     command.push("--locked");
+  }
+  for (const package_ of excluded) {
+    command.push("--exclude", `${package_.name}@${package_.version}`);
   }
   sh(command.join(" "), options);
 
