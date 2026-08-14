@@ -68030,6 +68030,39 @@ var kellnrImage = process.env.KELLNR_IMAGE || config.lock.kellnr;
 
 // src/cargo.ts
 var toml = await TOML.init();
+function packages(path12, options) {
+  if (options == void 0) {
+    options = { cwd: path12 };
+  }
+  const metadataContents = sh("cargo metadata --no-deps --format-version=1", options);
+  const metadata2 = JSON.parse(metadataContents);
+  const result = [];
+  for (const elem of metadata2.packages) {
+    result.push({
+      name: elem.name,
+      version: elem.version,
+      manifestPath: elem.manifest_path,
+      publish: shouldPublish(elem.publish),
+      workspaceDependencies: elem.dependencies.filter((dep) => "path" in dep).map(
+        (dep) => ({
+          name: dep.name,
+          req: dep.req,
+          path: dep.path
+        })
+      )
+    });
+  }
+  return result;
+}
+function shouldPublish(publish2) {
+  if (publish2 === null) {
+    return void 0;
+  } else if (typeof publish2 === "boolean") {
+    return publish2;
+  } else {
+    return publish2.length > 0;
+  }
+}
 async function setRegistry(path12, pattern, registry) {
   startGroup(`Changing ${pattern} dependencies' registry ${registry}`);
   const manifestPath = `${path12}/Cargo.toml`;
@@ -68193,9 +68226,9 @@ async function main(input) {
         throw new Error("No token provided for publication");
       }
       for (const repo of input.unpublishedDepsRepos) {
-        publishFn(input, repo);
+        await publishFn(input, repo);
       }
-      publishFn(input, input.repo, input.branch);
+      await publishFn(input, input.repo, input.branch);
     } else {
       const registry = await spawn3();
       await publishToKellnr(input, input.repo, registry, input.branch);
@@ -68264,16 +68297,42 @@ function publishToArtifactory(input, repo, branch) {
   };
   publish(path12, env);
 }
-function publishToCratesIo(input, repo, branch) {
+async function publishToCratesIo(input, repo, branch) {
   info("Publishing to CratesIo");
   clone(input, repo, branch);
   const path12 = repoPath(repo);
   const env = {
     CARGO_REGISTRY_TOKEN: input.cratesIoToken
   };
-  publish(path12, env);
+  const packages2 = packages(path12);
+  const published = await publishedPackages(packages2);
+  const candidates = packages2.filter((package_) => package_.publish !== false);
+  if (published.length === candidates.length) {
+    info("All publishable workspace packages are already published on crates.io");
+    return;
+  }
+  publish(path12, env, false, published);
 }
-function publish(path12, env, allowDirty = false) {
+async function publishedPackages(packages2, fetchFn = fetch) {
+  const published = [];
+  for (const package_ of packages2) {
+    if (package_.publish === false) {
+      continue;
+    }
+    const url2 = `https://crates.io/api/v1/crates/${encodeURIComponent(package_.name)}/${encodeURIComponent(package_.version)}`;
+    const response = await fetchFn(url2);
+    if (response.status === 200) {
+      info(`Skipping ${package_.name}@${package_.version}; it is already published on crates.io`);
+      published.push(package_);
+    } else if (response.status !== 404) {
+      throw new Error(
+        `Failed to check whether ${package_.name}@${package_.version} is published on crates.io: HTTP ${response.status}`
+      );
+    }
+  }
+  return published;
+}
+function publish(path12, env, allowDirty = false, excluded = []) {
   const options = {
     env,
     cwd: path12,
@@ -68284,6 +68343,9 @@ function publish(path12, env, allowDirty = false) {
     command.push("--allow-dirty");
   } else {
     command.push("--locked");
+  }
+  for (const package_ of excluded) {
+    command.push("--exclude", `${package_.name}@${package_.version}`);
   }
   sh(command.join(" "), options);
   sh("cargo clean", options);
