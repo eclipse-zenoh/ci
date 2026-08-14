@@ -204,19 +204,49 @@ export async function publishedPackages(
       continue;
     }
 
-    const url = `https://crates.io/api/v1/crates/${encodeURIComponent(package_.name)}/${encodeURIComponent(package_.version)}`;
-    const response = await fetchFn(url);
-    if (response.status === 200) {
+    const url = `https://index.crates.io/${cratesIoIndexPath(package_.name)}`;
+    const response = await fetchFn(url, {
+      headers: {
+        "User-Agent": "@eclipse-zenoh/ci (https://github.com/eclipse-zenoh/ci)",
+      },
+    });
+    if (response.status === 200 && indexContainsVersion(await response.text(), package_.version)) {
       core.info(`Skipping ${package_.name}@${package_.version}; it is already published on crates.io`);
       published.push(package_);
-    } else if (response.status !== 404) {
+    } else if (response.status !== 200 && response.status !== 404) {
       throw new Error(
-        `Failed to check whether ${package_.name}@${package_.version} is published on crates.io: HTTP ${response.status}`,
+        `Failed to check whether ${package_.name}@${package_.version} is published in the crates.io index: HTTP ${response.status}`,
       );
     }
   }
 
   return published;
+}
+
+export function cratesIoIndexPath(name: string): string {
+  const normalizedName = name.toLowerCase();
+  if (normalizedName.length === 1) {
+    return `1/${normalizedName}`;
+  }
+  if (normalizedName.length === 2) {
+    return `2/${normalizedName}`;
+  }
+  if (normalizedName.length === 3) {
+    return `3/${normalizedName.slice(0, 1)}/${normalizedName}`;
+  }
+  return `${normalizedName.slice(0, 2)}/${normalizedName.slice(2, 4)}/${normalizedName}`;
+}
+
+function indexContainsVersion(index: string, version: string): boolean {
+  const normalizedVersion = version.split("+", 1)[0];
+  return index
+    .trim()
+    .split("\n")
+    .filter(line => line !== "")
+    .some(line => {
+      const entry = JSON.parse(line) as { vers?: unknown };
+      return typeof entry.vers === "string" && entry.vers.split("+", 1)[0] === normalizedVersion;
+    });
 }
 
 function publish(path: string, env: NodeJS.ProcessEnv, allowDirty: boolean = false, excluded: cargo.Package[] = []) {
