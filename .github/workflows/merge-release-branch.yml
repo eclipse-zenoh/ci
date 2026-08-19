@@ -32,6 +32,8 @@ jobs:
           - eclipse-zenoh/zenoh-cpp
           - eclipse-zenoh/zenoh-c
           - eclipse-zenoh/zenoh-python
+          - eclipse-zenoh/zenoh-flat
+          - eclipse-zenoh/zenoh-flat-jni
           - eclipse-zenoh/zenoh-java
           - eclipse-zenoh/zenoh-kotlin
           - eclipse-zenoh/zenoh-plugin-dds
@@ -45,12 +47,6 @@ jobs:
           - eclipse-zenoh/zenoh-ts
           - eclipse-zenoh/zenoh-dissector
     steps:
-      - name: Setup rust toolchain
-        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp", "eclipse-zenoh/zenoh-dissector"]'), matrix.repo) }}
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: 1.93.0
-
       - name: Install dependencies for zenoh-dissector
         if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-dissector' }}
         run: |
@@ -61,7 +57,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
 
       - name: Update git/branch in release branch
-        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp", "eclipse-zenoh/zenoh-java", "eclipse-zenoh/zenoh-kotlin"]'), matrix.repo) }}
         uses: eclipse-zenoh/ci/set-git-branch@main
         with:
           version: ${{ inputs.version }}
@@ -71,6 +67,16 @@ jobs:
           deps-pattern: zenoh.*
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
           deps-branch: main
+
+      - name: Checkout zenoh-c merge release branch
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: eclipse-zenoh/zenoh-c
+          ref: eclipse-zenoh-bot/post-release-${{ inputs.version }}
+          path: zenoh-c
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          fetch-depth: 0
 
       - name: Update zenoh-c Cargo.toml.in CMake template
         if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
@@ -93,7 +99,7 @@ jobs:
       - name: Compute branch
         id: compute-branch
         run: |
-          if [[ "${{ matrix.repo }}" =~ ^eclipse-zenoh/zenoh(-cpp|-pico)?$ ]] ; then
+          if [[ "${{ matrix.repo }}" =~ ^eclipse-zenoh/zenoh(-cpp|-pico|-java|-kotlin)?$ ]] ; then
             echo "branch=release/${{ inputs.version }}" >> $GITHUB_OUTPUT
           else
             echo "branch=eclipse-zenoh-bot/post-release-${{ inputs.version }}" >> $GITHUB_OUTPUT
