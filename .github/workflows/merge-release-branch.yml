@@ -32,6 +32,8 @@ jobs:
           - eclipse-zenoh/zenoh-cpp
           - eclipse-zenoh/zenoh-c
           - eclipse-zenoh/zenoh-python
+          - eclipse-zenoh/zenoh-flat
+          - eclipse-zenoh/zenoh-flat-jni
           - eclipse-zenoh/zenoh-java
           - eclipse-zenoh/zenoh-kotlin
           - eclipse-zenoh/zenoh-plugin-dds
@@ -61,7 +63,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
 
       - name: Update git/branch in release branch
-        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp"]'), matrix.repo) }}
+        if: ${{ !contains(fromJSON('["eclipse-zenoh/zenoh", "eclipse-zenoh/zenoh-pico", "eclipse-zenoh/zenoh-cpp", "eclipse-zenoh/zenoh-java", "eclipse-zenoh/zenoh-kotlin"]'), matrix.repo) }}
         uses: eclipse-zenoh/ci/set-git-branch@main
         with:
           version: ${{ inputs.version }}
@@ -93,7 +95,7 @@ jobs:
       - name: Compute branch
         id: compute-branch
         run: |
-          if [[ "${{ matrix.repo }}" =~ ^eclipse-zenoh/zenoh(-cpp|-pico)?$ ]] ; then
+          if [[ "${{ matrix.repo }}" =~ ^eclipse-zenoh/zenoh(-cpp|-pico|-java|-kotlin|)?$ ]] ; then
             echo "branch=release/${{ inputs.version }}" >> $GITHUB_OUTPUT
           else
             echo "branch=eclipse-zenoh-bot/post-release-${{ inputs.version }}" >> $GITHUB_OUTPUT
