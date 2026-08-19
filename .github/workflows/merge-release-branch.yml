@@ -74,6 +74,16 @@ jobs:
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
           deps-branch: main
 
+      - name: Checkout zenoh-c merge release branch
+        if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: eclipse-zenoh/zenoh-c
+          ref: eclipse-zenoh-bot/post-release-${{ inputs.version }}
+          path: zenoh-c
+          token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
+          fetch-depth: 0
+
       - name: Update zenoh-c Cargo.toml.in CMake template
         if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
         run: |
