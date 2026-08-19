@@ -88,6 +88,7 @@ jobs:
             if ! git diff --exit-code Cargo.toml.in > /dev/null 2>&1; then
               git add Cargo.toml.in
               git commit --message "chore: Sync Cargo.toml.in with Cargo.toml"
+              git push
             fi
           fi
         env:
