@@ -74,7 +74,7 @@ jobs:
       - name: Recreate Cargo.lock
         run: |
           rm -f Cargo.lock
-          cargo "+${RUST_TOOLCHAIN}" -Zmin-publish-age --config registry.global-min-publish-age='"14 days"' update --manifest-path Cargo.toml
+          cargo "+${RUST_TOOLCHAIN}" -Zmin-publish-age --config registry.global-min-publish-age='"7 days"' update --manifest-path Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
