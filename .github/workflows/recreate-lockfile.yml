@@ -2,7 +2,7 @@ name: Recreate Cargo lockfile
 
 on:
   schedule:
-    - cron: "0 0 * * *" # At the end of every day
+    - cron: "0 0 */14 * *" # Run fortnightly at 00:00 UTC
   workflow_dispatch:
     inputs:
       branch:
@@ -26,7 +26,7 @@ jobs:
       pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
     steps:
       - name: Checkout Zenoh
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: eclipse-zenoh/zenoh
           ref: ${{ inputs.branch }}
@@ -44,16 +44,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ -n "$TOOLCHAIN_INPUT" ]]; then
-            RUST_TOOLCHAIN="$TOOLCHAIN_INPUT"
-          else
-            RUST_TOOLCHAIN="$(yq -r '.toolchain.channel // ""' rust-toolchain.toml)"
-          fi
+          # NOTE: override to nightly toolchain so we can use cargo's -Zmin-publish-age
+          # to avoid pulling in recently published dependencies possibly mitigating supply chain attacks.
+          # This feature will be available in 1.100.0 scheduled for release in September 2026.
+          RUST_TOOLCHAIN="nightly"
+          #if [[ -n "$TOOLCHAIN_INPUT" ]]; then
+          #  RUST_TOOLCHAIN="$TOOLCHAIN_INPUT"
+          #else
+          #  RUST_TOOLCHAIN="$(yq -r '.toolchain.channel // ""' rust-toolchain.toml)"
+          #fi
 
-          if [[ ! "$RUST_TOOLCHAIN" =~ ^[A-Za-z0-9][A-Za-z0-9._+@-]*$ ]]; then
-            echo "Invalid Rust toolchain" >&2
-            exit 1
-          fi
+          #if [[ ! "$RUST_TOOLCHAIN" =~ ^[A-Za-z0-9][A-Za-z0-9._+@-]*$ ]]; then
+          #  echo "Invalid Rust toolchain" >&2
+          #  exit 1
+          #fi
 
           printf 'RUST_TOOLCHAIN=%s\n' "$RUST_TOOLCHAIN" >> "$GITHUB_ENV"
 
@@ -70,12 +74,12 @@ jobs:
       - name: Recreate Cargo.lock
         run: |
           rm -f Cargo.lock
-          cargo "+${RUST_TOOLCHAIN}" update --manifest-path Cargo.toml
+          cargo "+${RUST_TOOLCHAIN}" -Zmin-publish-age --config registry.global-min-publish-age='"7 days"' update --manifest-path Cargo.toml
 
       - name: Create/Update a pull request if the lockfile changed
         id: cpr
         # NOTE: If there is a pending PR, this action will simply update it with a forced push.
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           title: "chore: recreate Cargo.lock"
           body: |
