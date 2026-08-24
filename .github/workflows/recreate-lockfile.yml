@@ -2,7 +2,7 @@ name: Recreate Cargo lockfile
 
 on:
   schedule:
-    - cron: "0 0 */14 * *" # Run fortnightly at 00:00 UTC
+    - cron: "0 0 1,15 * *" # Run every 1st and 15th of the month at 00:00 UTC
   workflow_dispatch:
     inputs:
       branch:
