@@ -64,9 +64,15 @@ jobs:
           release-branch: release/${{ inputs.version }}
           repo: ${{ matrix.repo }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-          deps-pattern: ^zenoh(?!-flat$).*
-          deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
-          deps-branch: main
+          deps-pattern: |
+            ^zenoh(?!-flat$).*
+            ^zenoh-flat$
+          deps-git-url: |
+            https://github.com/eclipse-zenoh/zenoh.git
+            https://github.com/eclipse-zenoh/zenoh-flat.git
+          deps-branch: |
+            main
+            main
 
       - name: Checkout zenoh-c merge release branch
         if: ${{ matrix.repo == 'eclipse-zenoh/zenoh-c' }}
