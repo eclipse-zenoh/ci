@@ -64,7 +64,7 @@ jobs:
           release-branch: release/${{ inputs.version }}
           repo: ${{ matrix.repo }}
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
-          deps-pattern: zenoh.*
+          deps-pattern: ^zenoh(?!-flat$).*
           deps-git-url: https://github.com/eclipse-zenoh/zenoh.git
           deps-branch: main
 
