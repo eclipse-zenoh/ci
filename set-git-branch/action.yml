@@ -18,10 +18,13 @@ inputs:
     required: false
     default: eclipse-zenoh-bot
   deps-pattern:
+    description: "Multiline list of regular expressions for dependencies (one per line)"
     required: true
   deps-git-url:
+    description: "Multiline list of git URLs matching deps-pattern (one per line)"
     required: true
   deps-branch:
+    description: "Multiline list of branches matching deps-pattern (one per line)"
     required: true
 runs:
   using: node24

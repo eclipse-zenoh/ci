@@ -15,10 +15,29 @@ export type Input = {
   toolchain: string;
   githubToken: string;
   githubUser?: string;
-  depsRegExp: RegExp;
-  depsGitUrl: string;
-  depsBranch: string;
+  dependencies: Dependency[];
 };
+
+export type Dependency = {
+  pattern: RegExp;
+  gitUrl: string;
+  branch: string;
+};
+
+export function parseDependencies(patterns: string[], gitUrls: string[], branches: string[]): Dependency[] {
+  if (patterns.length === 0 || gitUrls.length === 0 || branches.length === 0) {
+    throw new Error("deps-pattern, deps-git-url, and deps-branch must all be provided");
+  }
+  if (patterns.length !== gitUrls.length || patterns.length !== branches.length) {
+    throw new Error("deps-pattern, deps-git-url, and deps-branch must have the same number of lines");
+  }
+
+  return patterns.map((pattern, index) => ({
+    pattern: new RegExp(pattern),
+    gitUrl: gitUrls[index],
+    branch: branches[index],
+  }));
+}
 
 export function setup(): Input {
   const version = core.getInput("version", { required: true });
@@ -28,9 +47,9 @@ export function setup(): Input {
   const toolchain = core.getInput("toolchain", { required: false });
   const githubToken = core.getInput("github-token", { required: true });
   const githubUser = core.getInput("github-user");
-  const depsPattern = core.getInput("deps-pattern");
-  const depsGitUrl = core.getInput("deps-git-url");
-  const depsBranch = core.getInput("deps-branch");
+  const depsPatterns = core.getMultilineInput("deps-pattern");
+  const depsGitUrls = core.getMultilineInput("deps-git-url");
+  const depsBranches = core.getMultilineInput("deps-branch");
 
   return {
     version,
@@ -40,9 +59,7 @@ export function setup(): Input {
     toolchain: toolchain === "" ? "" : `+${toolchain}`,
     githubToken,
     githubUser: githubUser === "" ? "eclipse-zenoh-bot" : githubUser,
-    depsRegExp: depsPattern === "" ? undefined : new RegExp(depsPattern),
-    depsGitUrl: depsGitUrl === "" ? undefined : depsGitUrl,
-    depsBranch: depsBranch === "" ? undefined : depsBranch,
+    dependencies: parseDependencies(depsPatterns, depsGitUrls, depsBranches),
   };
 }
 
@@ -63,7 +80,9 @@ export async function main(input: Input) {
     const pathsToCheck: string[] = [];
     let path: string;
     for (path of cargoPaths) {
-      await cargo.setGitBranch(path, input.depsRegExp, input.depsGitUrl, input.depsBranch);
+      for (const dependency of input.dependencies) {
+        await cargo.setGitBranch(path, dependency.pattern, dependency.gitUrl, dependency.branch);
+      }
       if (sh("git diff", { cwd: repo, check: false })) {
         sh("find . -name 'Cargo.toml' | xargs git add", { cwd: repo });
         sh(`git commit --message 'chore: Update git/branch ${path}'`, { cwd: repo, env: gitEnv });
