@@ -68167,6 +68167,10 @@ async function spawn3() {
 }
 
 // src/publish-crates-cargo.ts
+var MAX_PUBLICATION_RETRIES = 5;
+var PUBLICATION_RETRY_BASE_DELAY_MS = 3e4;
+var PUBLICATION_RETRY_MAX_DELAY_MS = 30 * 6e4;
+var PUBLICATION_RETRY_SAFETY_MARGIN_MS = 1e4;
 function setup() {
   const liveRun = getBooleanInput("live-run", { required: true });
   const branch = getInput("branch", { required: true });
@@ -68311,7 +68315,72 @@ async function publishToCratesIo(input, repo, branch) {
     info("All publishable workspace packages are already published on crates.io");
     return;
   }
-  publish(path12, env, false, published);
+  await publishCratesIoWithRetry(path12, env, packages2, published);
+}
+async function publishCratesIoWithRetry(path12, env, packages2, published) {
+  let excluded = published;
+  for (let retry2 = 0; ; retry2++) {
+    try {
+      publish(path12, env, false, excluded);
+      return;
+    } catch (error2) {
+      if (!(error2 instanceof Error) || !isCratesIoRateLimit(error2.message) || retry2 >= MAX_PUBLICATION_RETRIES) {
+        throw error2;
+      }
+      const allowedAt = cratesIoPublicationAllowedAt(error2.message);
+      const delay4 = publicationRetryDelay(retry2, allowedAt);
+      const allowedAtMessage = allowedAt === void 0 ? "" : ` Publication is allowed after ${new Date(allowedAt).toISOString()}.`;
+      warning(
+        `crates.io rate limited publication (retry ${retry2 + 1}/${MAX_PUBLICATION_RETRIES}).${allowedAtMessage} Retrying in ${formatDelay(delay4)}.`
+      );
+      await sleep2(delay4);
+      excluded = mergePackages(excluded, await publishedPackages(packages2));
+    }
+  }
+}
+function isCratesIoRateLimit(message) {
+  return /(?:HTTP|status(?: code)?|response(?:d)? with status(?: code)?)?\s*429\b/i.test(message) || /(?:too many requests|rate limit exceeded)/i.test(message);
+}
+function cratesIoPublicationAllowedAt(message) {
+  const timestamps = [
+    ...message.match(
+      /\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:\s*(?:UTC|GMT)|Z|[+-]\d{2}:?\d{2})?)?\b/g
+    ) ?? [],
+    ...message.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT\b/g) ?? []
+  ];
+  if (timestamps.length === 0) {
+    return void 0;
+  }
+  for (const timestamp of timestamps) {
+    const parsed = Date.parse(timestamp);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  return void 0;
+}
+function publicationRetryDelay(retry2, allowedAt, now = Date.now()) {
+  const exponentialDelay = Math.min(PUBLICATION_RETRY_BASE_DELAY_MS * 2 ** retry2, PUBLICATION_RETRY_MAX_DELAY_MS);
+  const serverDelay = allowedAt === void 0 ? 0 : Math.max(0, allowedAt - now + PUBLICATION_RETRY_SAFETY_MARGIN_MS);
+  return Math.max(exponentialDelay, serverDelay);
+}
+function mergePackages(...packageLists) {
+  const packages2 = /* @__PURE__ */ new Map();
+  for (const packageList of packageLists) {
+    for (const package_ of packageList) {
+      packages2.set(`${package_.name}@${package_.version}`, package_);
+    }
+  }
+  return [...packages2.values()];
+}
+function sleep2(delay4) {
+  return new Promise((resolve2) => setTimeout(resolve2, delay4));
+}
+function formatDelay(delay4) {
+  if (delay4 < 6e4) {
+    return `${Math.ceil(delay4 / 1e3)}s`;
+  }
+  return `${Math.ceil(delay4 / 6e4)}m`;
 }
 async function publishedPackages(packages2, fetchFn = fetch) {
   const published = [];

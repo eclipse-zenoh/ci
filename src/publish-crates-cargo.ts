@@ -6,6 +6,11 @@ import * as cargo from "./cargo";
 import { sh } from "./command";
 import * as kellnr from "./kellnr";
 
+const MAX_PUBLICATION_RETRIES = 5;
+const PUBLICATION_RETRY_BASE_DELAY_MS = 30_000;
+const PUBLICATION_RETRY_MAX_DELAY_MS = 30 * 60_000;
+const PUBLICATION_RETRY_SAFETY_MARGIN_MS = 10_000;
+
 export type Input = {
   liveRun: boolean;
   branch: string;
@@ -190,7 +195,97 @@ async function publishToCratesIo(input: Input, repo: string, branch?: string) {
     return;
   }
 
-  publish(path, env, false, published);
+  await publishCratesIoWithRetry(path, env, packages, published);
+}
+
+async function publishCratesIoWithRetry(
+  path: string,
+  env: NodeJS.ProcessEnv,
+  packages: cargo.Package[],
+  published: cargo.Package[],
+): Promise<void> {
+  let excluded = published;
+
+  for (let retry = 0; ; retry++) {
+    try {
+      publish(path, env, false, excluded);
+      return;
+    } catch (error) {
+      if (!(error instanceof Error) || !isCratesIoRateLimit(error.message) || retry >= MAX_PUBLICATION_RETRIES) {
+        throw error;
+      }
+
+      const allowedAt = cratesIoPublicationAllowedAt(error.message);
+      const delay = publicationRetryDelay(retry, allowedAt);
+      const allowedAtMessage =
+        allowedAt === undefined ? "" : ` Publication is allowed after ${new Date(allowedAt).toISOString()}.`;
+      core.warning(
+        `crates.io rate limited publication (retry ${retry + 1}/${MAX_PUBLICATION_RETRIES}).${allowedAtMessage} ` +
+          `Retrying in ${formatDelay(delay)}.`,
+      );
+      await sleep(delay);
+
+      // Do not inspect the sparse index until the server-provided retry time has
+      // elapsed. The index can lag behind a successful upload, so refresh the
+      // exclusions before rerunning the workspace publication.
+      excluded = mergePackages(excluded, await publishedPackages(packages));
+    }
+  }
+}
+
+export function isCratesIoRateLimit(message: string): boolean {
+  return (
+    /(?:HTTP|status(?: code)?|response(?:d)? with status(?: code)?)?\s*429\b/i.test(message) ||
+    /(?:too many requests|rate limit exceeded)/i.test(message)
+  );
+}
+
+export function cratesIoPublicationAllowedAt(message: string): number | undefined {
+  const timestamps = [
+    ...(message.match(
+      /\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:\s*(?:UTC|GMT)|Z|[+-]\d{2}:?\d{2})?)?\b/g,
+    ) ?? []),
+    ...(message.match(/\b(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT\b/g) ?? []),
+  ];
+  if (timestamps.length === 0) {
+    return undefined;
+  }
+
+  for (const timestamp of timestamps) {
+    const parsed = Date.parse(timestamp);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  return undefined;
+}
+
+export function publicationRetryDelay(retry: number, allowedAt?: number, now = Date.now()): number {
+  const exponentialDelay = Math.min(PUBLICATION_RETRY_BASE_DELAY_MS * 2 ** retry, PUBLICATION_RETRY_MAX_DELAY_MS);
+  const serverDelay = allowedAt === undefined ? 0 : Math.max(0, allowedAt - now + PUBLICATION_RETRY_SAFETY_MARGIN_MS);
+  return Math.max(exponentialDelay, serverDelay);
+}
+
+function mergePackages(...packageLists: cargo.Package[][]): cargo.Package[] {
+  const packages = new Map<string, cargo.Package>();
+  for (const packageList of packageLists) {
+    for (const package_ of packageList) {
+      packages.set(`${package_.name}@${package_.version}`, package_);
+    }
+  }
+  return [...packages.values()];
+}
+
+function sleep(delay: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+function formatDelay(delay: number): string {
+  if (delay < 60_000) {
+    return `${Math.ceil(delay / 1_000)}s`;
+  }
+  return `${Math.ceil(delay / 60_000)}m`;
 }
 
 export async function publishedPackages(

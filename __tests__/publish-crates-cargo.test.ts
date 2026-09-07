@@ -1,7 +1,13 @@
 import { describe, expect, test } from "@jest/globals";
 
 import * as cargo from "../src/cargo";
-import { cratesIoIndexPath, publishedPackages } from "../src/publish-crates-cargo";
+import {
+  cratesIoIndexPath,
+  cratesIoPublicationAllowedAt,
+  isCratesIoRateLimit,
+  publishedPackages,
+  publicationRetryDelay,
+} from "../src/publish-crates-cargo";
 
 const package_ = (name: string, version: string, publish?: boolean): cargo.Package => ({
   name,
@@ -17,6 +23,21 @@ describe("publish-crates-cargo", () => {
     expect(cratesIoIndexPath("ab")).toBe("2/ab");
     expect(cratesIoIndexPath("abc")).toBe("3/a/abc");
     expect(cratesIoIndexPath("Test-Crate")).toBe("te/st/test-crate");
+  });
+
+  test("recognizes crates.io rate-limit failures", () => {
+    expect(isCratesIoRateLimit("server responded with status code 429")).toBe(true);
+    expect(isCratesIoRateLimit("429 Too Many Requests")).toBe(true);
+    expect(isCratesIoRateLimit("cargo publish failed with status code 101")).toBe(false);
+  });
+
+  test("uses the publication time from a crates.io rate-limit response", () => {
+    const now = Date.parse("2026-08-25T12:00:00Z");
+    const allowedAt = cratesIoPublicationAllowedAt("Please try again after Mon, 25 Aug 2026 12:02:00 GMT");
+
+    expect(allowedAt).toBe(Date.parse("Mon, 25 Aug 2026 12:02:00 GMT"));
+    expect(publicationRetryDelay(0, allowedAt, now)).toBe(130_000);
+    expect(publicationRetryDelay(0, undefined, now)).toBe(30_000);
   });
 
   test("filters versions already published on crates.io", async () => {
