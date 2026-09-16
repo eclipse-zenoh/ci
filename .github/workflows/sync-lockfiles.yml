@@ -159,7 +159,7 @@ jobs:
 
             - **sha**: eclipse-zenoh/zenoh@${{ needs.fetch.outputs.zenoh-head-hash }}
             - **date**: ${{ needs.fetch.outputs.zenoh-head-date }}
-            - **workflow**: [${{ github.run_id}}](https://github.com/eclipse-zenoh/ci/actions/runs/${{ github.run_id }})
+            - **workflow**: [${{ github.run_id}}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           commit-message: "build: Sync Cargo lockfile with Zenoh's"
           committer: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
           author: eclipse-zenoh-bot <eclipse-zenoh-bot@users.noreply.github.com>
