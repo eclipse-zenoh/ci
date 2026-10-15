@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Check if PR is from a bot
         id: bot-check
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           result-encoding: string
           script: |
@@ -50,7 +50,7 @@ jobs:
       - name: Get PR info
         if: steps.bot-check.outputs.result != 'true'
         id: pr-info
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             return {
@@ -61,7 +61,7 @@ jobs:
       - name: Get PR description with checklist
         if: steps.bot-check.outputs.result != 'true'
         id: verify
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { data: pr } = await github.rest.pulls.get({
@@ -91,7 +91,7 @@ jobs:
 
       - name: Update PR status
         if: steps.bot-check.outputs.result != 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const result = ${{ steps.verify.outputs.result }};

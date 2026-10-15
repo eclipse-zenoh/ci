@@ -34,7 +34,7 @@ jobs:
       issues: write # required for label/milestone writes if using GITHUB_TOKEN; adjust if using a bot token
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Read required labels
         id: read-labels
@@ -46,13 +46,13 @@ jobs:
           fi
 
       # Checkout the external github-sync repository into a subdirectory
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: pbochynski/github-sync
           ref: 131ac0c6d4a7682b027fb570a421197ed316a5db
           path: github-sync
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
 
@@ -101,7 +101,7 @@ jobs:
     steps:
       - name: Create milestone in zenoh if it does not exist
         if: ${{ inputs.milestone != '' && inputs.milestone != null }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           github-token: ${{ secrets.BOT_TOKEN_WORKFLOW }}
           result-encoding: string
@@ -124,13 +124,13 @@ jobs:
               await github.rest.issues.createMilestone(createParams);
             }
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ZettaScaleLabs/github-sync
           ref: main
           path: github-sync
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
 

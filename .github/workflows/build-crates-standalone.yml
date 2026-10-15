@@ -59,7 +59,7 @@ jobs:
           - { target: x86_64-pc-windows-gnu, os: windows-2022 }
     steps:
       - id: build
-        uses: eclipse-zenoh/ci/build-crates-standalone@main
+        uses: eclipse-zenoh/ci/build-crates-standalone@f139ca0eca68d7f87f452aecb489779c7e680fc5
         with:
           repo: ${{ inputs.repo }}
           version: ${{ inputs.version }}

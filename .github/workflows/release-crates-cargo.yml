@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6 # v2.0.0
         with:
           tool-cache: false
           android: true
@@ -62,7 +62,7 @@ jobs:
       - name: Install build-essential (Ubuntu)
         run: sudo apt-get update && sudo apt-get install -y build-essential clang libc6-dev
 
-      - uses: eclipse-zenoh/ci/publish-crates-cargo@main
+      - uses: eclipse-zenoh/ci/publish-crates-cargo@f139ca0eca68d7f87f452aecb489779c7e680fc5
         with:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}
