@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Execute remote SSH commands
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         env:
           VERSION: ${{ inputs.version }}
           DRY_RUN: ${{ inputs.dry-run }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Verify updates
         if: ${{ !inputs.dry-run }}
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
         with:
           host: projects-storage.eclipse.org
           username: genie.zenoh
