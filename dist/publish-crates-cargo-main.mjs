@@ -68339,7 +68339,9 @@ async function publishCratesIoWithRetry(path12, env, packages2, published) {
   }
 }
 function isCratesIoRateLimit(message) {
-  return /(?:HTTP|status(?: code)?|response(?:d)? with status(?: code)?)?\s*429\b/i.test(message) || /(?:too many requests|rate limit exceeded)/i.test(message);
+  return /\b(?:HTTP(?:\/\d(?:\.\d)?)?\s*|status(?:\s+code)?\s*[:=]?\s*|responded\s+with\s+status(?:\s+code)?\s*[:=]?\s*)429\b/i.test(
+    message
+  ) || /(?:too many requests|rate limit exceeded)/i.test(message);
 }
 function cratesIoPublicationAllowedAt(message) {
   const timestamps = [

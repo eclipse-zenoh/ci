@@ -27,8 +27,11 @@ describe("publish-crates-cargo", () => {
 
   test("recognizes crates.io rate-limit failures", () => {
     expect(isCratesIoRateLimit("server responded with status code 429")).toBe(true);
+    expect(isCratesIoRateLimit("HTTP 429: Too Many Requests")).toBe(true);
     expect(isCratesIoRateLimit("429 Too Many Requests")).toBe(true);
     expect(isCratesIoRateLimit("cargo publish failed with status code 101")).toBe(false);
+    expect(isCratesIoRateLimit("unrelated error at offset 429 in file")).toBe(false);
+    expect(isCratesIoRateLimit("foo bar 1429 baz")).toBe(false);
   });
 
   test("uses the publication time from a crates.io rate-limit response", () => {

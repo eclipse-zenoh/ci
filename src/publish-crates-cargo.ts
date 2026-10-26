@@ -235,8 +235,9 @@ async function publishCratesIoWithRetry(
 
 export function isCratesIoRateLimit(message: string): boolean {
   return (
-    /(?:HTTP|status(?: code)?|response(?:d)? with status(?: code)?)?\s*429\b/i.test(message) ||
-    /(?:too many requests|rate limit exceeded)/i.test(message)
+    /\b(?:HTTP(?:\/\d(?:\.\d)?)?\s*|status(?:\s+code)?\s*[:=]?\s*|responded\s+with\s+status(?:\s+code)?\s*[:=]?\s*)429\b/i.test(
+      message,
+    ) || /(?:too many requests|rate limit exceeded)/i.test(message)
   );
 }
 
