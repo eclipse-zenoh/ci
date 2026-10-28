@@ -59,7 +59,7 @@ jobs:
       matrix:
         target: [x86_64-apple-darwin, aarch64-apple-darwin]
     steps:
-      - uses: eclipse-zenoh/ci/build-crates-standalone@f139ca0eca68d7f87f452aecb489779c7e680fc5
+      - uses: eclipse-zenoh/ci/build-crates-standalone@49a77d5353971f8a393ecee2b5d0666501844abc
         with:
           repo: ${{ inputs.repo }}
           version: ${{ inputs.version }}
@@ -73,7 +73,7 @@ jobs:
     needs: build
     runs-on: macos-latest
     steps:
-      - uses: eclipse-zenoh/ci/publish-crates-homebrew@f139ca0eca68d7f87f452aecb489779c7e680fc5
+      - uses: eclipse-zenoh/ci/publish-crates-homebrew@49a77d5353971f8a393ecee2b5d0666501844abc
         with:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}

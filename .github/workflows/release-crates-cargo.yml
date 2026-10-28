@@ -62,7 +62,7 @@ jobs:
       - name: Install build-essential (Ubuntu)
         run: sudo apt-get update && sudo apt-get install -y build-essential clang libc6-dev
 
-      - uses: eclipse-zenoh/ci/publish-crates-cargo@f139ca0eca68d7f87f452aecb489779c7e680fc5
+      - uses: eclipse-zenoh/ci/publish-crates-cargo@49a77d5353971f8a393ecee2b5d0666501844abc
         with:
           repo: ${{ inputs.repo }}
           live-run: ${{ inputs.live-run }}

@@ -59,7 +59,7 @@ on:
 jobs:
   build:
     if: ${{ !inputs.no-build }}
-    uses: eclipse-zenoh/ci/.github/workflows/build-crates-standalone.yml@f139ca0eca68d7f87f452aecb489779c7e680fc5
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-standalone.yml@49a77d5353971f8a393ecee2b5d0666501844abc
     with:
       repo: ${{ inputs.repo }}
       version: ${{ inputs.version }}
@@ -70,7 +70,7 @@ jobs:
 
   build-debian:
     if: ${{ !inputs.no-build }}
-    uses: eclipse-zenoh/ci/.github/workflows/build-crates-debian.yml@f139ca0eca68d7f87f452aecb489779c7e680fc5
+    uses: eclipse-zenoh/ci/.github/workflows/build-crates-debian.yml@49a77d5353971f8a393ecee2b5d0666501844abc
     with:
       repo: ${{ inputs.repo }}
       version: ${{ inputs.version }}
@@ -82,7 +82,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: eclipse-zenoh/ci/publish-crates-eclipse@f139ca0eca68d7f87f452aecb489779c7e680fc5
+      - uses: eclipse-zenoh/ci/publish-crates-eclipse@49a77d5353971f8a393ecee2b5d0666501844abc
         with:
           live-run: ${{ inputs.live-run }}
           version: ${{ inputs.version }}
