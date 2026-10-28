@@ -37,7 +37,7 @@ jobs:
           - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04 }
     steps:
       - id: build
-        uses: eclipse-zenoh/ci/build-crates-debian@f139ca0eca68d7f87f452aecb489779c7e680fc5
+        uses: eclipse-zenoh/ci/build-crates-debian@49a77d5353971f8a393ecee2b5d0666501844abc
         with:
           repo: ${{ inputs.repo }}
           version: ${{ inputs.version }}
